@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "title": "Uccelli Society – Community. Integrity. Generativity.",
+    "description": "Uccelli Society: A network for education, social exchange and personal development in Zurich."
+  },
+  "nav": {
+    "home": "Home",
+    "skills4growth": "Skills4Growth",
+    "programm": "Program",
+    "projekte": "Projects",
+    "veranstaltungen": "Events",
+    "kursangebote": "Courses",
+    "news": "News",
+    "netzwerk": "Network",
+    "uccelliWomen": "Uccelli Women",
+    "uccelliGhana": "Uccelli Ghana",
+    "uccelliFC": "Uccelli FC",
+    "nightshift": "Nightshift Music",
+    "ueberUns": "About us",
+    "vorstand": "Board",
+    "formular": "Forms",
+    "partnerSponsoren": "Partners/Sponsors",
+    "faq": "FAQ",
+    "kontakt": "Contact"
+  },
+  "home": {
+    "hero": {
+      "title": "UCCELLI SOCIETY",
+      "claim": "Community. Integrity. Generativity.",
+      "cta": "LEARN MORE"
+    },
+    "about": {
+      "eyebrow": "About us",
+      "title": "Our mission & vision",
+      "text": "Our goal is to build a network that brings together and consolidates knowledge from various fields. This knowledge should enable members to achieve their individual goals and concerns.",
+      "cta": "LEARN MORE"
+    },
+    "tasks": {
+      "title": "Our core activities",
+      "bildung": {
+        "title": "Education",
+        "text": "We want to provide access to education and information to help those in need improve their standard of living."
+      },
+      "soziales": {
+        "title": "Social",
+        "text": "We promote social exchange and address current social issues while supporting those affected."
+      },
+      "community": {
+        "title": "Community",
+        "text": "We offer members the opportunity to work together on personal projects and strengthen the bond within the Uccelli family."
+      }
+    },
+    "projects": {
+      "title": "Current projects",
+      "cta": "ALL PROJECTS"
+    },
+    "cta": {
+      "title": "Grow together",
+      "text": "Interested? Get in touch with us.",
+      "button": "CONTACT"
+    }
+  },
+  "footer": {
+    "kontakt": "CONTACT",
+    "faq": "FAQ",
+    "email": "Send us an email",
+    "findUs": "Find us here",
+    "werte": "OUR VALUES",
+    "unterstuetzen": "SUPPORT US",
+    "unterstuetzenText": "We are very grateful if you would like to support our association. Our details are:",
+    "empfaenger": "Recipient",
+    "kontoNr": "Account No",
+    "download": "DOWNLOAD",
+    "vereinsstatuten": "Association statutes",
+    "socials": "SOCIALS",
+    "copyright": "Copyright © 2026"
+  },
+  "common": {
+    "moreInfo": "LEARN MORE",
+    "readMore": "Read more",
+    "backToTop": "Back to top",
+    "noEvents": "No upcoming events."
+  }
+}

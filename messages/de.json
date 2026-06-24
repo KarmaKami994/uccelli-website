@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "title": "Uccelli Society – Gemeinschaft. Integrität. Generativität.",
+    "description": "Verein Uccelli: Ein Netzwerk für Bildung, sozialen Austausch und persönliche Entwicklung in Zürich."
+  },
+  "nav": {
+    "home": "Home",
+    "skills4growth": "Skills4Growth",
+    "programm": "Programm",
+    "projekte": "Projekte",
+    "veranstaltungen": "Veranstaltungen",
+    "kursangebote": "Kursangebote",
+    "news": "News",
+    "netzwerk": "Netzwerk",
+    "uccelliWomen": "Uccelli Women",
+    "uccelliGhana": "Uccelli Ghana",
+    "uccelliFC": "Uccelli FC",
+    "nightshift": "Nightshift Music",
+    "ueberUns": "Über uns",
+    "vorstand": "Vorstand",
+    "formular": "Formular",
+    "partnerSponsoren": "Partner/Sponsoren",
+    "faq": "FAQ",
+    "kontakt": "Kontakt"
+  },
+  "home": {
+    "hero": {
+      "title": "UCCELLI SOCIETY",
+      "claim": "Gemeinschaft. Integrität. Generativität.",
+      "cta": "MEHR ERFAHREN"
+    },
+    "about": {
+      "eyebrow": "Über uns",
+      "title": "Vereinsziel & Leitbild",
+      "text": "Unser Ziel ist es, ein Netzwerk aufzubauen, welches Wissen aus verschiedenen Bereichen zusammenbringt und konsolidiert. Mit diesem Wissen sollen dann die Vereinsmitglieder ihre individuellen Ziele und Anliegen bewältigen können.",
+      "cta": "MEHR ERFAHREN"
+    },
+    "tasks": {
+      "title": "Unsere Hauptaufgaben",
+      "bildung": {
+        "title": "Bildung",
+        "text": "Wir wollen allen Hilfsbedürftigen den Zugang zur Bildung und Informationen verschaffen, um ihren Lebensstandard zu erhöhen."
+      },
+      "soziales": {
+        "title": "Soziales",
+        "text": "Wir wollen den sozialen Austausch unter Allen fördern, sowie aktuelle Gesellschaftsthemen behandeln und Betroffene unterstützen."
+      },
+      "community": {
+        "title": "Community",
+        "text": "Wir wollen den Mitgliedern im Verein, eine Möglichkeit bieten zusammen an persönlichen Projekten zu arbeiten."
+      }
+    },
+    "projects": {
+      "title": "Aktuelle Projekte",
+      "cta": "ALLE PROJEKTE"
+    },
+    "cta": {
+      "title": "Gemeinsam wachsen",
+      "text": "Interessiert? Nimm Kontakt mit uns auf.",
+      "button": "KONTAKT"
+    }
+  },
+  "footer": {
+    "kontakt": "KONTAKT",
+    "faq": "FAQ",
+    "email": "Schreibe uns eine E-Mail",
+    "findUs": "Finde uns hier",
+    "werte": "UNSERE WERTE",
+    "unterstuetzen": "UNTERSTÜTZE UNS",
+    "unterstuetzenText": "Wir sind euch sehr dankbar wenn ihr unseren Verein unterstützen wollt, unsere Angaben wären:",
+    "empfaenger": "Empfänger",
+    "kontoNr": "Konto Nr",
+    "download": "DOWNLOAD",
+    "vereinsstatuten": "Vereinsstatuten",
+    "socials": "SOCIALS",
+    "copyright": "Copyright © 2026"
+  },
+  "common": {
+    "moreInfo": "MEHR ERFAHREN",
+    "readMore": "Weiterlesen",
+    "backToTop": "Nach oben",
+    "noEvents": "Keine anstehenden Veranstaltungen."
+  }
+}
