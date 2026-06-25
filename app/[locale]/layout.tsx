@@ -30,20 +30,16 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-
-  if (!locales.includes(locale)) {
-    notFound();
-  }
-
+  if (!locales.includes(locale)) notFound();
   const messages = await getMessages();
 
   return (
     <html lang={locale} className={lato.variable}>
-      <body className="font-[family-name:var(--font-lato-var)] antialiased">
+      <body className={`${lato.className} antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <AttentionBanner />
           <Header />
-          <main>{children}</main>
+          <main className="min-h-screen">{children}</main>
           <Footer />
         </NextIntlClientProvider>
       </body>

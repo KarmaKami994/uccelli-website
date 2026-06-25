@@ -11,40 +11,27 @@ interface CardProps {
   className?: string;
 }
 
-export function Card({
-  title,
-  body,
-  imageSrc,
-  imageAlt = "",
-  buttonText,
-  buttonHref,
-  className,
-}: CardProps) {
+export function Card({ title, body, imageSrc, imageAlt = "", buttonText, buttonHref, className }: CardProps) {
   return (
-    <div
-      className={cn(
-        "border border-brand-black rounded-card overflow-hidden flex flex-col",
-        className
-      )}
-    >
-      {imageSrc && (
-        <div className="aspect-video w-full overflow-hidden bg-neutral-200">
-          <img
-            src={imageSrc}
-            alt={imageAlt}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
+    <div className={cn(
+      "group border border-neutral-200 rounded-[12px] overflow-hidden flex flex-col bg-white transition-shadow duration-300 hover:shadow-lg hover:border-neutral-300",
+      className
+    )}>
+      {imageSrc ? (
+        <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100">
+          <img src={imageSrc} alt={imageAlt} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />
+        </div>
+      ) : (
+        <div className="aspect-[16/10] w-full bg-gradient-to-br from-neutral-100 to-neutral-200 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-neutral-300/50" />
         </div>
       )}
-      <div className="p-5 flex flex-col flex-1">
-        <h3 className="text-h3 font-bold mb-2">{title}</h3>
-        <p className="text-body text-neutral-700 mb-4 flex-1">{body}</p>
+      <div className="p-6 flex flex-col flex-1">
+        <h3 className="text-lg font-bold mb-2 leading-tight">{title}</h3>
+        <p className="text-[15px] text-neutral-600 leading-relaxed mb-5 flex-1">{body}</p>
         {buttonText && (
           <div>
-            <Button variant="primary" href={buttonHref}>
-              {buttonText}
-            </Button>
+            <Button variant="primary" href={buttonHref}>{buttonText}</Button>
           </div>
         )}
       </div>

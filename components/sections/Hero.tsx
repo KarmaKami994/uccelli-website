@@ -15,35 +15,19 @@ interface HeroProps {
   className?: string;
 }
 
-export function Hero({
-  title,
-  subtitle,
-  ctaText,
-  ctaHref,
-  variant = "gradient",
-  imageSrc,
-  className,
-}: HeroProps) {
+export function Hero({ title, subtitle, ctaText, ctaHref, variant = "gradient", imageSrc, className }: HeroProps) {
   if (variant === "cutout") {
     return (
-      <section
-        className={cn(
-          "relative min-h-[60vh] lg:min-h-[70vh] flex items-end",
-          className
-        )}
-      >
-        {/* White top + black bottom creates the cutout effect */}
+      <section className={cn("relative min-h-[50vh] lg:min-h-[65vh] flex items-center", className)}>
         <div className="absolute inset-0 flex flex-col">
           <div className="flex-1 bg-white" />
-          <div className="flex-1 bg-brand-black" />
+          <div className="flex-1 bg-black" />
         </div>
-        <div className="relative z-10 px-5 lg:px-8 pb-16 lg:pb-24 max-w-[1400px] mx-auto w-full">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-lato uppercase leading-[0.95] tracking-tight">
-            {title.split(" ").map((word, i) => (
-              <span key={i} className="inline-block">
-                <span className="bg-brand-black text-brand-white px-2 py-1 inline-block">
-                  {word}
-                </span>{" "}
+        <div className="relative z-10 w-full max-w-[1200px] mx-auto px-6 lg:px-10">
+          <h1 className="text-[clamp(2.5rem,8vw,5.5rem)] font-bold uppercase leading-[0.92] tracking-tight">
+            {title.split(/\s+/).map((word, i) => (
+              <span key={i} className="inline-block mr-3 mb-2">
+                <span className="bg-black text-white px-3 py-1 inline-block">{word}</span>
               </span>
             ))}
           </h1>
@@ -55,54 +39,40 @@ export function Hero({
   if (variant === "split") {
     return (
       <section className={cn("", className)}>
-        <div className="px-5 lg:px-8 pt-12 pb-8 max-w-[1400px] mx-auto">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-lato uppercase">
-            {title}
-          </h1>
-          {subtitle && (
-            <p className="mt-4 text-lg text-neutral-600 max-w-xl">{subtitle}</p>
-          )}
+        <div className="max-w-[1200px] mx-auto px-6 lg:px-10 pt-16 pb-10">
+          <h1 className="text-[clamp(2.5rem,7vw,4.5rem)] font-bold uppercase leading-[0.95] tracking-tight">{title}</h1>
+          {subtitle && <p className="mt-5 text-lg text-neutral-500 max-w-xl leading-relaxed">{subtitle}</p>}
         </div>
         {imageSrc && (
           <div className="w-full aspect-[16/9] lg:aspect-[21/9] overflow-hidden">
-            <img
-              src={imageSrc}
-              alt=""
-              className="w-full h-full object-cover"
-            />
+            <img src={imageSrc} alt="" className="w-full h-full object-cover" />
           </div>
         )}
       </section>
     );
   }
 
-  // Default: gradient variant (fullscreen dark with gradient)
+  // gradient — fullscreen hero
   return (
-    <section
-      className={cn(
-        "relative min-h-[80vh] lg:min-h-screen flex items-end bg-gradient-to-b from-neutral-400 to-brand-black",
-        className
-      )}
-    >
+    <section className={cn("relative min-h-[85vh] lg:min-h-screen flex items-end overflow-hidden", className)}>
+      {/* Gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-neutral-500 via-neutral-800 to-black" />
+      {/* Subtle noise texture via CSS */}
+      <div className="absolute inset-0 opacity-[0.03]"
+        style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
       {imageSrc && (
-        <img
-          src={imageSrc}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40"
-        />
+        <img src={imageSrc} alt="" className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30" />
       )}
-      <div className="relative z-10 px-5 lg:px-8 pb-12 lg:pb-20 max-w-[1400px] mx-auto w-full">
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-lato uppercase text-white leading-[0.95] tracking-tight">
+      <div className="relative z-10 w-full max-w-[1200px] mx-auto px-6 lg:px-10 pb-16 lg:pb-24">
+        <h1 className="text-[clamp(2.5rem,8vw,6rem)] font-bold uppercase text-white leading-[0.92] tracking-tight max-w-4xl">
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-4 text-lg text-neutral-300 max-w-xl">{subtitle}</p>
+          <p className="mt-5 text-[clamp(1rem,2vw,1.25rem)] text-neutral-300 max-w-xl leading-relaxed">{subtitle}</p>
         )}
         {ctaText && (
-          <div className="mt-8">
-            <Button variant="secondary" href={ctaHref}>
-              {ctaText}
-            </Button>
+          <div className="mt-10">
+            <Button variant="secondary" size="lg" href={ctaHref}>{ctaText}</Button>
           </div>
         )}
       </div>
