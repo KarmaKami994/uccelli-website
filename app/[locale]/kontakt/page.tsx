@@ -1,5 +1,11 @@
-"use client";
 import { ContactForm } from "@/components/ui/ContactForm";
+import { MapLoader } from "@/components/ui/MapLoader";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Kontakt – Uccelli Society",
+  description: "Kontaktiere den Verein Uccelli. Riedhofstrasse 364, 8049 Zürich. E-Mail: uccelli.society@gmail.com",
+};
 
 export default function KontaktPage() {
   return (
@@ -13,10 +19,7 @@ export default function KontaktPage() {
 
       <section className="py-16 lg:py-24 px-6 lg:px-10">
         <div className="max-w-[1100px] mx-auto grid lg:grid-cols-2 gap-16">
-          {/* Form */}
           <ContactForm />
-
-          {/* Info */}
           <div className="space-y-10">
             <div>
               <h3 className="text-[13px] font-bold uppercase tracking-wide mb-3">Wo du uns finden kannst</h3>
@@ -40,9 +43,9 @@ export default function KontaktPage() {
                 ))}
               </div>
             </div>
-            {/* Map placeholder — Leaflet/OSM will be integrated in Phase 3 */}
-            <div className="aspect-[4/3] bg-neutral-100 rounded-[12px] flex items-center justify-center">
-              <p className="text-neutral-400 text-[14px]">Karte wird geladen...</p>
+            {/* OpenStreetMap – Riedhofstrasse 364, 8049 Zürich */}
+            <div className="aspect-[4/3] rounded-[12px] overflow-hidden border border-neutral-200">
+              <MapLoader lat={47.3982} lng={8.4928} zoom={15} />
             </div>
           </div>
         </div>

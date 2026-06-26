@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+export const metadata: Metadata = { title: "Veranstaltungen – Uccelli Society", description: "Kommende Events und Veranstaltungen des Verein Uccelli." };
+
 import { Hero } from "@/components/sections/Hero";
 
 export default function VeranstaltungenPage() {

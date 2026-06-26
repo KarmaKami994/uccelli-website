@@ -1,5 +1,10 @@
-"use client";
 import { Accordion } from "@/components/ui/Accordion";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "FAQ – Uccelli Society",
+  description: "Häufig gestellte Fragen zum Verein Uccelli, Mitgliedschaft, Projekten und Unterstützungsmöglichkeiten.",
+};
 
 const faqItems = [
   { question: "Was ist der Verein Uccelli?", answer: "Der Verein Uccelli ist ein integratives Netzwerk mit Sitz in Zürich, das Bildung, sozialen Austausch und persönliche Entwicklung fördert. Wir stehen allen offen, unabhängig von Hintergrund oder sozialer Schicht." },

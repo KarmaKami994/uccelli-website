@@ -5,6 +5,7 @@ import localFont from "next/font/local";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { AttentionBanner } from "@/components/layout/AttentionBanner";
+import { CookieBanner } from "@/components/layout/CookieBanner";
 import "@/styles/globals.css";
 
 const lato = localFont({
@@ -41,6 +42,7 @@ export default async function LocaleLayout({
           <Header />
           <main className="min-h-screen">{children}</main>
           <Footer />
+          <CookieBanner />
         </NextIntlClientProvider>
       </body>
     </html>

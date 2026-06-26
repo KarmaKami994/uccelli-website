@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+export const metadata: Metadata = { title: "Kursangebote – Uccelli Society", description: "Kurse zu Psychologie, Sport, Finanzen und IT & Business." };
+
 import { Hero } from "@/components/sections/Hero";
 import { Button } from "@/components/ui/Button";
 

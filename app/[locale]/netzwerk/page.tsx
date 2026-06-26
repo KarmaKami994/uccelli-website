@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+export const metadata: Metadata = { title: "Netzwerk – Uccelli Society", description: "Unsere Netzwerke: Uccelli Ghana, Uccelli Women, Uccelli FC und Nightshift Music." };
+
 import { Hero } from "@/components/sections/Hero";
 
 const networks = [

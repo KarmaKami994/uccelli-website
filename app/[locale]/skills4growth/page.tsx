@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+export const metadata: Metadata = { title: "Skills4Growth / LifeLab – Uccelli Society", description: "LifeLab vermittelt Jugendlichen lebenspraktische Kompetenzen für den Alltag." };
+
 import { Hero } from "@/components/sections/Hero";
 import { Button } from "@/components/ui/Button";
 

@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+export const metadata: Metadata = { title: "Über uns – Uccelli Society", description: "Erfahre mehr über den Verein Uccelli: Geschichte, Mission, Vision und unsere Säulen." };
+
 import { Hero } from "@/components/sections/Hero";
 import { Button } from "@/components/ui/Button";
 

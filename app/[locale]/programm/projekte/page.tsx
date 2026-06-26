@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+export const metadata: Metadata = { title: "Projekte – Uccelli Society", description: "Sozialprojekte, Bildungsprojekte und Gemeinschaftsprojekte des Verein Uccelli." };
+
 import { Hero } from "@/components/sections/Hero";
 import { Card } from "@/components/ui/Card";
 

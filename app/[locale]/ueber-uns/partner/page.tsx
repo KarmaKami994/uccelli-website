@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+export const metadata: Metadata = { title: "Partner & Sponsoren – Uccelli Society", description: "Unsere Partner und Sponsoren: GZ Höngg, Royal Studio, Anker Swiss AG, Hosttech, GymOne und mehr." };
+
 import { Hero } from "@/components/sections/Hero";
 import { Button } from "@/components/ui/Button";
 

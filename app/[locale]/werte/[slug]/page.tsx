@@ -1,3 +1,6 @@
+import { Button } from "@/components/ui/Button";
+import type { Metadata } from "next";
+
 const werteContent: Record<string, { title: string; text: string }> = {
   "schutz-der-umwelt": {
     title: "Schutz der Umwelt",
@@ -24,6 +27,15 @@ const werteContent: Record<string, { title: string; text: string }> = {
     text: "Der Verein Uccelli sieht sich in der Pflicht, ökonomisch und umweltbewusst zu handeln. Der Verein Uccelli ist bestrebt, seine Tätigkeiten ehrlich und auf ethisch moralischer Grundlage zu betreiben.",
   },
 };
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const wert = werteContent[slug];
+  return {
+    title: wert ? `${wert.title} – Uccelli Society` : "Seite nicht gefunden",
+    description: wert?.text.slice(0, 160),
+  };
+}
 
 export default async function WertePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

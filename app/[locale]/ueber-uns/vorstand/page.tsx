@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+export const metadata: Metadata = { title: "Der Vorstand – Uccelli Society", description: "Lernen Sie den Vorstand des Verein Uccelli kennen: Ato, Hatice und Karim." };
+
 import { Hero } from "@/components/sections/Hero";
 import { PersonCard } from "@/components/ui/PersonCard";
 

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Menu, X, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 interface NavChild { key: string; href: string }
 interface NavItem { key: string; href?: string; children?: NavChild[] }
@@ -92,6 +93,7 @@ function MobileAccordion({ label, items, t }: { label: string; items: NavChild[]
 
 export function Header() {
   const t = useTranslations("nav");
+  const locale = useLocale();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const renderNavItem = (item: NavItem) => {
@@ -116,6 +118,7 @@ export function Header() {
         </a>
         <div className="flex-1 flex items-center justify-start gap-10 pl-16">
           {navRight.map(renderNavItem)}
+          <LanguageSwitcher currentLocale={locale} />
         </div>
       </nav>
 
@@ -144,6 +147,9 @@ export function Header() {
                     className="block py-4 text-[17px] font-medium border-b border-neutral-100">{t(item.key)}</a>
                 )
               )}
+              <div className="pt-6 flex justify-center">
+                <LanguageSwitcher currentLocale={locale} />
+              </div>
             </div>
           </motion.div>
         )}
