@@ -50,15 +50,108 @@
         "text": "Wir wollen den Mitgliedern im Verein, eine Möglichkeit bieten zusammen an persönlichen Projekten zu arbeiten."
       }
     },
-    "projects": {
-      "title": "Aktuelle Projekte",
-      "cta": "ALLE PROJEKTE"
-    },
     "cta": {
       "title": "Gemeinsam wachsen",
       "text": "Interessiert? Nimm Kontakt mit uns auf.",
       "button": "KONTAKT"
     }
+  },
+  "about": {
+    "history": {
+      "title": "Wie alles begann",
+      "p1": "Was heute die Uccelli Society ist, begann mit einer einfachen Begegnung und vielen grossen Gesprächen. Aus dem Wunsch nach Zugehörigkeit, Austausch und einer Gemeinschaft für Menschen mit unterschiedlichen Perspektiven entstand zunächst eine kleine Gruppe von Freunden.",
+      "p2": "Mit der Zeit wurde aus dieser Idee mehr: eine Vision für einen offenen, inklusiven Verein, der Menschen verbindet, Potenziale fördert und Raum für persönliche Entwicklung schafft. Nach Jahren des Austauschs wurde 2021 der Verein Uccelli offiziell gegründet.",
+      "p3": "Der Name Uccelli – inspiriert von den italienischen Vögeln – steht bis heute für Individualität, Freiheit und die Überzeugung, dass Vielfalt eine Stärke ist."
+    },
+    "mission": "Uccelli schafft ein integratives Netzwerk, das Bildung, Austausch und persönliche Entwicklung fördert – offen für alle, unabhängig von Hintergrund oder sozialer Schicht.",
+    "vision": "In den kommenden 5 Jahren ein Netzwerk aufbauen, in dem sich Personen verschiedener Hintergründe zusammenkommen, austauschen und gegenseitig inspirieren können.",
+    "team": {
+      "title": "Hinter jeder Vision stehen Menschen",
+      "text": "Lernen Sie die Persönlichkeiten kennen, die die Uccelli Society mitgestalten, Projekte vorantreiben und unsere Vision Tag für Tag zum Leben erwecken.",
+      "cta": "DER VORSTAND"
+    },
+    "pillars": "Unsere Säulen",
+    "moreInfo": "Mehr erfahren →"
+  },
+  "vorstand": {
+    "title": "DER VORSTAND"
+  },
+  "faq": {
+    "title": "FAQ",
+    "subtitle": "Wir sind da um zu helfen!",
+    "items": [
+      {
+        "q": "Was ist der Verein Uccelli?",
+        "a": "Der Verein Uccelli ist ein integratives Netzwerk mit Sitz in Zürich, das Bildung, sozialen Austausch und persönliche Entwicklung fördert."
+      },
+      {
+        "q": "Wie kann ich Mitglied werden?",
+        "a": "Du kannst dich über unser Kontaktformular oder direkt per E-Mail an uccelli.society@gmail.com anmelden."
+      },
+      {
+        "q": "Was kostet eine Mitgliedschaft?",
+        "a": "Die Mitgliedschaft ist kostenlos. Wir finanzieren uns über Spenden, Sponsoren und Partnerschaften."
+      },
+      {
+        "q": "Welche Projekte bietet Uccelli an?",
+        "a": "Wir bieten Sozialprojekte, Bildungsprojekte wie LifeLab und Gemeinschaftsprojekte wie die Nightshift Music Konzertreihe."
+      },
+      {
+        "q": "Wo finden die Veranstaltungen statt?",
+        "a": "Die meisten unserer Veranstaltungen finden in Zürich statt, oft im GZ Höngg oder an wechselnden Locations."
+      },
+      {
+        "q": "Kann ich den Verein finanziell unterstützen?",
+        "a": "Ja! Empfänger: Verein Uccelli, Konto Nr: 1148-5358.899, IBAN: CH53 0070 0114 8053 5889 9."
+      },
+      {
+        "q": "Was bedeutet der Name Uccelli?",
+        "a": "Uccelli ist das italienische Wort für Vögel. Der Name steht für Freiheit, Individualität und die Überzeugung, dass Vielfalt eine Stärke ist."
+      }
+    ]
+  },
+  "partner": {
+    "intro": {
+      "title": "Gemeinsam Grosses Erreichen",
+      "text": "Starke Partnerschaften sind der Schlüssel zum Erfolg. Wir freuen uns über die Zusammenarbeit mit Unternehmen, die unsere Vision teilen."
+    },
+    "partnerLabel": "Partner",
+    "sponsorLabel": "Sponsoren",
+    "toPartner": "ZUM PARTNER",
+    "toSponsor": "ZUM SPONSOR"
+  },
+  "projekte": {
+    "subtitle": "Gemeinsam wachsen, lernen und vernetzen",
+    "intro": "Unsere Projekte schaffen Räume für Austausch, Bildung und persönliche Entwicklung. Wir bringen Menschen zusammen, fördern neue Perspektiven und unterstützen individuelle Ziele.",
+    "sozial": "Sozialprojekte",
+    "bildung": "Bildungsprojekte",
+    "gemeinschaft": "Gemeinschaftsprojekte",
+    "moreInfo": "MEHR ERFAHREN"
+  },
+  "kursangebote": {
+    "subtitle": "Lernen. Wachsen. Vernetzen.",
+    "intro": "Unsere Kurse bieten mehr als Wissen – sie schaffen Möglichkeiten. Von IT und Business bis hin zu kreativen Workshops unterstützen wir Menschen dabei, neue Kompetenzen zu entwickeln."
+  },
+  "netzwerk": {
+    "subtitle": "Menschen. Ideen. Möglichkeiten.",
+    "intro": "Unser Netzwerk bringt Menschen zusammen, die etwas bewegen, lernen und wachsen möchten. In unseren verschiedenen Gruppen treffen unterschiedliche Erfahrungen, Perspektiven und Interessen aufeinander."
+  },
+  "kontakt": {
+    "title": "Get in Touch with Us",
+    "subtitle": "Kontaktiere uns gerne, wir werden uns so schnell wie möglich bei dir melden.",
+    "address": "Wo du uns finden kannst",
+    "email": "Schreib uns per Mail",
+    "social": "Social Media"
+  },
+  "events": {
+    "subtitle": "Unsere kommenden Events",
+    "empty": "Keine anstehenden Veranstaltungen.",
+    "emptyHint": "Folge uns auf Instagram für aktuelle Updates."
+  },
+  "news": {
+    "subtitle": "Neuigkeiten aus der Uccelli Society",
+    "back": "← ZURÜCK ZU NEWS",
+    "readMore": "WEITERLESEN"
   },
   "footer": {
     "kontakt": "KONTAKT",
@@ -79,6 +172,16 @@
     "moreInfo": "MEHR ERFAHREN",
     "readMore": "Weiterlesen",
     "backToTop": "Nach oben",
-    "noEvents": "Keine anstehenden Veranstaltungen."
+    "notFound": "Seite nicht gefunden",
+    "notFoundText": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
+    "toHome": "ZUR STARTSEITE",
+    "contact": "KONTAKT",
+    "contactUs": "KONTAKT AUFNEHMEN",
+    "sent": "Nachricht gesendet!",
+    "sentText": "Wir werden uns so schnell wie möglich bei dir melden.",
+    "send": "SENDEN",
+    "sending": "WIRD GESENDET...",
+    "moreValues": "Weitere Werte",
+    "mapLoading": "Karte wird geladen..."
   }
 }

@@ -4,6 +4,12 @@ import type { NextConfig } from "next";
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: [
+    "@payloadcms/db-sqlite",
+    "@libsql/client",
+    "@libsql/hrana-client",
+    "drizzle-kit",
+  ],
   // WordPress → Next.js 301 Redirect Mapping
   async redirects() {
     return [

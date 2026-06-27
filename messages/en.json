@@ -4,81 +4,83 @@
     "description": "Uccelli Society: A network for education, social exchange and personal development in Zurich."
   },
   "nav": {
-    "home": "Home",
-    "skills4growth": "Skills4Growth",
-    "programm": "Program",
-    "projekte": "Projects",
-    "veranstaltungen": "Events",
-    "kursangebote": "Courses",
-    "news": "News",
-    "netzwerk": "Network",
-    "uccelliWomen": "Uccelli Women",
-    "uccelliGhana": "Uccelli Ghana",
-    "uccelliFC": "Uccelli FC",
-    "nightshift": "Nightshift Music",
-    "ueberUns": "About us",
-    "vorstand": "Board",
-    "formular": "Forms",
-    "partnerSponsoren": "Partners/Sponsors",
-    "faq": "FAQ",
-    "kontakt": "Contact"
+    "home": "Home", "skills4growth": "Skills4Growth", "programm": "Program", "projekte": "Projects",
+    "veranstaltungen": "Events", "kursangebote": "Courses", "news": "News", "netzwerk": "Network",
+    "uccelliWomen": "Uccelli Women", "uccelliGhana": "Uccelli Ghana", "uccelliFC": "Uccelli FC",
+    "nightshift": "Nightshift Music", "ueberUns": "About us", "vorstand": "Board", "formular": "Forms",
+    "partnerSponsoren": "Partners/Sponsors", "faq": "FAQ", "kontakt": "Contact"
   },
   "home": {
-    "hero": {
-      "title": "UCCELLI SOCIETY",
-      "claim": "Community. Integrity. Generativity.",
-      "cta": "LEARN MORE"
-    },
-    "about": {
-      "eyebrow": "About us",
-      "title": "Our mission & vision",
-      "text": "Our goal is to build a network that brings together and consolidates knowledge from various fields. This knowledge should enable members to achieve their individual goals and concerns.",
-      "cta": "LEARN MORE"
-    },
+    "hero": { "title": "UCCELLI SOCIETY", "claim": "Community. Integrity. Generativity.", "cta": "LEARN MORE" },
+    "about": { "eyebrow": "About us", "title": "Our mission & vision", "text": "Our goal is to build a network that brings together and consolidates knowledge from various fields. This knowledge should enable members to achieve their individual goals and concerns.", "cta": "LEARN MORE" },
     "tasks": {
       "title": "Our core activities",
-      "bildung": {
-        "title": "Education",
-        "text": "We want to provide access to education and information to help those in need improve their standard of living."
-      },
-      "soziales": {
-        "title": "Social",
-        "text": "We promote social exchange and address current social issues while supporting those affected."
-      },
-      "community": {
-        "title": "Community",
-        "text": "We offer members the opportunity to work together on personal projects and strengthen the bond within the Uccelli family."
-      }
+      "bildung": { "title": "Education", "text": "We want to provide access to education and information to help those in need improve their standard of living." },
+      "soziales": { "title": "Social", "text": "We promote social exchange and address current social issues while supporting those affected." },
+      "community": { "title": "Community", "text": "We offer members the opportunity to work together on personal projects and strengthen the bond within the Uccelli family." }
     },
-    "projects": {
-      "title": "Current projects",
-      "cta": "ALL PROJECTS"
-    },
-    "cta": {
-      "title": "Grow together",
-      "text": "Interested? Get in touch with us.",
-      "button": "CONTACT"
-    }
+    "cta": { "title": "Grow together", "text": "Interested? Get in touch with us.", "button": "CONTACT" }
   },
+  "about": {
+    "history": { "title": "How it all began", "p1": "What is today the Uccelli Society began with a simple encounter and many great conversations. From the desire for belonging, exchange and a community for people with different perspectives, a small group of friends first emerged.", "p2": "Over time, this idea became more: a vision for an open, inclusive association that connects people, promotes potential and creates space for personal development. After years of exchange, the Uccelli association was officially founded in 2021.", "p3": "The name 'Uccelli' – inspired by the Italian word for 'birds' – stands to this day for individuality, freedom and the conviction that diversity is a strength." },
+    "mission": "Uccelli creates an integrative network that promotes education, exchange and personal development — open to all, regardless of background or social class.",
+    "vision": "To build a network over the next 5 years where people from different backgrounds come together, exchange ideas and inspire each other.",
+    "team": { "title": "Behind every vision are people", "text": "Meet the personalities who help shape the Uccelli Society, drive projects forward and bring our vision to life every day.", "cta": "THE BOARD" },
+    "pillars": "Our pillars",
+    "moreInfo": "Learn more →"
+  },
+  "vorstand": { "title": "THE BOARD" },
+  "faq": { "title": "FAQ", "subtitle": "We're here to help!",
+    "items": [
+      { "q": "What is the Uccelli Society?", "a": "The Uccelli Society is an integrative network based in Zurich that promotes education, social exchange and personal development. We are open to everyone, regardless of background or social class." },
+      { "q": "How can I become a member?", "a": "You can register via our contact form or directly by email to uccelli.society@gmail.com. We look forward to every new member!" },
+      { "q": "What does a membership cost?", "a": "Membership is free. We finance ourselves through donations, sponsors and partnerships." },
+      { "q": "What projects does Uccelli offer?", "a": "We offer social projects, educational projects like LifeLab and community projects like the Nightshift Music concert series. You can find current projects on our projects page." },
+      { "q": "Where do the events take place?", "a": "Most of our events take place in Zurich, often at GZ Höngg or at changing locations. Details can be found with the respective events." },
+      { "q": "Can I support the association financially?", "a": "Yes! You can support us via bank transfer. Recipient: Verein Uccelli, Account No: 1148-5358.899, IBAN: CH53 0070 0114 8053 5889 9." },
+      { "q": "What does the name Uccelli mean?", "a": "'Uccelli' is the Italian word for 'birds'. The name stands for freedom, individuality and the conviction that diversity is a strength." }
+    ]
+  },
+  "partner": {
+    "intro": { "title": "Achieving Great Things Together", "text": "Strong partnerships are the key to success. We are delighted to work with companies that share our vision and support us in achieving our goals." },
+    "partnerLabel": "Partners", "sponsorLabel": "Sponsors", "toPartner": "TO PARTNER", "toSponsor": "TO SPONSOR"
+  },
+  "projekte": {
+    "subtitle": "Growing, learning and connecting together",
+    "intro": "Our projects create spaces for exchange, education and personal development. Whether psychological counseling, IT and business courses or creative offerings — we bring people together, promote new perspectives and support individual goals.",
+    "sozial": "Social projects", "bildung": "Educational projects", "gemeinschaft": "Community projects", "moreInfo": "LEARN MORE"
+  },
+  "kursangebote": {
+    "subtitle": "Learn. Grow. Connect.",
+    "intro": "Our courses offer more than knowledge — they create opportunities. From IT and business to creative workshops, we support people in developing new skills, sharing experiences and achieving their personal and professional goals."
+  },
+  "netzwerk": {
+    "subtitle": "People. Ideas. Possibilities.",
+    "intro": "Our network brings together people who want to make a difference, learn and grow. In our various groups, different experiences, perspectives and interests meet — and from this, new ideas, exciting projects and valuable connections emerge."
+  },
+  "kontakt": {
+    "title": "Get in Touch with Us",
+    "subtitle": "Feel free to contact us, we will get back to you as soon as possible.",
+    "address": "Where to find us", "email": "Send us an email", "social": "Social media"
+  },
+  "events": {
+    "subtitle": "Our upcoming events",
+    "empty": "No upcoming events.", "emptyHint": "Follow us on Instagram for updates."
+  },
+  "news": { "subtitle": "News from the Uccelli Society", "back": "← BACK TO NEWS", "readMore": "READ MORE" },
   "footer": {
-    "kontakt": "CONTACT",
-    "faq": "FAQ",
-    "email": "Send us an email",
-    "findUs": "Find us here",
-    "werte": "OUR VALUES",
-    "unterstuetzen": "SUPPORT US",
+    "kontakt": "CONTACT", "faq": "FAQ", "email": "Send us an email", "findUs": "Find us here",
+    "werte": "OUR VALUES", "unterstuetzen": "SUPPORT US",
     "unterstuetzenText": "We are very grateful if you would like to support our association. Our details are:",
-    "empfaenger": "Recipient",
-    "kontoNr": "Account No",
-    "download": "DOWNLOAD",
-    "vereinsstatuten": "Association statutes",
-    "socials": "SOCIALS",
-    "copyright": "Copyright © 2026"
+    "empfaenger": "Recipient", "kontoNr": "Account No",
+    "download": "DOWNLOAD", "vereinsstatuten": "Association statutes",
+    "socials": "SOCIALS", "copyright": "Copyright © 2026"
   },
   "common": {
-    "moreInfo": "LEARN MORE",
-    "readMore": "Read more",
-    "backToTop": "Back to top",
-    "noEvents": "No upcoming events."
+    "moreInfo": "LEARN MORE", "readMore": "Read more", "backToTop": "Back to top",
+    "notFound": "Page not found", "notFoundText": "The page you are looking for does not exist or has been moved.",
+    "toHome": "TO HOMEPAGE", "contact": "CONTACT",
+    "contactUs": "GET IN TOUCH", "sent": "Message sent!", "sentText": "We will get back to you as soon as possible.", "send": "SEND", "sending": "SENDING...",
+    "moreValues": "More values", "mapLoading": "Loading map..."
   }
 }

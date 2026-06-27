@@ -1,6 +1,6 @@
 import path from "path";
 import { buildConfig } from "payload";
-import { mongooseAdapter } from "@payloadcms/db-mongodb";
+import { sqliteAdapter } from "@payloadcms/db-sqlite";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 
 import { Projects } from "./collections/Projects";
@@ -20,8 +20,10 @@ export default buildConfig({
     },
   },
   editor: lexicalEditor(),
-  db: mongooseAdapter({
-    url: process.env.MONGODB_URI || "mongodb://localhost:27017/uccelli",
+  db: sqliteAdapter({
+    client: {
+      url: process.env.DATABASE_URI || "file:./uccelli.db",
+    },
   }),
   collections: [
     // Content

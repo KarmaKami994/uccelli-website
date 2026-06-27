@@ -1,0 +1,11 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api
+
+# Host
+Host: https://uccelli-society.ch
+
+# Sitemaps
+Sitemap: https://uccelli-society.ch/sitemap.xml

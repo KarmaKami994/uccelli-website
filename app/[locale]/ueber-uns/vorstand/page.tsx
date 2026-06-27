@@ -1,25 +1,23 @@
 import type { Metadata } from "next";
-export const metadata: Metadata = { title: "Der Vorstand – Uccelli Society", description: "Lernen Sie den Vorstand des Verein Uccelli kennen: Ato, Hatice und Karim." };
-
+import { getTranslations } from "next-intl/server";
 import { Hero } from "@/components/sections/Hero";
 import { PersonCard } from "@/components/ui/PersonCard";
+import { StaggerReveal } from "@/components/ui/StaggerReveal";
+import { getTeam } from "@/lib/data";
 
-const team = [
-  { name: "Ato Akrofi", role: "Vereinspräsident" },
-  { name: "Hatice Aksüt", role: "Head of Project Management" },
-  { name: "Karim Moutiq", role: "Head of IT" },
-];
+export const metadata: Metadata = { title: "Der Vorstand – Uccelli Society", description: "Lernen Sie den Vorstand des Verein Uccelli kennen." };
 
-export default function VorstandPage() {
+export default async function VorstandPage() {
+  const t = await getTranslations("vorstand");
+  const team = await getTeam();
+
   return (
     <>
-      <Hero title="DER VORSTAND" variant="cutout" />
+      <Hero title={t("title")} variant="cutout" />
       <section className="py-20 lg:py-28 px-6 lg:px-10">
-        <div className="max-w-[1000px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16">
-          {team.map((member) => (
-            <PersonCard key={member.name} {...member} />
-          ))}
-        </div>
+        <StaggerReveal className="max-w-[1000px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16" stagger={0.2}>
+          {team.map((m) => <PersonCard key={m.name} name={m.name} role={m.role} imageSrc={m.image} />)}
+        </StaggerReveal>
       </section>
     </>
   );

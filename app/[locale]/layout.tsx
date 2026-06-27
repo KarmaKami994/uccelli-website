@@ -6,6 +6,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { AttentionBanner } from "@/components/layout/AttentionBanner";
 import { CookieBanner } from "@/components/layout/CookieBanner";
+import { OrganizationJsonLd } from "@/components/layout/JsonLd";
+import { PageTransition } from "@/components/layout/PageTransition";
 import "@/styles/globals.css";
 
 const lato = localFont({
@@ -36,11 +38,16 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className={lato.variable}>
+      <head>
+        <OrganizationJsonLd />
+      </head>
       <body className={`${lato.className} antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <AttentionBanner />
           <Header />
-          <main className="min-h-screen">{children}</main>
+          <main className="min-h-screen">
+            <PageTransition>{children}</PageTransition>
+          </main>
           <Footer />
           <CookieBanner />
         </NextIntlClientProvider>

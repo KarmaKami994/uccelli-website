@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Menu, X, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -96,6 +96,16 @@ export function Header() {
   const locale = useLocale();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
+
   const renderNavItem = (item: NavItem) => {
     if (item.children) return <DesktopDropdown key={item.key} label={t(item.key)} items={item.children} t={t} />;
     return (
@@ -107,53 +117,71 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-neutral-100">
-      {/* Desktop */}
-      <nav className="hidden lg:flex items-center h-[72px] px-10 relative max-w-[1400px] mx-auto">
-        <div className="flex-1 flex items-center justify-end gap-10 pr-16">
-          {navLeft.map(renderNavItem)}
-        </div>
-        <a href="/" className="absolute left-1/2 -translate-x-1/2 z-10" aria-label="Home">
-          <Logo className="text-[18px]" />
-        </a>
-        <div className="flex-1 flex items-center justify-start gap-10 pl-16">
-          {navRight.map(renderNavItem)}
-          <LanguageSwitcher currentLocale={locale} />
-        </div>
-      </nav>
+    <>
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-neutral-100">
+        {/* Desktop */}
+        <nav className="hidden lg:flex items-center h-[72px] px-10 relative max-w-[1400px] mx-auto">
+          <div className="flex-1 flex items-center justify-end gap-10 pr-16">
+            {navLeft.map(renderNavItem)}
+          </div>
+          <a href="/" className="absolute left-1/2 -translate-x-1/2 z-10" aria-label="Home">
+            <Logo className="text-[18px]" />
+          </a>
+          <div className="flex-1 flex items-center justify-start gap-10 pl-16">
+            {navRight.map(renderNavItem)}
+            <LanguageSwitcher currentLocale={locale} />
+          </div>
+        </nav>
 
-      {/* Mobile */}
-      <nav className="lg:hidden flex items-center justify-between h-[60px] px-5">
-        <button onClick={() => setMobileOpen(!mobileOpen)} className="p-1.5 -ml-1.5 cursor-pointer"
-          aria-label={mobileOpen ? "Menü schliessen" : "Menü öffnen"}>
-          {mobileOpen ? <X size={22} strokeWidth={1.5} /> : <Menu size={22} strokeWidth={1.5} />}
-        </button>
-        <a href="/" aria-label="Home"><Logo className="text-[16px]" /></a>
-      </nav>
+        {/* Mobile header bar */}
+        <nav className="lg:hidden flex items-center justify-between h-[60px] px-5">
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-1.5 -ml-1.5 cursor-pointer"
+            aria-label={mobileOpen ? "Menü schliessen" : "Menü öffnen"}>
+            {mobileOpen ? <X size={22} strokeWidth={1.5} /> : <Menu size={22} strokeWidth={1.5} />}
+          </button>
+          <a href="/" aria-label="Home"><Logo className="text-[16px]" /></a>
+        </nav>
+      </header>
 
-      {/* Mobile overlay */}
+      {/* Mobile overlay — OUTSIDE header to avoid sticky/fixed conflicts */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="lg:hidden fixed inset-0 top-[60px] bg-white z-40 overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="lg:hidden fixed inset-0 z-[100] bg-white overflow-y-auto"
+          >
+            {/* Mobile overlay header */}
+            <div className="flex items-center justify-between h-[60px] px-5 border-b border-neutral-100">
+              <button onClick={() => setMobileOpen(false)} className="p-1.5 -ml-1.5 cursor-pointer" aria-label="Menü schliessen">
+                <X size={22} strokeWidth={1.5} />
+              </button>
+              <a href="/" aria-label="Home" onClick={() => setMobileOpen(false)}><Logo className="text-[16px]" /></a>
+            </div>
+
+            {/* Mobile nav items */}
             <div className="px-6 pt-2 pb-10">
-              <a href="/" className="block py-4 text-[17px] font-medium border-b border-neutral-100">{t("home")}</a>
+              <a href="/" onClick={() => setMobileOpen(false)}
+                className="block py-4 text-[17px] font-medium border-b border-neutral-100">{t("home")}</a>
+
               {[...navLeft, ...navRight].map((item) =>
                 item.children ? (
                   <MobileAccordion key={item.key} label={t(item.key)} items={item.children} t={t} />
                 ) : (
-                  <a key={item.key} href={item.href!}
+                  <a key={item.key} href={item.href!} onClick={() => setMobileOpen(false)}
                     className="block py-4 text-[17px] font-medium border-b border-neutral-100">{t(item.key)}</a>
                 )
               )}
-              <div className="pt-6 flex justify-center">
+
+              <div className="pt-8 flex justify-center">
                 <LanguageSwitcher currentLocale={locale} />
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 }
