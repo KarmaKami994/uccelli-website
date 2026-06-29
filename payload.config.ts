@@ -1,7 +1,7 @@
 import path from "path";
 import { buildConfig } from "payload";
 import { sqliteAdapter } from "@payloadcms/db-sqlite";
-import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import { lexicalEditor, FixedToolbarFeature, HeadingFeature } from "@payloadcms/richtext-lexical";
 
 import { Projects } from "./collections/Projects";
 import { Posts } from "./collections/Posts";
@@ -19,7 +19,13 @@ export default buildConfig({
       titleSuffix: " – Uccelli CMS",
     },
   },
-  editor: lexicalEditor(),
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      FixedToolbarFeature(),
+      HeadingFeature({ enabledHeadingSizes: ["h2", "h3", "h4"] }),
+    ],
+  }),
   db: sqliteAdapter({
     client: {
       url: process.env.DATABASE_URI || "file:./uccelli.db",

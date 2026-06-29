@@ -9,7 +9,7 @@ export const TeamMembers: CollectionConfig = {
   fields: [
     { name: "name", type: "text", required: true },
     { name: "role", type: "text", required: true },
-    { name: "bio", type: "textarea" },
+    { name: "bio", type: "richText", label: "Biografie" },
     { name: "image", type: "upload", relationTo: "media" },
     { name: "order", type: "number", defaultValue: 0, admin: { position: "sidebar" } },
   ],

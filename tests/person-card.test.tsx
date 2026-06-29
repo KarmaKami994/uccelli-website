@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { PersonCard } from "@/components/ui/PersonCard";
 
 describe("PersonCard", () => {
@@ -16,5 +16,21 @@ describe("PersonCard", () => {
   it("renders image when provided", () => {
     render(<PersonCard name="Max" role="CEO" imageSrc="/max.jpg" />);
     expect(screen.getByAltText("Max")).toBeInTheDocument();
+  });
+
+  it("shows 'Mehr erfahren' when bio is provided", () => {
+    render(<PersonCard name="Max" role="CEO" bio="Some bio text" />);
+    expect(screen.getByText("Mehr erfahren →")).toBeInTheDocument();
+  });
+
+  it("does not show 'Mehr erfahren' without bio", () => {
+    render(<PersonCard name="Max" role="CEO" />);
+    expect(screen.queryByText("Mehr erfahren →")).not.toBeInTheDocument();
+  });
+
+  it("opens bio modal on click", () => {
+    render(<PersonCard name="Max" role="CEO" bio="Some bio text" />);
+    fireEvent.click(screen.getByText("Max"));
+    expect(screen.getByText("Some bio text")).toBeInTheDocument();
   });
 });

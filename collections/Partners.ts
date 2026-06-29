@@ -17,12 +17,13 @@ export const Partners: CollectionConfig = {
         { label: "Sponsor", value: "sponsor" },
       ],
     },
-    { name: "description", type: "textarea", required: true },
+    { name: "description", type: "richText", required: true, label: "Beschreibung" },
     { name: "logo", type: "upload", relationTo: "media" },
-    { name: "url", type: "text" },
+    { name: "url", type: "text", label: "Website URL" },
     {
       name: "socials",
       type: "group",
+      label: "Social Media",
       fields: [
         { name: "linkedin", type: "text" },
         { name: "instagram", type: "text" },

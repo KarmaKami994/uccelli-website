@@ -1,7 +1,7 @@
 import { fetchCollection, fetchBySlug } from "./payload";
 
 // ─── Types ───────────────────────────────────────────────
-export type TeamMember = { name: string; role: string; image?: string; order?: number };
+export type TeamMember = { name: string; role: string; image?: string; bio?: any; order?: number };
 export type FAQ = { question: string; answer: string; order?: number };
 export type Partner = { name: string; type: "partner" | "sponsor"; description: string; logo?: string; url?: string };
 export type Project = { title: string; slug: string; category: string; summary: string; body?: string[]; image?: string };
@@ -42,10 +42,28 @@ const POSTS_FALLBACK: Post[] = [
 
 const EVENTS_FALLBACK: Event[] = [];
 
+// Helper: Extract image URL from Payload media relation
+function resolveImageUrl(media: any): string | undefined {
+  if (!media) return undefined;
+  if (typeof media === "string") return media; // Already a URL
+  if (media.url) return media.url; // Payload media object
+  if (media.filename) return `/api/media/file/${media.filename}`; // Fallback
+  return undefined;
+}
+
 // ─── Data Fetching (Payload → Fallback) ──────────────────
 export async function getTeam(): Promise<TeamMember[]> {
-  const docs = await fetchCollection<TeamMember>("team-members", { sort: "order" });
-  return docs.length > 0 ? docs : TEAM_FALLBACK;
+  const docs = await fetchCollection<any>("team-members", { sort: "order" });
+  if (docs.length > 0) {
+    return docs.map((d: any) => ({
+      name: d.name,
+      role: d.role,
+      bio: d.bio || undefined,
+      image: resolveImageUrl(d.image),
+      order: d.order,
+    }));
+  }
+  return TEAM_FALLBACK;
 }
 
 export async function getFAQs(): Promise<FAQ[]> {

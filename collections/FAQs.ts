@@ -8,7 +8,7 @@ export const FAQs: CollectionConfig = {
   },
   fields: [
     { name: "question", type: "text", required: true },
-    { name: "answer", type: "textarea", required: true },
+    { name: "answer", type: "richText", required: true, label: "Antwort" },
     { name: "order", type: "number", defaultValue: 0, admin: { position: "sidebar" } },
     { name: "locale", type: "select", options: ["de", "en"], defaultValue: "de", admin: { position: "sidebar" } },
   ],
