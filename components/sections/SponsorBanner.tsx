@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const sponsors = [
@@ -18,7 +19,7 @@ export function SponsorBanner({ title = "Unsere Partner & Sponsoren" }: { title?
         </p>
         <div className="max-w-[1100px] mx-auto flex flex-wrap items-center justify-center gap-x-12 gap-y-8 px-6 lg:px-10">
           {sponsors.map((s) => (
-            <a
+            <Link
               key={s.name}
               href={s.href}
               className="text-neutral-600 hover:text-neutral-300 transition-colors duration-300"
@@ -27,7 +28,7 @@ export function SponsorBanner({ title = "Unsere Partner & Sponsoren" }: { title?
               <span className="text-[18px] lg:text-[22px] font-bold tracking-wide whitespace-nowrap">
                 {s.name}
               </span>
-            </a>
+            </Link>
           ))}
         </div>
       </ScrollReveal>

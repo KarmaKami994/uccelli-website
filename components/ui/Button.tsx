@@ -1,5 +1,6 @@
 import { cn } from "@/lib/cn";
 import { type ButtonHTMLAttributes, forwardRef } from "react";
+import Link from "next/link";
 
 type ButtonVariant = "primary" | "secondary" | "accent";
 type ButtonSize = "default" | "lg";
@@ -30,7 +31,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       sizes[size],
       className
     );
-    if (href) return <a href={href} className={cls}>{children}</a>;
+    if (href) return <Link href={href} className={cls}>{children}</Link>;
     return <button ref={ref} className={cls} {...props}>{children}</button>;
   }
 );

@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 const locales = [
   { code: "de", label: "DE" },
@@ -29,12 +30,12 @@ export function LanguageSwitcher({ currentLocale }: { currentLocale: string }) {
           {locale.code === currentLocale ? (
             <span className="text-black">{locale.label}</span>
           ) : (
-            <a
+            <Link
               href={getLocalePath(locale.code)}
               className="text-neutral-400 hover:text-black transition-colors"
             >
               {locale.label}
-            </a>
+            </Link>
           )}
         </span>
       ))}

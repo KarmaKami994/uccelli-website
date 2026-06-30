@@ -4,20 +4,27 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Button } from "./Button";
 
-const contactSchema = z.object({
-  name: z.string().min(2, "Name muss mindestens 2 Zeichen lang sein."),
-  email: z.string().email("Bitte gib eine gültige E-Mail-Adresse ein."),
-  subject: z.string().min(3, "Betreff muss mindestens 3 Zeichen lang sein."),
-  message: z.string().min(10, "Nachricht muss mindestens 10 Zeichen lang sein."),
-});
-
-type ContactFormData = z.infer<typeof contactSchema>;
+type ContactFormData = {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+};
 
 export function ContactForm() {
+  const t = useTranslations("kontakt.form");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [serverError, setServerError] = useState("");
+
+  const contactSchema = z.object({
+    name: z.string().min(2, t("valName")),
+    email: z.string().email(t("valEmail")),
+    subject: z.string().min(3, t("valSubject")),
+    message: z.string().min(10, t("valMessage")),
+  });
 
   const {
     register,
@@ -41,14 +48,14 @@ export function ContactForm() {
       const result = await res.json();
 
       if (!res.ok) {
-        setServerError(result.error || "Ein Fehler ist aufgetreten.");
+        setServerError(result.error || t("errorGeneric"));
         setStatus("error");
         return;
       }
 
       setStatus("sent");
     } catch {
-      setServerError("Verbindungsfehler. Bitte versuche es erneut.");
+      setServerError(t("errorConnection"));
       setStatus("error");
     }
   }
@@ -57,20 +64,22 @@ export function ContactForm() {
     return (
       <div className="py-12 text-center border border-dashed border-neutral-300 rounded-[12px]">
         <div className="text-2xl mb-3">✓</div>
-        <p className="text-lg font-bold mb-2">Nachricht gesendet!</p>
-        <p className="text-neutral-500">Wir werden uns so schnell wie möglich bei dir melden.</p>
+        <p className="text-lg font-bold mb-2">{t("successTitle")}</p>
+        <p className="text-neutral-500">{t("successText")}</p>
       </div>
     );
   }
 
+  const fields = [
+    { name: "name" as const, label: t("name"), type: "text" },
+    { name: "email" as const, label: t("email"), type: "email" },
+    { name: "subject" as const, label: t("subject"), type: "text" },
+  ] as const;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
       <div className="space-y-5">
-        {([
-          { name: "name" as const, label: "Name", type: "text" },
-          { name: "email" as const, label: "Email", type: "email" },
-          { name: "subject" as const, label: "Betreff", type: "text" },
-        ] as const).map((field) => (
+        {fields.map((field) => (
           <div key={field.name}>
             <label htmlFor={field.name} className="block text-[13px] font-bold uppercase tracking-wide mb-2">
               {field.label}
@@ -91,7 +100,7 @@ export function ContactForm() {
 
         <div>
           <label htmlFor="message" className="block text-[13px] font-bold uppercase tracking-wide mb-2">
-            Nachricht
+            {t("message")}
           </label>
           <textarea
             id="message"
@@ -106,9 +115,6 @@ export function ContactForm() {
           )}
         </div>
 
-        {/* Turnstile widget placeholder — add site key in production */}
-        {/* <div id="turnstile-widget" className="mt-2" /> */}
-
         {serverError && (
           <div className="bg-red-50 text-red-700 text-[13px] px-4 py-3 rounded-[8px]" role="alert">
             {serverError}
@@ -116,7 +122,7 @@ export function ContactForm() {
         )}
 
         <Button type="submit" variant="primary" disabled={status === "sending"}>
-          {status === "sending" ? "WIRD GESENDET..." : "SENDEN"}
+          {status === "sending" ? t("sending") : t("send")}
         </Button>
       </div>
     </form>

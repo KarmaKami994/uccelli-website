@@ -18,6 +18,18 @@ vi.mock("next/navigation", () => ({
   notFound: vi.fn(),
 }));
 
+// Mock next/link
+vi.mock("next/link", () => ({
+  __esModule: true,
+  default: ({ children, href, ...props }: any) => <a href={href} {...props}>{children}</a>,
+}));
+
+// Mock next/image
+vi.mock("next/image", () => ({
+  __esModule: true,
+  default: ({ src, alt, fill, ...props }: any) => <img src={src} alt={alt} {...props} />,
+}));
+
 // Mock next/font/local
 vi.mock("next/font/local", () => ({
   __esModule: true,

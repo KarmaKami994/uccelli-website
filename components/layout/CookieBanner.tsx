@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
 const CONSENT_KEY = "uccelli-cookie-consent";
@@ -8,6 +10,7 @@ const CONSENT_KEY = "uccelli-cookie-consent";
 type ConsentState = "pending" | "accepted" | "rejected";
 
 export function CookieBanner() {
+  const t = useTranslations("cookie");
   const [consent, setConsent] = useState<ConsentState>("accepted"); // Default to accepted to avoid flash
 
   useEffect(() => {
@@ -41,10 +44,10 @@ export function CookieBanner() {
       <div className="max-w-[1200px] mx-auto px-6 lg:px-10 py-5">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div className="flex-1">
-            <p className="text-[14px] font-medium mb-1">Wir respektieren deine Privatsphäre</p>
+            <p className="text-[14px] font-medium mb-1">{t("title")}</p>
             <p className="text-[13px] text-neutral-500 leading-relaxed">
-              Diese Website verwendet ausschliesslich technisch notwendige Cookies. Wir setzen keine Tracking-Cookies ein.{" "}
-              <a href="/datenschutz" className="underline hover:text-black transition-colors">Datenschutzerklärung</a>
+              {t("text")}{" "}
+              <Link href="/datenschutz" className="underline hover:text-black transition-colors">{t("privacy")}</Link>
             </p>
           </div>
           <div className="flex gap-3 flex-shrink-0">
@@ -52,10 +55,10 @@ export function CookieBanner() {
               onClick={handleReject}
               className="text-[12px] font-bold uppercase tracking-[0.1em] text-neutral-500 hover:text-black transition-colors py-2 px-4 cursor-pointer"
             >
-              Ablehnen
+              {t("reject")}
             </button>
             <Button variant="primary" onClick={handleAccept}>
-              Akzeptieren
+              {t("accept")}
             </Button>
           </div>
         </div>

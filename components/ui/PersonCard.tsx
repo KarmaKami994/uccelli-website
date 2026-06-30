@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { X } from "lucide-react";
 import { LexicalRenderer } from "./LexicalRenderer";
 
@@ -24,11 +25,11 @@ export function PersonCard({ name, role, imageSrc, bio }: PersonCardProps) {
         tabIndex={hasBio ? 0 : undefined}
         onKeyDown={(e) => hasBio && e.key === "Enter" && setShowBio(true)}
       >
-        <div className="aspect-[3/4] w-full max-w-[280px] mx-auto overflow-hidden rounded-[4px] bg-neutral-200 mb-5">
+        <div className="aspect-[3/4] w-full max-w-[280px] mx-auto overflow-hidden rounded-[4px] bg-neutral-200 mb-5 relative">
           {imageSrc ? (
-            <img src={imageSrc} alt={name}
-              className="w-full h-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0 group-hover:scale-[1.03]"
-              loading="lazy" />
+            <Image src={imageSrc} alt={name} fill
+              className="object-cover grayscale transition-all duration-500 group-hover:grayscale-0 group-hover:scale-[1.03]"
+              sizes="280px" />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
               <span className="text-5xl font-bold text-neutral-400/50">{name.charAt(0)}</span>
@@ -51,7 +52,7 @@ export function PersonCard({ name, role, imageSrc, bio }: PersonCardProps) {
               <X size={20} />
             </button>
             <div className="flex items-center gap-4 mb-6">
-              {imageSrc && <img src={imageSrc} alt={name} className="w-16 h-16 rounded-full object-cover" />}
+              {imageSrc && <Image src={imageSrc} alt={name} width={64} height={64} className="rounded-full object-cover" />}
               <div>
                 <h3 className="text-lg font-bold">{name}</h3>
                 <p className="text-[14px] text-neutral-500">{role}</p>

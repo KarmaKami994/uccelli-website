@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 
 type HeroVariant = "gradient" | "split" | "cutout";
@@ -44,8 +45,8 @@ export function Hero({ title, subtitle, ctaText, ctaHref, variant = "gradient", 
           {subtitle && <p className="mt-5 text-lg text-neutral-500 max-w-xl leading-relaxed">{subtitle}</p>}
         </div>
         {imageSrc && (
-          <div className="w-full aspect-[16/9] lg:aspect-[21/9] overflow-hidden">
-            <img src={imageSrc} alt="" className="w-full h-full object-cover" />
+          <div className="w-full aspect-[16/9] lg:aspect-[21/9] overflow-hidden relative">
+            <Image src={imageSrc} alt="" fill className="object-cover" sizes="100vw" priority />
           </div>
         )}
       </section>
@@ -61,7 +62,7 @@ export function Hero({ title, subtitle, ctaText, ctaHref, variant = "gradient", 
       <div className="absolute inset-0 opacity-[0.03]"
         style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
       {imageSrc && (
-        <img src={imageSrc} alt="" className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30" />
+        <Image src={imageSrc} alt="" fill className="object-cover mix-blend-overlay opacity-30" sizes="100vw" priority />
       )}
       <div className="relative z-10 w-full max-w-[1200px] mx-auto px-6 lg:px-10 pb-16 lg:pb-24">
         <h1 className="text-[clamp(2.5rem,8vw,6rem)] font-bold uppercase text-white leading-[0.92] tracking-tight max-w-4xl">

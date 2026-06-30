@@ -134,14 +134,46 @@
   },
   "netzwerk": {
     "subtitle": "Menschen. Ideen. Möglichkeiten.",
-    "intro": "Unser Netzwerk bringt Menschen zusammen, die etwas bewegen, lernen und wachsen möchten. In unseren verschiedenen Gruppen treffen unterschiedliche Erfahrungen, Perspektiven und Interessen aufeinander."
+    "intro": "Unser Netzwerk bringt Menschen zusammen, die etwas bewegen, lernen und wachsen möchten. In unseren verschiedenen Gruppen treffen unterschiedliche Erfahrungen, Perspektiven und Interessen aufeinander.",
+    "ghana": {
+      "name": "Uccelli Ghana",
+      "desc": "Unser Bestreben, die Gemeinschaft zu stärken, geht über die nationalen Grenzen hinaus. Der Fokus dieser Initiative liegt daran, die Selbstwirksamkeit zu stärken und Menschen dazu zu ermutigen, andere zu stützen."
+    },
+    "women": {
+      "name": "Uccelli Women",
+      "desc": "Wir möchten eine eigenständige Subgruppe namens Uccelli Women ins Leben rufen. Diese Gruppe dient als spezielles Netzwerk für unsere weibliche Zielgruppe und bietet eine Anlaufstelle für Frauen innerhalb des Vereins."
+    },
+    "fc": {
+      "name": "Uccelli FC",
+      "desc": "Der Aufbau von Uccelli FC war für uns nicht nur die Schaffung einer Fussballmannschaft, sondern auch die Erkenntnis, dass Fussball Menschen verbindet."
+    },
+    "nightshift": {
+      "name": "Nightshift Music",
+      "desc": "Nightshift Music ist unsere Konzert- und Musikplattform, die neuen Artists eine Bühne bietet. Durch regelmässige Events schaffen wir Raum für kreative Entfaltung."
+    }
   },
   "kontakt": {
     "title": "Get in Touch with Us",
     "subtitle": "Kontaktiere uns gerne, wir werden uns so schnell wie möglich bei dir melden.",
     "address": "Wo du uns finden kannst",
     "email": "Schreib uns per Mail",
-    "social": "Social Media"
+    "social": "Social Media",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "subject": "Betreff",
+      "message": "Nachricht",
+      "send": "Senden",
+      "sending": "Wird gesendet...",
+      "successTitle": "Nachricht gesendet!",
+      "successText": "Wir werden uns so schnell wie möglich bei dir melden.",
+      "errorConnection": "Verbindungsfehler. Bitte versuche es erneut.",
+      "errorGeneric": "Ein Fehler ist aufgetreten.",
+      "valName": "Name muss mindestens 2 Zeichen lang sein.",
+      "valEmail": "Bitte gib eine gültige E-Mail-Adresse ein.",
+      "valSubject": "Betreff muss mindestens 3 Zeichen lang sein.",
+      "valMessage": "Nachricht muss mindestens 10 Zeichen lang sein."
+    }
   },
   "events": {
     "subtitle": "Unsere kommenden Events",
@@ -166,7 +198,15 @@
     "download": "DOWNLOAD",
     "vereinsstatuten": "Vereinsstatuten",
     "socials": "SOCIALS",
-    "copyright": "Copyright © 2026"
+    "copyright": "Copyright © 2026",
+    "werteLabels": {
+      "schutz-der-umwelt": "Schutz der Umwelt",
+      "datenschutz": "Datenschutz",
+      "diskriminierungsverbot": "Diskriminierungsverbot",
+      "freiheit-und-autonomie": "Freiheit und Autonomie",
+      "solidaritaet-und-kohaesion": "Solidarität und Kohäsion",
+      "integritaet": "Integrität"
+    }
   },
   "common": {
     "moreInfo": "MEHR ERFAHREN",
@@ -183,5 +223,12 @@
     "sending": "WIRD GESENDET...",
     "moreValues": "Weitere Werte",
     "mapLoading": "Karte wird geladen..."
+  },
+  "cookie": {
+    "title": "Wir respektieren deine Privatsphäre",
+    "text": "Diese Website verwendet ausschliesslich technisch notwendige Cookies. Wir setzen keine Tracking-Cookies ein.",
+    "privacy": "Datenschutzerklärung",
+    "accept": "Akzeptieren",
+    "reject": "Ablehnen"
   }
 }

@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const werte = [
-  { label: "Schutz der Umwelt", href: "/werte/schutz-der-umwelt" },
-  { label: "Datenschutz", href: "/werte/datenschutz" },
-  { label: "Diskriminierungsverbot", href: "/werte/diskriminierungsverbot" },
-  { label: "Freiheit und Autonomie", href: "/werte/freiheit-und-autonomie" },
-  { label: "Solidarität und Kohäsion", href: "/werte/solidaritaet-und-kohaesion" },
-  { label: "Integrität", href: "/werte/integritaet" },
+const werteKeys = [
+  "schutz-der-umwelt",
+  "datenschutz",
+  "diskriminierungsverbot",
+  "freiheit-und-autonomie",
+  "solidaritaet-und-kohaesion",
+  "integritaet",
 ];
 
 function MobileSection({ title, children }: { title: string; children: React.ReactNode }) {
@@ -40,16 +41,16 @@ export function Footer() {
 
   const kontaktContent = (
     <div className="space-y-2.5 text-[13px] text-neutral-400">
-      <a href="/ueber-uns/faq" className="block hover:text-white transition-colors">{t("faq")}</a>
+      <Link href="/ueber-uns/faq" className="block hover:text-white transition-colors">{t("faq")}</Link>
       <a href="mailto:uccelli.society@gmail.com" className="block hover:text-white transition-colors">{t("email")}</a>
-      <a href="/kontakt" className="block hover:text-white transition-colors">{t("findUs")}</a>
+      <Link href="/kontakt" className="block hover:text-white transition-colors">{t("findUs")}</Link>
     </div>
   );
 
   const werteContent = (
     <div className="space-y-2.5 text-[13px] text-neutral-400">
-      {werte.map((item) => (
-        <a key={item.href} href={item.href} className="block hover:text-white transition-colors">{item.label}</a>
+      {werteKeys.map((key) => (
+        <Link key={key} href={`/werte/${key}`} className="block hover:text-white transition-colors">{t(`werteLabels.${key}`)}</Link>
       ))}
     </div>
   );

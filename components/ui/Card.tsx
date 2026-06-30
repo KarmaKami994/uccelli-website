@@ -1,4 +1,5 @@
 import { cn } from "@/lib/cn";
+import Image from "next/image";
 import { Button } from "./Button";
 
 interface CardProps {
@@ -18,8 +19,8 @@ export function Card({ title, body, imageSrc, imageAlt = "", buttonText, buttonH
       className
     )}>
       {imageSrc ? (
-        <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100">
-          <img src={imageSrc} alt={imageAlt} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />
+        <div className="aspect-[16/10] w-full overflow-hidden bg-neutral-100 relative">
+          <Image src={imageSrc} alt={imageAlt} fill className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" sizes="(max-width: 768px) 100vw, 400px" />
         </div>
       ) : (
         <div className="aspect-[16/10] w-full bg-gradient-to-br from-neutral-100 to-neutral-200 flex items-center justify-center">

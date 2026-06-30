@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { Hero } from "@/components/sections/Hero";
 import { Button } from "@/components/ui/Button";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
@@ -50,11 +51,11 @@ export default function UeberUnsPage() {
           <ScrollReveal><h2 className="text-[clamp(1.5rem,4vw,2.25rem)] font-bold mb-12 text-center">{t("pillars")}</h2></ScrollReveal>
           <StaggerReveal className="space-y-4" stagger={0.08}>
             {saeulen.map((item, i) => (
-              <a key={item.key} href={`/werte/${item.key}`}
+              <Link key={item.key} href={`/werte/${item.key}`}
                 className={`flex items-center justify-between p-6 rounded-[12px] transition-all duration-200 hover:shadow-md ${i % 2 === 0 ? "bg-black text-white hover:bg-neutral-800" : "bg-neutral-50 hover:bg-neutral-100"}`}>
                 <span className="text-lg font-medium">{item.title}</span>
                 <span className="text-[13px] font-bold uppercase tracking-wide opacity-60">{t("moreInfo")}</span>
-              </a>
+              </Link>
             ))}
           </StaggerReveal>
         </div>

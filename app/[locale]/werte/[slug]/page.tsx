@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import type { Metadata } from "next";
 
@@ -60,7 +61,7 @@ export default async function WertePage({ params }: { params: Promise<{ slug: st
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-400 mb-3">Weitere Werte</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(werteContent).filter(([k]) => k !== slug).map(([key, val]) => (
-              <a key={key} href={`/werte/${key}`} className="text-[13px] text-neutral-500 hover:text-black transition-colors underline">{val.title}</a>
+              <Link key={key} href={`/werte/${key}`} className="text-[13px] text-neutral-500 hover:text-black transition-colors underline">{val.title}</Link>
             ))}
           </div>
         </div>

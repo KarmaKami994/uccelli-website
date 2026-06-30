@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import Link from "next/link";
 import { Menu, X, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -52,10 +53,10 @@ function DesktopDropdown({ label, items, t }: { label: string; items: NavChild[]
       <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
         <div className="bg-white border border-neutral-200 rounded-lg shadow-xl py-2 min-w-[220px]">
           {items.map((item) => (
-            <a key={item.key} href={item.href}
+            <Link key={item.key} href={item.href}
               className="block px-5 py-2.5 text-[13px] text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">
               {t(item.key)}
-            </a>
+            </Link>
           ))}
         </div>
       </div>
@@ -78,10 +79,10 @@ function MobileAccordion({ label, items, t }: { label: string; items: NavChild[]
             exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
             <div className="pl-4 pb-4 space-y-0.5">
               {items.map((item) => (
-                <a key={item.key} href={item.href}
+                <Link key={item.key} href={item.href}
                   className="block py-2.5 text-[15px] text-neutral-500 hover:text-black transition-colors">
                   {t(item.key)}
-                </a>
+                </Link>
               ))}
             </div>
           </motion.div>
@@ -109,10 +110,10 @@ export function Header() {
   const renderNavItem = (item: NavItem) => {
     if (item.children) return <DesktopDropdown key={item.key} label={t(item.key)} items={item.children} t={t} />;
     return (
-      <a key={item.key} href={item.href!}
+      <Link key={item.key} href={item.href!}
         className="text-[13px] font-medium tracking-wide uppercase hover:opacity-60 transition-opacity py-2">
         {t(item.key)}
-      </a>
+      </Link>
     );
   };
 
@@ -124,9 +125,9 @@ export function Header() {
           <div className="flex-1 flex items-center justify-end gap-10 pr-16">
             {navLeft.map(renderNavItem)}
           </div>
-          <a href="/" className="absolute left-1/2 -translate-x-1/2 z-10" aria-label="Home">
+          <Link href="/" className="absolute left-1/2 -translate-x-1/2 z-10" aria-label="Home">
             <Logo className="text-[18px]" />
-          </a>
+          </Link>
           <div className="flex-1 flex items-center justify-start gap-10 pl-16">
             {navRight.map(renderNavItem)}
             <LanguageSwitcher currentLocale={locale} />
@@ -139,7 +140,7 @@ export function Header() {
             aria-label={mobileOpen ? "Menü schliessen" : "Menü öffnen"}>
             {mobileOpen ? <X size={22} strokeWidth={1.5} /> : <Menu size={22} strokeWidth={1.5} />}
           </button>
-          <a href="/" aria-label="Home"><Logo className="text-[16px]" /></a>
+          <Link href="/" aria-label="Home"><Logo className="text-[16px]" /></Link>
         </nav>
       </header>
 
@@ -158,20 +159,20 @@ export function Header() {
               <button onClick={() => setMobileOpen(false)} className="p-1.5 -ml-1.5 cursor-pointer" aria-label="Menü schliessen">
                 <X size={22} strokeWidth={1.5} />
               </button>
-              <a href="/" aria-label="Home" onClick={() => setMobileOpen(false)}><Logo className="text-[16px]" /></a>
+              <Link href="/" aria-label="Home" onClick={() => setMobileOpen(false)}><Logo className="text-[16px]" /></Link>
             </div>
 
             {/* Mobile nav items */}
             <div className="px-6 pt-2 pb-10">
-              <a href="/" onClick={() => setMobileOpen(false)}
-                className="block py-4 text-[17px] font-medium border-b border-neutral-100">{t("home")}</a>
+              <Link href="/" onClick={() => setMobileOpen(false)}
+                className="block py-4 text-[17px] font-medium border-b border-neutral-100">{t("home")}</Link>
 
               {[...navLeft, ...navRight].map((item) =>
                 item.children ? (
                   <MobileAccordion key={item.key} label={t(item.key)} items={item.children} t={t} />
                 ) : (
-                  <a key={item.key} href={item.href!} onClick={() => setMobileOpen(false)}
-                    className="block py-4 text-[17px] font-medium border-b border-neutral-100">{t(item.key)}</a>
+                  <Link key={item.key} href={item.href!} onClick={() => setMobileOpen(false)}
+                    className="block py-4 text-[17px] font-medium border-b border-neutral-100">{t(item.key)}</Link>
                 )
               )}
 
