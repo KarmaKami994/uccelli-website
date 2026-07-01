@@ -13,6 +13,7 @@ import { Networks } from "./collections/Networks";
 import { Werte } from "./collections/Werte";
 import { Courses } from "./collections/Courses";
 import { Navigation } from "./collections/Navigation";
+import { Homepage } from "./collections/Homepage";
 import { Pages } from "./collections/Pages";
 import { Media } from "./collections/Media";
 
@@ -47,6 +48,7 @@ export default buildConfig({
     Werte,
     Courses,
     Navigation,
+    Homepage,
     Pages,
     Media,
     // Auth

@@ -13,6 +13,13 @@ export type Course = { name: string; description: string; order?: number };
 export type Page = { title: string; slug: string; body: any };
 export type NavItem = { label: string; href?: string; order: number; openInNewTab?: boolean; children: { label: string; href: string }[] };
 
+export type HomepageData = {
+  hero: { title: string; subtitle?: string; ctaText?: string; ctaHref?: string; image?: string };
+  about: { eyebrow?: string; title: string; text: string; ctaText?: string; ctaHref?: string };
+  tasks: { title: string; cards: { title: string; text: string; buttonText?: string; buttonHref?: string; image?: string }[] };
+  cta: { title: string; text?: string; buttonText?: string; buttonHref?: string };
+};
+
 // Helper: Extract image URL from Payload media relation
 function resolveImageUrl(media: any): string | undefined {
   if (!media) return undefined;
@@ -108,4 +115,16 @@ export async function getNavigation(): Promise<NavItem[]> {
 export async function getBannerEvents(): Promise<{ title: string; date: string }[]> {
   const docs = await fetchCollection<any>("events", { sort: "date", where: { date: { greater_than: new Date().toISOString() } } });
   return docs.map((d: any) => ({ title: d.title, date: d.date }));
+}
+
+export async function getHomepage(): Promise<HomepageData | null> {
+  const docs = await fetchCollection<any>("homepage", { limit: 1 });
+  const d = docs[0];
+  if (!d) return null;
+  return {
+    hero: { title: d.hero?.title || "", subtitle: d.hero?.subtitle, ctaText: d.hero?.ctaText, ctaHref: d.hero?.ctaHref, image: resolveImageUrl(d.hero?.image) },
+    about: { eyebrow: d.about?.eyebrow, title: d.about?.title || "", text: d.about?.text || "", ctaText: d.about?.ctaText, ctaHref: d.about?.ctaHref },
+    tasks: { title: d.tasks?.title || "", cards: (d.tasks?.cards || []).map((c: any) => ({ title: c.title, text: c.text, buttonText: c.buttonText, buttonHref: c.buttonHref, image: resolveImageUrl(c.image) })) },
+    cta: { title: d.cta?.title || "", text: d.cta?.text, buttonText: d.cta?.buttonText, buttonHref: d.cta?.buttonHref },
+  };
 }

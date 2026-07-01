@@ -164,6 +164,18 @@ const events = [
   { title: "Nightshift Music #4", date: "2026-10-10", location: "TBA", description: "Die vierte Ausgabe unserer Konzertreihe mit aufstrebenden Artists." },
 ];
 
+const homepage = {
+  title: "Homepage",
+  hero: { title: "UCCELLI SOCIETY", subtitle: "Gemeinschaft. Integrität. Generativität.", ctaText: "MEHR ERFAHREN", ctaHref: "/ueber-uns" },
+  about: { eyebrow: "Über uns", title: "Vereinsziel & Leitbild", text: "Unser Ziel ist es, ein Netzwerk aufzubauen, welches Wissen aus verschiedenen Bereichen zusammenbringt und konsolidiert. Mit diesem Wissen sollen dann die Vereinsmitglieder ihre individuellen Ziele und Anliegen bewältigen können.", ctaText: "MEHR ERFAHREN", ctaHref: "/ueber-uns" },
+  tasks: { title: "Unsere Hauptaufgaben", cards: [
+    { title: "Bildung", text: "Wir wollen allen Hilfsbedürftigen den Zugang zur Bildung und Informationen verschaffen, um ihren Lebensstandard zu erhöhen.", buttonText: "Bildung", buttonHref: "/programm/projekte" },
+    { title: "Soziales", text: "Wir wollen den sozialen Austausch unter Allen fördern, sowie aktuelle Gesellschaftsthemen behandeln und Betroffene unterstützen.", buttonText: "Soziales", buttonHref: "/programm/projekte" },
+    { title: "Community", text: "Wir wollen den Mitgliedern im Verein, eine Möglichkeit bieten zusammen an persönlichen Projekten zu arbeiten.", buttonText: "Community", buttonHref: "/netzwerk" },
+  ] },
+  cta: { title: "Gemeinsam wachsen", text: "Interessiert? Nimm Kontakt mit uns auf.", buttonText: "KONTAKT", buttonHref: "/kontakt" },
+};
+
 // ─── Seed Handler ────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
@@ -202,6 +214,15 @@ export async function GET(request: NextRequest) {
     await seedIfEmpty("pages", "Seite", pages, (p) => ({ title: p.title, slug: p.slug, body: toRichText(p.body), locale: "de" }));
     await seedIfEmpty("navigation", "Nav", navigation, (n) => ({ label: n.label, href: n.href, order: n.order, children: n.children }));
     await seedIfEmpty("events", "Event", events, (e) => ({ title: e.title, date: e.date, location: e.location, description: toRichText(e.description), locale: "de" }));
+
+    // Homepage (single entry)
+    const existingHomepage = await payload.find({ collection: "homepage" as any, limit: 1 });
+    if (existingHomepage.docs.length === 0) {
+      await payload.create({ collection: "homepage" as any, data: homepage as any });
+      results.push("✅ Homepage: Inhalt erstellt");
+    } else {
+      skipped.push("⏭️ Homepage: bereits vorhanden");
+    }
 
     return NextResponse.json({
       message: results.length > 0

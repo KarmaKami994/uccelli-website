@@ -9,13 +9,13 @@ interface RichTextRendererProps {
 export function RichTextRenderer({ content, className = "" }: RichTextRendererProps) {
   // Plain string fallback (from static data or textarea)
   if (typeof content === "string") {
-    return <div className={className}><p>{content}</p></div>;
+    return <div className={`rich-text ${className}`}><p>{content}</p></div>;
   }
 
   // Lexical rich text (from Payload CMS richText field)
   if (content && typeof content === "object" && content.root) {
     return (
-      <div className={className}>
+      <div className={`rich-text ${className}`}>
         <RichText data={content} />
       </div>
     );

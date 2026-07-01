@@ -76,7 +76,7 @@ export function LexicalRenderer({ data, className = "" }: LexicalRendererProps) 
 
   return (
     <div
-      className={className}
+      className={`rich-text ${className}`}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
