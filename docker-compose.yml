@@ -12,5 +12,11 @@ services:
       - TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-}
       - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY:-}
     volumes:
-      - ./data:/app/data       # SQLite DB — persistent
-      - ./media:/app/media     # Payload Uploads — persistent
+      - ./data:/app/data
+      - ./media:/app/media
+    networks:
+      - npm
+
+networks:
+  npm:
+    external: true
