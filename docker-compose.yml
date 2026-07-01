@@ -1,0 +1,16 @@
+services:
+  uccelli:
+    build: .
+    container_name: uccelli-website
+    restart: unless-stopped
+    ports:
+      - "3100:3000"
+    environment:
+      - DATABASE_URI=file:/app/data/uccelli.db
+      - PAYLOAD_SECRET=${PAYLOAD_SECRET:-change-me-mindestens-32-zeichen-lang}
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      - TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-}
+      - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY:-}
+    volumes:
+      - ./data:/app/data       # SQLite DB — persistent
+      - ./media:/app/media     # Payload Uploads — persistent
