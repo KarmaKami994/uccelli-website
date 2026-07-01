@@ -8,8 +8,11 @@ const locales = [
   { code: "en", label: "EN" },
 ];
 
-export function LanguageSwitcher({ currentLocale }: { currentLocale: string }) {
+export function LanguageSwitcher({ currentLocale }: { currentLocale?: string } = {}) {
   const pathname = usePathname();
+  const segments = pathname.split("/").filter(Boolean);
+  const detectedLocale = locales.some((l) => l.code === segments[0]) ? segments[0] : "de";
+  const activeLocale = currentLocale || detectedLocale;
 
   function getLocalePath(targetLocale: string) {
     // Remove current locale prefix and add new one
@@ -27,7 +30,7 @@ export function LanguageSwitcher({ currentLocale }: { currentLocale: string }) {
       {locales.map((locale, i) => (
         <span key={locale.code} className="flex items-center">
           {i > 0 && <span className="text-neutral-300 mx-1.5">|</span>}
-          {locale.code === currentLocale ? (
+          {locale.code === activeLocale ? (
             <span className="text-black">{locale.label}</span>
           ) : (
             <Link
