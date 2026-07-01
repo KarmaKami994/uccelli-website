@@ -8,6 +8,7 @@ import { AttentionBanner } from "@/components/layout/AttentionBanner";
 import { CookieBanner } from "@/components/layout/CookieBanner";
 import { OrganizationJsonLd } from "@/components/layout/JsonLd";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { getNavigation, getBannerEvents } from "@/lib/data";
 import "@/styles/globals.css";
 
 const lato = localFont({
@@ -35,6 +36,8 @@ export default async function LocaleLayout({
   const { locale } = await params;
   if (!locales.includes(locale)) notFound();
   const messages = await getMessages();
+  const navItems = await getNavigation();
+  const bannerEvents = await getBannerEvents();
 
   return (
     <html lang={locale} className={lato.variable}>
@@ -43,9 +46,12 @@ export default async function LocaleLayout({
       </head>
       <body className={`${lato.className} antialiased`}>
         <NextIntlClientProvider messages={messages}>
-          <AttentionBanner />
-          <Header />
-          <main className="min-h-screen">
+          <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:bg-black focus:text-white focus:px-5 focus:py-3 focus:rounded-[12px] focus:text-[13px] focus:font-bold focus:uppercase focus:tracking-[0.12em]">
+            {locale === "de" ? "Zum Inhalt springen" : "Skip to content"}
+          </a>
+          <AttentionBanner events={bannerEvents} />
+          <Header navItems={navItems} />
+          <main id="main-content" className="min-h-screen">
             <PageTransition>{children}</PageTransition>
           </main>
           <Footer />
@@ -54,4 +60,4 @@ export default async function LocaleLayout({
       </body>
     </html>
   );
-}
+};

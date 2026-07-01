@@ -21,7 +21,9 @@
     "formular": "Formular",
     "partnerSponsoren": "Partner/Sponsoren",
     "faq": "FAQ",
-    "kontakt": "Kontakt"
+    "kontakt": "Kontakt",
+    "menuOpen": "Menü öffnen",
+    "menuClose": "Menü schliessen"
   },
   "home": {
     "hero": {
@@ -71,7 +73,8 @@
       "cta": "DER VORSTAND"
     },
     "pillars": "Unsere Säulen",
-    "moreInfo": "Mehr erfahren →"
+    "moreInfo": "Mehr erfahren →",
+    "subtitle": "Geschichte, Mission und Vision des Vereins Uccelli."
   },
   "vorstand": {
     "title": "DER VORSTAND"
@@ -209,7 +212,7 @@
     }
   },
   "common": {
-    "moreInfo": "MEHR ERFAHREN",
+    "moreInfo": "Mehr erfahren →",
     "readMore": "Weiterlesen",
     "backToTop": "Nach oben",
     "notFound": "Seite nicht gefunden",
@@ -222,13 +225,15 @@
     "send": "SENDEN",
     "sending": "WIRD GESENDET...",
     "moreValues": "Weitere Werte",
-    "mapLoading": "Karte wird geladen..."
+    "mapLoading": "Karte wird geladen...",
+    "close": "Schliessen"
   },
   "cookie": {
     "title": "Wir respektieren deine Privatsphäre",
     "text": "Diese Website verwendet ausschliesslich technisch notwendige Cookies. Wir setzen keine Tracking-Cookies ein.",
     "privacy": "Datenschutzerklärung",
     "accept": "Akzeptieren",
-    "reject": "Ablehnen"
+    "reject": "Ablehnen",
+    "ariaLabel": "Cookie-Einstellungen"
   }
 }

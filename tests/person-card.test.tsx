@@ -18,14 +18,15 @@ describe("PersonCard", () => {
     expect(screen.getByAltText("Max")).toBeInTheDocument();
   });
 
-  it("shows 'Mehr erfahren' when bio is provided", () => {
+  it("shows learn-more link when bio is provided", () => {
     render(<PersonCard name="Max" role="CEO" bio="Some bio text" />);
-    expect(screen.getByText("Mehr erfahren →")).toBeInTheDocument();
+    // Mock useTranslations returns the key: t("moreInfo") → "moreInfo"
+    expect(screen.getByText("moreInfo")).toBeInTheDocument();
   });
 
-  it("does not show 'Mehr erfahren' without bio", () => {
+  it("does not show learn-more link without bio", () => {
     render(<PersonCard name="Max" role="CEO" />);
-    expect(screen.queryByText("Mehr erfahren →")).not.toBeInTheDocument();
+    expect(screen.queryByText("moreInfo")).not.toBeInTheDocument();
   });
 
   it("opens bio modal on click", () => {

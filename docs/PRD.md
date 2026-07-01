@@ -1,21 +1,26 @@
 # PRD – Uccelli Society Website Redesign
 
-**Version:** 4.0  
-**Datum:** 27. Juni 2026  
+**Version:** 6.0  
+**Datum:** 30. Juni 2026  
 **Auftraggeber:** Verein Uccelli  
-**Aktuell:** https://uccelli-society.ch (WordPress)  
+**Aktuell:** https://uccelli-society.ch (WordPress — wird ersetzt)  
 **Repository:** https://github.com/KarmaKami994/uccelli-website.git  
+**Hosting:** Hosttech vServer (entschieden) — Deployment via GitHub Actions
 
-**Changelog v4.0:** Phase 3+4 abgeschlossen. MongoDB → SQLite gewechselt, Payload CMS 3.85 installiert + konfiguriert, Kontaktformular-Backend (Turnstile + Resend + Rate Limiting), Leaflet/OSM, CookieBanner, GSAP ScrollReveal/StaggerReveal, PageTransition, JSON-LD, Sitemap, alle Phase-2-Lücken geschlossen  
-**Changelog v3.0:** Gap-Analyse, fehlende Deliverables identifiziert  
-**Changelog v2.1:** Payload CMS gewählt  
-**Changelog v2.0:** Three.js entfernt (Option E), SEO-Redirects, Consent, Farbkontrast, OpenStreetMap, Spam-Schutz
+**Changelog v6.0:** Phase A+B (Code-Qualität) abgeschlossen: `<a>` → `next/link` Migration (10 Dateien), `<img>` → `next/image` Migration (3 Dateien), vollständige i18n-Abdeckung (143/143 Keys DE+EN, 0 hardcoded Strings), ContactForm i18n + dynamische Zod-Validierung, Lucide SVG Social Icons (Footer + Kontakt), Skip-to-Content Accessibility Link, Mobile-Menu-Fix (Sub-Links schliessen Overlay), Test-Mocks für Link/Image, PersonCard i18n  
+**Changelog v5.0:** SponsorBanner, Mobile-Nav-Fix, Unit Tests (34 Tests/7 Dateien), Payload importMap komplett (32 Einträge), FixedToolbarFeature, LexicalRenderer, PersonCard Bio-Modal, resolveImageUrl, COMMANDS.md, Collections auf richText umgestellt  
+**Changelog v4.0:** Phase 3+4 abgeschlossen, SQLite, Kontaktformular, Leaflet, CookieBanner, GSAP, JSON-LD, Sitemap  
+**Changelog v3.0:** Gap-Analyse, fehlende Deliverables  
+**Changelog v2.0:** Option E, SEO-Redirects, Consent, Farbkontrast, OpenStreetMap
 
 ---
 
 ## 1. Projektzusammenfassung
 
-Kompletter Neubau der Uccelli Society Website als moderne React/Next.js-Applikation. Die aktuelle WordPress-Seite wird durch eine performante, mehrsprachige Architektur ersetzt. Migration beinhaltet 301-Redirect-Mapping aller WordPress-URLs.
+Kompletter Neubau der Website des **Verein Uccelli** (gemeinnütziger Verein in Zürich für Bildung, sozialen Austausch und persönliche Entwicklung) als React/Next.js-Applikation mit Payload CMS. Migration von WordPress mit 301-Redirect-Mapping. Der Name „Uccelli" bedeutet „Vögel" auf Italienisch.
+
+**Standort:** Riedhofstrasse 364, 8049 Zürich, Schweiz  
+**Kontakt:** uccelli.society@gmail.com
 
 ---
 
@@ -23,284 +28,314 @@ Kompletter Neubau der Uccelli Society Website als moderne React/Next.js-Applikat
 
 | Ebene | Technologie | Version | Status |
 |-------|-------------|---------|--------|
-| Framework | **Next.js (App Router)** | 16.2.9 | ✅ |
-| UI | **React + TypeScript** | 19.2.4 | ✅ |
-| Styling | **Tailwind CSS** | 4.3.1 | ✅ |
-| Animation | **Framer Motion** | 12.41.0 | ✅ Eingesetzt |
-| Animation | **GSAP + ScrollTrigger** | 3.15.0 | ✅ Eingesetzt |
-| i18n | **next-intl** | 4.13.0 | ✅ (DE + EN Basis) |
-| CMS | **Payload CMS** | 3.85.1 | ✅ Installiert |
-| Datenbank | **SQLite** (via @payloadcms/db-sqlite) | — | ✅ Kein Setup nötig |
-| Formulare | **React Hook Form + Zod** | — | ✅ |
-| E-Mail | **Resend** | — | ✅ (API-Key in .env) |
-| Spam-Schutz | **Cloudflare Turnstile** | — | ✅ (Keys in .env) |
-| Karten | **Leaflet + OpenStreetMap** | — | ✅ |
-| Consent | **CookieBanner** (custom) | — | ✅ |
-| SEO | **next-sitemap** | — | ✅ Auto-generiert |
-| Structured Data | **JSON-LD** (Organization, FAQPage) | — | ✅ |
-| Fonts | **next/font/local (Lato)** | — | ✅ |
-| Icons | **Lucide React** | — | ✅ |
-| Deployment | **Vercel** | — | ⏳ Phase 5 |
+| Framework | Next.js (App Router) | 16.2.9 | ✅ |
+| UI | React + TypeScript | 19.2.4 | ✅ |
+| Styling | Tailwind CSS | 4.3.1 | ✅ (v4 — @theme in CSS) |
+| Animation | Framer Motion | 12.41.0 | ✅ |
+| Animation | GSAP + ScrollTrigger | 3.15.0 | ✅ |
+| i18n | next-intl | 4.13.0 | ✅ **143/143 Keys** |
+| CMS | Payload CMS | 3.85.1 | ✅ |
+| Datenbank | SQLite (@payloadcms/db-sqlite) | — | ✅ |
+| Rich Text | Lexical + FixedToolbarFeature | — | ✅ |
+| Formulare | React Hook Form + Zod | — | ✅ i18n-Validierung |
+| E-Mail | Resend | — | ✅ (API-Key in .env) |
+| Spam-Schutz | Cloudflare Turnstile | — | ✅ |
+| Karten | Leaflet + OpenStreetMap | — | ✅ |
+| Consent | CookieBanner (custom) | — | ✅ i18n |
+| SEO | next-sitemap + JSON-LD | — | ✅ |
+| Navigation | next/link | — | ✅ Client-Side Routing |
+| Bilder | next/image | — | ✅ WebP/AVIF, Lazy Loading |
+| Icons | Lucide React | 1.21.0 | ✅ SVG Social Icons |
+| Tests | Vitest + React Testing Library | 4.1.9 | ✅ 34 Tests |
+| Fonts | next/font/local (Lato) | — | ✅ |
+| Hosting | Hosttech vServer | — | ⏳ Deployment |
 
 ---
 
 ## 3. Design-System
 
 ### Farben
-| Rolle | Hex | Status |
-|-------|-----|--------|
-| Primary | `#000000` | ✅ |
-| White | `#FFFFFF` | ✅ |
-| Accent | `#5170FF` (Buttons ≥18px) | ✅ |
-| Accent Accessible | `#3D5BD9` (kleine Links) | ✅ |
+| Rolle | Hex | Verwendung |
+|-------|-----|------------|
+| Primary | #000000 | Text, Buttons, Hintergründe |
+| White | #FFFFFF | Hintergründe, Button-Text |
+| Accent | #5170FF | Buttons ≥18px |
+| Accent Accessible | #3D5BD9 | Kleine Links (WCAG AA) |
 
 ### Typografie
-Lato Bold + Regular, lokal geladen via `next/font/local`. Responsive Sizing via `clamp()`. ✅
+Lato Bold (700) + Regular (400), lokal geladen via next/font/local. H1 = clamp(2.5rem, 8vw, 6rem), H2 = clamp(1.5rem, 4vw, 2.25rem), Body = 16px.
 
-### Komponenten-Bibliothek (17 Komponenten)
+### Buttons
+3 Varianten (primary/black, secondary/outline, accent/blue), rounded-[12px], uppercase, tracking 0.12em. Client-Side Navigation via next/link.
+
+---
+
+## 4. Komponenten-Bibliothek (20 Komponenten)
 
 | Komponente | Datei | Status |
 |------------|-------|--------|
 | AttentionBanner | `components/layout/AttentionBanner.tsx` | ✅ |
-| Header (Split Menu) | `components/layout/Header.tsx` | ✅ |
-| Footer | `components/layout/Footer.tsx` | ✅ |
-| LanguageSwitcher | `components/layout/LanguageSwitcher.tsx` | ✅ |
-| CookieBanner | `components/layout/CookieBanner.tsx` | ✅ |
-| PageTransition | `components/layout/PageTransition.tsx` | ✅ |
-| JsonLd | `components/layout/JsonLd.tsx` | ✅ |
-| Hero (3 Varianten) | `components/sections/Hero.tsx` | ✅ |
-| Button | `components/ui/Button.tsx` | ✅ |
-| Card | `components/ui/Card.tsx` | ✅ |
-| PersonCard | `components/ui/PersonCard.tsx` | ✅ |
+| Header (Split Menu) | `components/layout/Header.tsx` | ✅ Desktop + Mobile + i18n aria |
+| Footer | `components/layout/Footer.tsx` | ✅ 4-Spalten + Accordion + SVG Icons |
+| LanguageSwitcher | `components/layout/LanguageSwitcher.tsx` | ✅ DE \| EN (next/link) |
+| CookieBanner | `components/layout/CookieBanner.tsx` | ✅ nDSG-konform + i18n |
+| PageTransition | `components/layout/PageTransition.tsx` | ✅ Framer Motion |
+| JsonLd | `components/layout/JsonLd.tsx` | ✅ Organization + FAQPage |
+| Hero (3 Varianten) | `components/sections/Hero.tsx` | ✅ gradient, split, cutout + next/image |
+| SponsorBanner | `components/sections/SponsorBanner.tsx` | ✅ next/link |
+| Button | `components/ui/Button.tsx` | ✅ next/link für href |
+| Card | `components/ui/Card.tsx` | ✅ next/image |
+| PersonCard | `components/ui/PersonCard.tsx` | ✅ Bio-Modal + next/image + i18n |
 | Accordion | `components/ui/Accordion.tsx` | ✅ |
-| ContactForm | `components/ui/ContactForm.tsx` | ✅ |
+| ContactForm | `components/ui/ContactForm.tsx` | ✅ RHF + Zod + i18n |
 | Map (Leaflet/OSM) | `components/ui/Map.tsx` | ✅ |
 | MapLoader (SSR-safe) | `components/ui/MapLoader.tsx` | ✅ |
 | ScrollReveal (GSAP) | `components/ui/ScrollReveal.tsx` | ✅ |
 | StaggerReveal (GSAP) | `components/ui/StaggerReveal.tsx` | ✅ |
+| LexicalRenderer | `components/ui/LexicalRenderer.tsx` | ✅ Client-seitiger Rich-Text |
+| RichTextRenderer | `components/ui/RichTextRenderer.tsx` | ✅ Server-seitig (Payload RSC) |
 
 ---
 
-## 4. Informationsarchitektur
+## 5. Seitenübersicht (20 Routen)
 
-### Desktop-Navigation (Split Menu)
-```
-Skills4Growth    Programm    |  ✦UCCELLI  |    Netzwerk    Über uns    Kontakt    DE|EN
-```
-
-### Mobile Navigation
-Hamburger → Fullscreen Overlay mit Akkordeon-Submenüs + LanguageSwitcher unten
-
-### URL-Struktur
-```
-/[locale]/                              → Homepage
-/[locale]/skills4growth                 → Skills4Growth (LifeLab)
-/[locale]/programm/projekte             → Projekte Overview
-/[locale]/programm/projekte/[slug]      → Einzelnes Projekt (6 Projekte)
-/[locale]/programm/veranstaltungen      → Event-Kalender
-/[locale]/programm/kursangebote         → Kursangebote
-/[locale]/programm/news                 → News-Blog
-/[locale]/programm/news/[slug]          → Einzelner News-Artikel (3 Artikel)
-/[locale]/netzwerk                      → Netzwerke Overview
-/[locale]/ueber-uns                     → Über uns
-/[locale]/ueber-uns/vorstand            → Team / Vorstand
-/[locale]/ueber-uns/partner             → Partner & Sponsoren
-/[locale]/ueber-uns/faq                 → FAQ
-/[locale]/kontakt                       → Kontaktseite
-/[locale]/werte/[slug]                  → Werte-Seiten (6 Seiten)
-/[locale]/datenschutz                   → Datenschutzerklärung
-/admin/[[...segments]]                  → Payload Admin UI
-/api/[[...slug]]                        → Payload REST API
-/api/contact                            → Kontaktformular-Backend
-```
+| # | Route | i18n | SEO | Animation | Payload | Status |
+|---|-------|------|-----|-----------|---------|--------|
+| 1 | `/` Homepage | ✅ | ✅ OG | ✅ | — | ✅ |
+| 2 | `/ueber-uns` | ✅ | ✅ | ✅ | — | ✅ |
+| 3 | `/ueber-uns/vorstand` | ✅ | ✅ | ✅ | ✅ Team | ✅ |
+| 4 | `/ueber-uns/faq` | ✅ | ✅ JSON-LD | ✅ | ✅ FAQs | ✅ |
+| 5 | `/ueber-uns/partner` | ✅ | ✅ | ✅ | ✅ Partners | ✅ |
+| 6 | `/skills4growth` | ✅ | ✅ | ✅ | — | ✅ |
+| 7 | `/programm/projekte` | ✅ | ✅ | ✅ | — | ✅ |
+| 8 | `/programm/projekte/[slug]` | — | ✅ gen. | — | — | ✅ |
+| 9 | `/programm/veranstaltungen` | ✅ | ✅ | — | ✅ Events | ✅ |
+| 10 | `/programm/kursangebote` | ✅ | ✅ | ✅ | — | ✅ |
+| 11 | `/programm/news` | ✅ | ✅ | ✅ | ✅ Posts | ✅ |
+| 12 | `/programm/news/[slug]` | — | ✅ gen. | — | — | ✅ |
+| 13 | `/netzwerk` | ✅ | ✅ | ✅ | — | ✅ |
+| 14 | `/kontakt` | ✅ | ✅ | ✅ | — | ✅ |
+| 15 | `/werte/[slug]` (6x) | — | ✅ gen. | — | — | ✅ |
+| 16 | `/datenschutz` | — | ✅ | — | — | ✅ |
+| 17 | `not-found` (404) | — | — | — | — | ✅ |
+| 18 | `/admin/[[...]]` | — | — | — | — | ✅ Payload |
+| 19 | `/api/[[...slug]]` | — | — | — | — | ✅ Payload REST |
+| 20 | `/api/contact` | — | — | — | — | ✅ Form Backend |
 
 ---
 
-## 5. Seitenübersicht — Komplett-Tracker
+## 6. Payload CMS
 
-| # | Seite | Route | SEO | Animationen | Status |
-|---|-------|-------|-----|-------------|--------|
-| 1 | Homepage | `/` | ✅ | ✅ ScrollReveal + StaggerReveal | ✅ |
-| 2 | Über uns | `/ueber-uns` | ✅ | ✅ ScrollReveal + StaggerReveal | ✅ |
-| 3 | Der Vorstand | `/ueber-uns/vorstand` | ✅ | — | ✅ |
-| 4 | FAQ | `/ueber-uns/faq` | ✅ + JSON-LD | ✅ ScrollReveal | ✅ |
-| 5 | Partner & Sponsoren | `/ueber-uns/partner` | ✅ | — | ✅ |
-| 6 | Skills4Growth | `/skills4growth` | ✅ | — | ✅ |
-| 7 | Projekte Overview | `/programm/projekte` | ✅ | — | ✅ |
-| 8 | Einzelnes Projekt | `/programm/projekte/[slug]` | ✅ generateMetadata | — | ✅ |
-| 9 | Veranstaltungen | `/programm/veranstaltungen` | ✅ | — | ✅ |
-| 10 | Kursangebote | `/programm/kursangebote` | ✅ | — | ✅ |
-| 11 | News Overview | `/programm/news` | ✅ | — | ✅ |
-| 12 | News-Artikel | `/programm/news/[slug]` | ✅ generateMetadata | — | ✅ |
-| 13 | Netzwerke | `/netzwerk` | ✅ | — | ✅ |
-| 14 | Kontakt | `/kontakt` | ✅ | — | ✅ |
-| 15 | Werte-Seiten (6x) | `/werte/[slug]` | ✅ generateMetadata | — | ✅ |
-| 16 | Datenschutz | `/datenschutz` | ✅ | — | ✅ |
-| 17 | 404-Seite | `not-found.tsx` | — | — | ✅ |
+### Collections (9)
 
----
+| Collection | Felder | richText | Seiten |
+|------------|--------|----------|--------|
+| projects | title, slug, category, summary, body, image, locale, featured | body | Projekte |
+| posts | title, slug, date, summary, body, image, locale | body | News |
+| events | title, date, endDate, location, description, image, locale | description | Events |
+| team-members | name, role, bio, image, order | bio | Vorstand |
+| partners | name, type, description, logo, url, socials | description | Partner |
+| faqs | question, answer, order, locale | answer | FAQ |
+| pages | title, slug, body, locale | body | Statische Seiten |
+| media | alt (upload: image/*, pdf) | — | Medien |
+| users | email, name, role (auth) | — | Auth |
 
-## 6. Payload CMS Collections
+### Admin Panel
+- **URL:** `/admin`
+- **Editor:** Lexical mit FixedToolbarFeature (sichtbare Toolbar)
+- **importMap:** 32 Einträge (9 RSC + 23 Client Features) — manuell befüllt wegen Node 24 ESM-Inkompatibilität
+- **Datenbank:** SQLite (uccelli.db im Projektroot)
 
-| Collection | Slug | Felder | Status |
-|------------|------|--------|--------|
-| Projects | `projects` | title, slug, category, summary, body, image, locale, featured | ✅ |
-| Posts | `posts` | title, slug, date, summary, body, image, locale | ✅ |
-| Events | `events` | title, date, endDate, location, description, image, locale | ✅ |
-| Team Members | `team-members` | name, role, bio, image, order | ✅ |
-| Partners | `partners` | name, type, description, logo, url, socials | ✅ |
-| FAQs | `faqs` | question, answer, order, locale | ✅ |
-| Pages | `pages` | title, slug, body, locale | ✅ |
-| Media | `media` | alt (+ upload: image/*, application/pdf) | ✅ |
-| Users | `users` | email, name, role (auth collection) | ✅ |
+### Data Layer
+- `lib/payload.ts` — `fetchCollection()` und `fetchBySlug()` mit try/catch
+- `lib/data.ts` — Payload-first Datenzugriff mit statischem Fallback
+- `resolveImageUrl()` — Extrahiert URLs aus Payload Media-Relationen
+- 5 Seiten angebunden: Vorstand, FAQ, Partner, News, Events
 
 ---
 
-## 7. Interaktive Features — Status
+## 7. i18n — Vollständig
 
-| Feature | Status | Details |
-|---------|--------|---------|
-| Kontaktformular (UI) | ✅ | React Hook Form + Zod Validierung |
-| Kontaktformular (Backend) | ✅ | `app/api/contact/route.ts` — Resend E-Mail |
-| Turnstile Spam-Schutz | ✅ | Token-Verifikation serverseitig, graceful fallback ohne Key |
-| Rate Limiting | ✅ | 5 Anfragen / IP / 15 Minuten |
-| Leaflet/OSM Karte | ✅ | `MapLoader.tsx` (SSR-safe), Custom Marker, lazy-loaded |
-| Cookie-Banner | ✅ | Akzeptieren/Ablehnen, localStorage, Link zu /datenschutz |
-| FAQ Akkordeon | ✅ | Framer Motion animated open/close |
-| LanguageSwitcher | ✅ | DE \| EN im Header (Desktop + Mobile) |
-| Attention Banner | ✅ | Event-Carousel mit Pfeilen |
+- **Framework:** next-intl, middleware.ts mit localePrefix: "as-needed", Default: de
+- **Messages:** de.json (143 Keys) + en.json (143 Keys)
+- **Status: 143/143 Keys — 0 hardcoded deutsche Strings**
+- **Abdeckung:** Navigation, Footer (inkl. Werte-Labels), CookieBanner, ContactForm (Labels + Zod-Validierung + Status-Meldungen), PersonCard ("Mehr erfahren", "Schliessen"), Header aria-labels, Netzwerk-Beschreibungen, alle Seitentexte
+- **Async Server Components** nutzen `getTranslations()` von `next-intl/server`
 
 ---
 
-## 8. Animation & Motion
+## 8. Tests
 
-| Element | Technik | Status |
-|---------|---------|--------|
-| ScrollReveal | GSAP ScrollTrigger — opacity + translateY | ✅ |
-| StaggerReveal | GSAP — Kinder versetzt einblenden | ✅ |
-| PageTransition | Framer Motion — fade-in 0.35s | ✅ |
-| Card Hover | CSS — shadow + scale(1.03) | ✅ |
-| PersonCard Hover | CSS — grayscale → color + scale | ✅ |
-| FAQ Akkordeon | Framer Motion — height animation | ✅ |
-| Mobile Menu | Framer Motion — slide + stagger | ✅ |
-| Reduced Motion | Alle GSAP-Animationen prüfen prefers-reduced-motion | ✅ |
-| Hero Titel | Noch nicht animiert | ⏳ Optional |
-| Magnetic Buttons | Noch nicht implementiert | ⏳ Optional |
+| Datei | Tests | Komponente |
+|-------|-------|------------|
+| button.test.tsx | 8 | Button (Varianten, Sizes, Link/Button, disabled) |
+| card.test.tsx | 5 | Card (Render, Button, Image, Placeholder) |
+| person-card.test.tsx | 6 | PersonCard (Render, Image, Initial, Bio-Modal, i18n) |
+| accordion.test.tsx | 5 | Accordion (Render, Open/Close, Single-Open) |
+| contact-form.test.tsx | 3 | ContactForm (Fields, Submit-Button, i18n) |
+| language-switcher.test.tsx | 3 | LanguageSwitcher (DE/EN, Active, Links) |
+| sponsor-banner.test.tsx | 4 | SponsorBanner (Title, Names, Links) |
+| **Total** | **34** | **7 Dateien, alle grün** |
+
+### Test-Mocks (setup.tsx)
+next-intl, next/navigation, next/link, next/image, next/font/local, framer-motion, gsap, gsap/ScrollTrigger, ScrollReveal, StaggerReveal
 
 ---
 
-## 9. SEO — Status
+## 9. Accessibility
 
 | Massnahme | Status |
 |-----------|--------|
-| Meta title + description (alle 16 Seiten) | ✅ |
+| Skip-to-Content Link | ✅ sr-only, sichtbar bei Tab, DE/EN |
+| Keyboard Navigation | ✅ Alle interaktiven Elemente fokusierbar |
+| ARIA Labels (i18n) | ✅ Hamburger Menu, Modal Close, Cookie Dialog |
+| Focus Visible Outlines | ✅ focus-visible:outline-2 auf Buttons |
+| Reduced Motion | ✅ GSAP + CSS prefers-reduced-motion |
+| Farbkontrast WCAG AA | ✅ Accent-Accessible #3D5BD9 für kleine Links |
+| Semantische HTML-Struktur | ✅ header, main, footer, nav, section |
+
+---
+
+## 10. SEO
+
+| Massnahme | Status |
+|-----------|--------|
+| Meta title + description (16/16 Seiten) | ✅ |
 | generateMetadata für dynamische Routen | ✅ |
 | OpenGraph Tags (Homepage) | ✅ |
-| JSON-LD Organization | ✅ (auf allen Seiten) |
-| JSON-LD FAQPage | ✅ (auf /faq) |
-| Sitemap (next-sitemap) | ✅ Auto-generiert bei build |
-| robots.txt | ✅ /admin + /api ausgeschlossen |
-| 301-Redirects (25+ WordPress-URLs) | ✅ in next.config.ts |
-| hreflang (de + en) | ✅ in sitemap config |
-| Custom 404 | ✅ (locale + root) |
-| Canonical URLs | ⏳ Phase 5 |
+| JSON-LD Organization (alle Seiten) | ✅ |
+| JSON-LD FAQPage (/faq) | ✅ |
+| Sitemap (next-sitemap, auto-generiert) | ✅ |
+| robots.txt (/admin + /api ausgeschlossen) | ✅ |
+| 301-Redirects (25+ WordPress-URLs) | ✅ |
+| hreflang (de + en) | ✅ |
+| Custom 404 | ✅ |
+| next/link Client-Side Routing + Prefetching | ✅ |
+| next/image Optimierung (WebP/AVIF, sizes, priority) | ✅ |
 
 ---
 
-## 10. Datenschutz & Consent
+## 11. Datenschutz & Compliance (nDSG)
 
 | Massnahme | Status |
 |-----------|--------|
-| CookieBanner | ✅ Custom-Implementierung |
-| Google Maps entfernt → Leaflet/OSM | ✅ Keine Tracking-Cookies |
-| Google Fonts entfernt → lokal | ✅ Kein Datenabfluss |
-| Google reCAPTCHA entfernt → Turnstile | ✅ DSGVO-konform |
-| Datenschutzseite | ✅ /datenschutz |
-| nDSG-konform | ✅ |
+| Google Maps → Leaflet/OpenStreetMap | ✅ |
+| Google Fonts → Lato lokal geladen | ✅ |
+| Google reCAPTCHA → Cloudflare Turnstile | ✅ |
+| CookieBanner (i18n, Akzeptieren/Ablehnen) | ✅ |
+| Datenschutzseite (/datenschutz) | ✅ |
+| Kontaktformular Rate Limiting (5 Req/IP/15min) | ✅ |
+| Hosting Schweiz (Hosttech, Daten in CH) | ✅ |
 
 ---
 
-## 11. Entwicklungs-Phasen — Status
+## 12. Entwicklungs-Phasen
 
-### Phase 1: Foundation ✅ ABGESCHLOSSEN
-- [x] Next.js 16, Tailwind v4, i18n, Font-Loading
-- [x] Komponenten-Bibliothek, Layout, Homepage
-- [x] 301-Redirects
+### Phase 1: Foundation ✅
+Next.js 16, Tailwind v4, i18n, Font-Loading, Komponenten, Layout, Homepage, 301-Redirects
 
-### Phase 2: Seiten ✅ ABGESCHLOSSEN
-- [x] Alle 17 Frontend-Seiten inkl. dynamische Routen
-- [x] LanguageSwitcher, 404-Seite, Datenschutz
-- [x] 16/16 Seiten mit SEO-Metadaten
+### Phase 2: Seiten ✅
+17 Frontend-Seiten, LanguageSwitcher, 404, Datenschutz, SEO-Metadaten (16/16)
 
-### Phase 3: Features & Compliance ✅ ABGESCHLOSSEN
-- [x] Kontaktformular-Backend (API + Turnstile + Resend + Rate Limiting)
-- [x] React Hook Form + Zod Validierung
-- [x] Leaflet/OpenStreetMap (SSR-safe)
-- [x] CookieBanner (nDSG-konform)
-- [x] Payload CMS 3.85 (SQLite, 8 Collections, Admin UI, REST API)
-- [x] .env.example Template
+### Phase 3: Features & Compliance ✅
+Kontaktformular (RHF + Zod + Turnstile + Resend + Rate Limiting), Leaflet/OSM, CookieBanner, Payload CMS + SQLite, SponsorBanner
 
-### Phase 4: Animation & SEO ✅ ABGESCHLOSSEN
-- [x] GSAP ScrollReveal + StaggerReveal
-- [x] Framer Motion PageTransition
-- [x] prefers-reduced-motion Fallbacks
-- [x] JSON-LD (Organization + FAQPage)
-- [x] next-sitemap + robots.txt
-- [x] Homepage + Über uns animiert
-- [ ] ~~i18n-Ausbau~~ → verschoben auf Phase 5
+### Phase 4: Animation & SEO ✅
+GSAP ScrollReveal/StaggerReveal, PageTransition, JSON-LD, Sitemap, i18n-Basis
 
-### Phase 5: Launch ⏳ ANSTEHEND
-- [ ] i18n-Ausbau: Alle hardcodierten Texte → de.json/en.json
-- [ ] Seiten an Payload CMS anbinden (statt statischer Daten)
-- [ ] Bilder ersetzen (Platzhalter → finale Bilder)
-- [ ] Cross-Browser Testing
+### Phase 5: Polish & Bugfixes ✅
+Mobile-Nav-Fix, Unit Tests (34), Payload importMap (32 Einträge), FixedToolbar, LexicalRenderer, PersonCard Bio-Modal, resolveImageUrl, richText Collections, COMMANDS.md
+
+### Phase 6: Code-Qualität ✅
+- [x] next/link Migration (10 Dateien — Client-Side Routing + Prefetching)
+- [x] next/image Migration (3 Dateien — WebP/AVIF, Lazy Loading, priority)
+- [x] i18n komplett (143/143 Keys, 0 hardcoded DE-Strings)
+- [x] ContactForm i18n (Labels, Zod-Validierung, Status-Meldungen)
+- [x] Netzwerk/Footer/CookieBanner/PersonCard/Header i18n
+- [x] Lucide SVG Social Icons (Footer + Kontaktseite)
+- [x] Skip-to-Content Accessibility Link
+- [x] Mobile Menu Sub-Link Close Fix (onNavigate Callback)
+- [x] Test-Mocks + Tests angepasst
+
+### Phase 7: Deployment & Launch ⏳ ANSTEHEND
+- [ ] Hosttech vServer einrichten (Node.js 22 LTS, PM2, Nginx)
+- [ ] GitHub Action für Auto-Deployment
+- [ ] Production .env konfigurieren
+- [ ] DNS uccelli-society.ch → Hosttech
+- [ ] SSL-Zertifikat (Let's Encrypt)
+- [ ] Finale Bilder ersetzen
+- [ ] Content in Payload CMS pflegen
+- [ ] 301-Redirect-Monitoring (Google Search Console)
 - [ ] Performance-Audit (Lighthouse)
 - [ ] Accessibility-Audit (axe-core)
-- [ ] Vercel Deployment
-- [ ] DNS-Umstellung uccelli-society.ch
-- [ ] 301-Redirect-Monitoring (Google Search Console)
-- [ ] ScrollReveal/StaggerReveal auf alle restlichen Seiten anwenden
+- [ ] Cross-Browser Testing
 
 ---
 
-## 12. Offene Fragen
+## 13. Offene Fragen
 
 | # | Frage | Status |
 |---|-------|--------|
-| 1 | Payload CMS → **Payload 3.85 + SQLite** | ✅ Entschieden |
-| 2 | Datenbank → **SQLite** (kein externer Service nötig) | ✅ Entschieden |
-| 3 | Kontaktformular: E-Mail direkt oder CRM? | Offen |
-| 4 | Hosting: Vercel oder eigener Server? | Offen |
-| 5 | Domain: Bleibt uccelli-society.ch? | Offen |
-| 6 | Skills4Growth = LifeLab, oder separates Programm? | Offen |
-| 7 | Analytics: Plausible/Umami? | Offen |
-| 8 | Finale Bilder: Wann werden sie geliefert? | Offen |
+| 1 | CMS → Payload 3.85 + SQLite | ✅ |
+| 2 | Hosting → Hosttech vServer | ✅ |
+| 3 | Deployment → GitHub Actions + SSH | ✅ |
+| 4 | Domain: Bleibt uccelli-society.ch? | Offen |
+| 5 | Finale Bilder: Wann werden sie geliefert? | Offen |
+| 6 | Analytics: Plausible/Umami? | Offen |
+| 7 | Node 24 → 22 LTS downgrade für Payload CLI? | Empfohlen |
 
 ---
 
-## 13. Umgebungsvariablen (.env.local)
+## 14. Umgebungsvariablen (.env.local)
 
 ```bash
-# Datenbank (SQLite — Datei wird automatisch erstellt)
 DATABASE_URI=file:./uccelli.db
-
-# Payload CMS
 PAYLOAD_SECRET=mindestens-32-zeichen-langer-geheimer-string
-
-# E-Mail (optional für Entwicklung)
-RESEND_API_KEY=re_xxxxxxxxxxxx
-
-# Spam-Schutz (optional für Entwicklung)
-TURNSTILE_SITE_KEY=0x0000000000000000
-TURNSTILE_SECRET_KEY=0x0000000000000000
+RESEND_API_KEY=re_xxxxxxxxxxxx          # Optional für Dev
+TURNSTILE_SITE_KEY=0x0000000000000000    # Optional für Dev
+TURNSTILE_SECRET_KEY=0x0000000000000000  # Optional für Dev
 ```
 
 ---
 
-## 14. Anhang: Design-Assets
+## 15. Bekannte Issues & Workarounds
 
-### Komponenten (PDF)
-00_Uccelli Brand Kit, 01_Buttons, 02_Header, 03_Footer, 04_Hero, 05_Attention Banner, 06_Card, 07_Card_Person
+| Issue | Workaround |
+|-------|------------|
+| `payload generate:importmap` schlägt fehl | importMap.ts manuell befüllt (32 Einträge) — Node.js 24 ESM-Inkompatibilität |
+| `middleware.ts` Deprecation-Warnung | Ignorieren — Next.js 16 empfiehlt proxy statt middleware |
+| `.next` Cache-Korruption nach Build + Dev | .next Ordner löschen, dann neu starten |
+| Neue richText-Felder → alte Daten inkompatibel | uccelli.db löschen und neu anlegen (nur bei Feldtyp-Wechsel) |
 
-### Page Templates (JPG/PNG)
-Template_Über-uns, Template_Aktuelles-Projekt, Template_Contact-us_Desktop, Template_Contact-us_Mobile, Template_FAQ, Template_Kursangebote, Template_Netzwerke, Template_Partner-und-Sponsoren, Template_Projekte-Overview, Template_Standard-Content, Template_Team_Seite
+---
+
+## 16. Projektstruktur
+
+```
+uccelli-website/
+├── middleware.ts                     # next-intl Locale-Routing
+├── payload.config.ts                # Payload CMS Config
+├── next.config.ts                   # withNextIntl(), 301-Redirects
+├── vitest.config.ts                 # Test-Konfiguration
+├── .env.example                     # Umgebungsvariablen-Template
+├── app/
+│   ├── layout.tsx                   # Root (pass-through)
+│   ├── not-found.tsx                # Root 404
+│   ├── [locale]/
+│   │   └── layout.tsx               # Skip-to-Content + Header/Footer
+│   ├── (payload)/admin/             # Payload Admin UI
+│   └── api/                         # contact + Payload REST
+├── collections/                     # 8 Payload Collection-Definitionen
+├── components/                      # 20 React-Komponenten
+├── lib/
+│   ├── cn.ts                        # clsx + tailwind-merge
+│   ├── payload.ts                   # Payload Client + Helpers
+│   └── data.ts                      # Payload-first Data Layer
+├── messages/                        # de.json (143) + en.json (143)
+├── tests/                           # 7 Testdateien + setup.tsx
+├── public/fonts/                    # Lato-Regular.woff2 + Lato-Bold.woff2
+├── styles/globals.css               # Tailwind v4 @theme
+└── docs/
+    ├── PRD.md                       # Dieses Dokument (v6.0)
+    └── COMMANDS.md                  # Entwickler-Befehls-Referenz
+```

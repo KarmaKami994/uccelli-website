@@ -39,7 +39,7 @@ export function CookieBanner() {
     <div
       className="fixed bottom-0 left-0 right-0 z-[60] bg-white border-t border-neutral-200 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]"
       role="dialog"
-      aria-label="Cookie-Einstellungen"
+      aria-label={t("ariaLabel")}
     >
       <div className="max-w-[1200px] mx-auto px-6 lg:px-10 py-5">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">

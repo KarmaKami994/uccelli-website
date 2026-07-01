@@ -21,7 +21,9 @@
     "formular": "Forms",
     "partnerSponsoren": "Partners/Sponsors",
     "faq": "FAQ",
-    "kontakt": "Contact"
+    "kontakt": "Contact",
+    "menuOpen": "Open menu",
+    "menuClose": "Close menu"
   },
   "home": {
     "hero": {
@@ -71,7 +73,8 @@
       "cta": "THE BOARD"
     },
     "pillars": "Our pillars",
-    "moreInfo": "Learn more →"
+    "moreInfo": "Learn more →",
+    "subtitle": "History, mission and vision of the Uccelli Society."
   },
   "vorstand": {
     "title": "THE BOARD"
@@ -209,7 +212,7 @@
     }
   },
   "common": {
-    "moreInfo": "LEARN MORE",
+    "moreInfo": "Learn more →",
     "readMore": "Read more",
     "backToTop": "Back to top",
     "notFound": "Page not found",
@@ -222,13 +225,15 @@
     "send": "SEND",
     "sending": "SENDING...",
     "moreValues": "More values",
-    "mapLoading": "Loading map..."
+    "mapLoading": "Loading map...",
+    "close": "Close"
   },
   "cookie": {
     "title": "We respect your privacy",
     "text": "This website only uses technically necessary cookies. We do not use tracking cookies.",
     "privacy": "Privacy Policy",
     "accept": "Accept",
-    "reject": "Decline"
+    "reject": "Decline",
+    "ariaLabel": "Cookie settings"
   }
 }

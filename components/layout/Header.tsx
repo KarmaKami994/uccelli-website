@@ -1,87 +1,49 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Menu, X, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
-interface NavChild { key: string; href: string }
-interface NavItem { key: string; href?: string; children?: NavChild[] }
-
-const navLeft: NavItem[] = [
-  { key: "skills4growth", href: "/skills4growth" },
-  { key: "programm", children: [
-    { key: "projekte", href: "/programm/projekte" },
-    { key: "veranstaltungen", href: "/programm/veranstaltungen" },
-    { key: "kursangebote", href: "/programm/kursangebote" },
-    { key: "news", href: "/programm/news" },
-  ]},
-];
-
-const navRight: NavItem[] = [
-  { key: "netzwerk", href: "/netzwerk", children: [
-    { key: "uccelliWomen", href: "/netzwerk#uccelli-women" },
-    { key: "uccelliGhana", href: "/netzwerk#uccelli-ghana" },
-    { key: "uccelliFC", href: "/netzwerk#uccelli-fc" },
-    { key: "nightshift", href: "/netzwerk#nightshift" },
-  ]},
-  { key: "ueberUns", children: [
-    { key: "vorstand", href: "/ueber-uns/vorstand" },
-    { key: "partnerSponsoren", href: "/ueber-uns/partner" },
-    { key: "faq", href: "/ueber-uns/faq" },
-  ]},
-  { key: "kontakt", href: "/kontakt" },
-];
+type NavChild = { label: string; href: string };
+type NavItem = { label: string; href?: string; order: number; openInNewTab?: boolean; children: NavChild[] };
 
 function Logo({ className = "" }: { className?: string }) {
-  return (
-    <span className={`font-bold tracking-[0.15em] uppercase text-black select-none ${className}`}>
-      <span className="text-[1.1em] mr-[1px]">✦</span>UCCELLI
-    </span>
-  );
+  return <span className={`font-bold tracking-[0.15em] uppercase ${className}`}>Uccelli</span>;
 }
 
-function DesktopDropdown({ label, items, t }: { label: string; items: NavChild[]; t: (k: string) => string }) {
-  return (
-    <div className="relative group">
-      <button className="flex items-center gap-1 text-[13px] font-medium tracking-wide uppercase hover:opacity-60 transition-opacity py-2 cursor-pointer">
-        {label}
-        <ChevronDown size={12} className="opacity-50" />
-      </button>
-      <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-        <div className="bg-white border border-neutral-200 rounded-lg shadow-xl py-2 min-w-[220px]">
-          {items.map((item) => (
-            <Link key={item.key} href={item.href}
-              className="block px-5 py-2.5 text-[13px] text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">
-              {t(item.key)}
-            </Link>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+// ─── Desktop Dropdown ────────────────────────────────────
 
-function MobileAccordion({ label, items, t }: { label: string; items: NavChild[]; t: (k: string) => string }) {
+function DesktopDropdown({ item }: { item: NavItem }) {
   const [open, setOpen] = useState(false);
+
+  if (item.children.length === 0) {
+    return (
+      <Link href={item.href || "/"} className="text-[13px] font-medium tracking-wide uppercase hover:opacity-60 transition-opacity py-2"
+        target={item.openInNewTab ? "_blank" : undefined} rel={item.openInNewTab ? "noopener noreferrer" : undefined}>
+        {item.label}
+      </Link>
+    );
+  }
+
   return (
-    <div className="border-b border-neutral-100">
-      <button onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-4 text-[17px] font-medium cursor-pointer">
-        {label}
-        {open ? <ChevronUp size={18} className="text-neutral-400" /> : <ChevronDown size={18} className="text-neutral-400" />}
-      </button>
+    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <Link href={item.href || item.children[0]?.href || "/"}
+        className="text-[13px] font-medium tracking-wide uppercase hover:opacity-60 transition-opacity py-2 flex items-center gap-1">
+        {item.label}
+        <ChevronDown size={14} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+      </Link>
       <AnimatePresence>
         {open && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-            <div className="pl-4 pb-4 space-y-0.5">
-              {items.map((item) => (
-                <Link key={item.key} href={item.href}
-                  className="block py-2.5 text-[15px] text-neutral-500 hover:text-black transition-colors">
-                  {t(item.key)}
+          <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.15 }} className="absolute top-full left-0 pt-2 z-50">
+            <div className="bg-white border border-neutral-200 rounded-lg shadow-xl py-2 min-w-[220px]">
+              {item.children.map((child) => (
+                <Link key={child.href} href={child.href}
+                  className="block px-5 py-2.5 text-[13px] text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors">
+                  {child.label}
                 </Link>
               ))}
             </div>
@@ -92,93 +54,115 @@ function MobileAccordion({ label, items, t }: { label: string; items: NavChild[]
   );
 }
 
-export function Header() {
+// ─── Mobile Accordion ────────────────────────────────────
+
+function MobileAccordion({ item, onNavigate }: { item: NavItem; onNavigate: () => void }) {
+  const [open, setOpen] = useState(false);
+
+  if (item.children.length === 0) {
+    return (
+      <Link href={item.href || "/"} onClick={onNavigate}
+        className="block py-4 text-[17px] font-medium border-b border-neutral-100">
+        {item.label}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="border-b border-neutral-100">
+      <div className="flex items-center">
+        <Link href={item.href || item.children[0]?.href || "/"} onClick={onNavigate}
+          className="flex-1 py-4 text-[17px] font-medium">
+          {item.label}
+        </Link>
+        <button onClick={() => setOpen(!open)} className="p-3 cursor-pointer" aria-label={open ? "Untermenü schliessen" : "Untermenü öffnen"}>
+          {open ? <ChevronUp size={18} className="text-neutral-400" /> : <ChevronDown size={18} className="text-neutral-400" />}
+        </button>
+      </div>
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+            <div className="pl-4 pb-4 space-y-0.5">
+              {item.children.map((child) => (
+                <Link key={child.href} href={child.href} onClick={onNavigate}
+                  className="block py-2.5 text-[15px] text-neutral-500 hover:text-black transition-colors">
+                  {child.label}
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ─── Header ──────────────────────────────────────────────
+
+export function Header({ navItems = [] }: { navItems?: NavItem[] }) {
   const t = useTranslations("nav");
-  const locale = useLocale();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  const renderNavItem = (item: NavItem) => {
-    if (item.children) return <DesktopDropdown key={item.key} label={t(item.key)} items={item.children} t={t} />;
-    return (
-      <Link key={item.key} href={item.href!}
-        className="text-[13px] font-medium tracking-wide uppercase hover:opacity-60 transition-opacity py-2">
-        {t(item.key)}
-      </Link>
-    );
-  };
+  // Split nav items for the split-menu layout: left half + right half + last item
+  const midpoint = Math.ceil(navItems.length / 2);
+  const leftItems = navItems.slice(0, midpoint);
+  const rightItems = navItems.slice(midpoint);
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-neutral-100">
-        {/* Desktop */}
-        <nav className="hidden lg:flex items-center h-[72px] px-10 relative max-w-[1400px] mx-auto">
-          <div className="flex-1 flex items-center justify-end gap-10 pr-16">
-            {navLeft.map(renderNavItem)}
-          </div>
+      {/* Desktop */}
+      <header className="hidden lg:block border-b border-neutral-100">
+        <div className="max-w-[1400px] mx-auto px-10 h-[72px] flex items-center justify-between relative">
+          <nav className="flex items-center gap-8">
+            {leftItems.map((item) => <DesktopDropdown key={item.label} item={item} />)}
+          </nav>
           <Link href="/" className="absolute left-1/2 -translate-x-1/2 z-10" aria-label="Home">
             <Logo className="text-[18px]" />
           </Link>
-          <div className="flex-1 flex items-center justify-start gap-10 pl-16">
-            {navRight.map(renderNavItem)}
-            <LanguageSwitcher currentLocale={locale} />
-          </div>
-        </nav>
-
-        {/* Mobile header bar */}
-        <nav className="lg:hidden flex items-center justify-between h-[60px] px-5">
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-1.5 -ml-1.5 cursor-pointer"
-            aria-label={mobileOpen ? "Menü schliessen" : "Menü öffnen"}>
-            {mobileOpen ? <X size={22} strokeWidth={1.5} /> : <Menu size={22} strokeWidth={1.5} />}
-          </button>
-          <Link href="/" aria-label="Home"><Logo className="text-[16px]" /></Link>
-        </nav>
+          <nav className="flex items-center gap-8">
+            {rightItems.map((item) => <DesktopDropdown key={item.label} item={item} />)}
+            <LanguageSwitcher />
+          </nav>
+        </div>
       </header>
 
-      {/* Mobile overlay — OUTSIDE header to avoid sticky/fixed conflicts */}
+      {/* Mobile Bar */}
+      <header className="lg:hidden border-b border-neutral-100">
+        <div className="px-5 h-[60px] flex items-center justify-between">
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-1.5 -ml-1.5 cursor-pointer"
+            aria-label={mobileOpen ? t("menuClose") : t("menuOpen")}>
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+          <Link href="/" aria-label="Home"><Logo className="text-[16px]" /></Link>
+        </div>
+      </header>
+
+      {/* Mobile Overlay */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="lg:hidden fixed inset-0 z-[100] bg-white overflow-y-auto"
-          >
-            {/* Mobile overlay header */}
-            <div className="flex items-center justify-between h-[60px] px-5 border-b border-neutral-100">
-              <button onClick={() => setMobileOpen(false)} className="p-1.5 -ml-1.5 cursor-pointer" aria-label="Menü schliessen">
-                <X size={22} strokeWidth={1.5} />
-              </button>
-              <Link href="/" aria-label="Home" onClick={() => setMobileOpen(false)}><Logo className="text-[16px]" /></Link>
-            </div>
-
-            {/* Mobile nav items */}
-            <div className="px-6 pt-2 pb-10">
-              <Link href="/" onClick={() => setMobileOpen(false)}
-                className="block py-4 text-[17px] font-medium border-b border-neutral-100">{t("home")}</Link>
-
-              {[...navLeft, ...navRight].map((item) =>
-                item.children ? (
-                  <MobileAccordion key={item.key} label={t(item.key)} items={item.children} t={t} />
-                ) : (
-                  <Link key={item.key} href={item.href!} onClick={() => setMobileOpen(false)}
-                    className="block py-4 text-[17px] font-medium border-b border-neutral-100">{t(item.key)}</Link>
-                )
-              )}
-
-              <div className="pt-8 flex justify-center">
-                <LanguageSwitcher currentLocale={locale} />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-white z-[100] lg:hidden overflow-y-auto">
+            <div className="px-5">
+              <div className="h-[60px] flex items-center justify-between">
+                <button onClick={() => setMobileOpen(false)} className="p-1.5 -ml-1.5 cursor-pointer" aria-label={t("menuClose")}>
+                  <X size={22} />
+                </button>
+                <Link href="/" aria-label="Home" onClick={() => setMobileOpen(false)}><Logo className="text-[16px]" /></Link>
               </div>
+              <nav className="py-4">
+                <Link href="/" onClick={() => setMobileOpen(false)}
+                  className="block py-4 text-[17px] font-medium border-b border-neutral-100">Home</Link>
+                {navItems.map((item) => (
+                  <MobileAccordion key={item.label} item={item} onNavigate={() => setMobileOpen(false)} />
+                ))}
+                <div className="py-6"><LanguageSwitcher /></div>
+              </nav>
             </div>
           </motion.div>
         )}

@@ -9,6 +9,10 @@ import { Events } from "./collections/Events";
 import { TeamMembers } from "./collections/TeamMembers";
 import { Partners } from "./collections/Partners";
 import { FAQs } from "./collections/FAQs";
+import { Networks } from "./collections/Networks";
+import { Werte } from "./collections/Werte";
+import { Courses } from "./collections/Courses";
+import { Navigation } from "./collections/Navigation";
 import { Pages } from "./collections/Pages";
 import { Media } from "./collections/Media";
 
@@ -39,6 +43,10 @@ export default buildConfig({
     TeamMembers,
     Partners,
     FAQs,
+    Networks,
+    Werte,
+    Courses,
+    Navigation,
     Pages,
     Media,
     // Auth

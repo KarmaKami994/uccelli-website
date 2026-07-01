@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { X } from "lucide-react";
 import { LexicalRenderer } from "./LexicalRenderer";
@@ -13,6 +14,7 @@ interface PersonCardProps {
 }
 
 export function PersonCard({ name, role, imageSrc, bio }: PersonCardProps) {
+  const t = useTranslations("common");
   const [showBio, setShowBio] = useState(false);
   const hasBio = bio && (typeof bio === "string" ? bio.length > 0 : bio.root?.children?.length > 0);
 
@@ -38,7 +40,7 @@ export function PersonCard({ name, role, imageSrc, bio }: PersonCardProps) {
         </div>
         <h3 className="text-lg font-bold uppercase tracking-wide">{name}</h3>
         <p className="text-[14px] text-neutral-500 mt-1">{role}</p>
-        {hasBio && <p className="text-[12px] text-brand-accent-accessible mt-2 font-medium">Mehr erfahren →</p>}
+        {hasBio && <p className="text-[12px] text-brand-accent-accessible mt-2 font-medium">{t("moreInfo")}</p>}
       </div>
 
       {showBio && hasBio && (
@@ -48,7 +50,7 @@ export function PersonCard({ name, role, imageSrc, bio }: PersonCardProps) {
             onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowBio(false)}
               className="absolute top-4 right-4 p-1 text-neutral-400 hover:text-black transition-colors cursor-pointer"
-              aria-label="Schliessen">
+              aria-label={t("close")}>
               <X size={20} />
             </button>
             <div className="flex items-center gap-4 mb-6">
