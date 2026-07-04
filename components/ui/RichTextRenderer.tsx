@@ -1,19 +1,22 @@
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
+import type { RichTextContent } from "@/lib/richtext";
 
 interface RichTextRendererProps {
-  content: string | SerializedEditorState | any;
+  content: RichTextContent | string | null | undefined;
   className?: string;
 }
 
+/**
+ * Renders Payload Lexical rich text via the official renderer
+ * (escapes content — safe against stored XSS). Plain strings are
+ * supported as a fallback for textarea fields.
+ */
 export function RichTextRenderer({ content, className = "" }: RichTextRendererProps) {
-  // Plain string fallback (from static data or textarea)
   if (typeof content === "string") {
     return <div className={`rich-text ${className}`}><p>{content}</p></div>;
   }
 
-  // Lexical rich text (from Payload CMS richText field)
-  if (content && typeof content === "object" && content.root) {
+  if (content?.root) {
     return (
       <div className={`rich-text ${className}`}>
         <RichText data={content} />
@@ -21,6 +24,5 @@ export function RichTextRenderer({ content, className = "" }: RichTextRendererPr
     );
   }
 
-  // Empty or unsupported
   return null;
 }

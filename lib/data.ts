@@ -1,17 +1,25 @@
-import { fetchCollection, fetchBySlug } from "./payload";
+import { cache } from "react";
+import { fetchCollection, fetchBySlug, fetchGlobal, type Locale } from "./payload";
+import type {
+  Media,
+  Project as ProjectDoc,
+  Post as PostDoc,
+  Event as EventDoc,
+} from "@/payload-types";
+import type { RichTextContent } from "./richtext";
 
-// ─── Types ───────────────────────────────────────────────
-export type TeamMember = { name: string; role: string; image?: string; bio?: any; order?: number };
-export type FAQ = { question: string; answer: string; order?: number };
-export type Partner = { name: string; type: "partner" | "sponsor"; description: string; logo?: string; url?: string };
-export type Project = { title: string; slug: string; category: string; summary: string; body?: any; image?: string; featured?: boolean };
-export type Post = { title: string; slug: string; date: string; summary: string; body?: any; image?: string };
-export type Event = { title: string; date: string; location?: string; description?: string };
-export type Network = { name: string; slug: string; description: any; image?: string; order?: number };
-export type Wert = { title: string; slug: string; body: any };
-export type Course = { name: string; description: string; order?: number };
-export type Page = { title: string; slug: string; body: any };
-export type NavItem = { label: string; href?: string; order: number; openInNewTab?: boolean; children: { label: string; href: string }[] };
+// ─── View types (what the components consume) ────────────
+export type TeamMember = { name: string; role: string; image?: string; bio?: RichTextContent | null };
+export type FAQ = { question: string; answer: RichTextContent };
+export type Partner = { name: string; type: "partner" | "sponsor"; description: RichTextContent; logo?: string; url?: string };
+export type Project = { title: string; slug: string; category: ProjectDoc["category"]; summary: string; body?: RichTextContent | null; image?: string; featured?: boolean };
+export type Post = { title: string; slug: string; date: string; summary: string; body?: RichTextContent | null; image?: string };
+export type EventItem = { title: string; date: string; location?: string; description?: RichTextContent | null };
+export type Network = { name: string; slug: string; description: RichTextContent; image?: string };
+export type Wert = { title: string; slug: string; body?: RichTextContent | null };
+export type Course = { name: string; description: string };
+export type Page = { title: string; slug: string; body?: RichTextContent | null };
+export type NavItem = { label: string; href?: string; openInNewTab?: boolean; children: { label: string; href: string }[] };
 
 export type HomepageData = {
   hero: { title: string; subtitle?: string; ctaText?: string; ctaHref?: string; image?: string };
@@ -20,111 +28,173 @@ export type HomepageData = {
   cta: { title: string; text?: string; buttonText?: string; buttonHref?: string };
 };
 
-// Helper: Extract image URL from Payload media relation
-function resolveImageUrl(media: any): string | undefined {
-  if (!media) return undefined;
-  if (typeof media === "string") return media;
+// ─── Helpers ─────────────────────────────────────────────
+
+/** Extract a usable URL from a Payload media relation. */
+export function resolveImageUrl(media: number | Media | null | undefined): string | undefined {
+  if (!media || typeof media === "number") return undefined;
   if (media.url) return media.url;
   if (media.filename) return `/api/media/file/${media.filename}`;
   return undefined;
 }
 
-// ─── Data Fetching ───────────────────────────────────────
+const opt = (v: string | null | undefined): string | undefined => v ?? undefined;
 
-export async function getTeam(): Promise<TeamMember[]> {
-  const docs = await fetchCollection<any>("team-members", { sort: "order" });
-  return docs.map((d: any) => ({
-    name: d.name, role: d.role, bio: d.bio || undefined, image: resolveImageUrl(d.image), order: d.order,
+// ─── Data fetching ───────────────────────────────────────
+// Every getter is wrapped in React.cache() so identical calls within one
+// request (e.g. generateMetadata + page component) hit the DB only once.
+
+export const getTeam = cache(async (locale: Locale): Promise<TeamMember[]> => {
+  const docs = await fetchCollection("team-members", { sort: "order", locale });
+  return docs.map((d) => ({ name: d.name, role: d.role, bio: d.bio, image: resolveImageUrl(d.image) }));
+});
+
+export const getFAQs = cache(async (locale: Locale): Promise<FAQ[]> => {
+  const docs = await fetchCollection("faqs", { sort: "order", locale });
+  return docs.map((d) => ({ question: d.question, answer: d.answer }));
+});
+
+export const getPartners = cache(
+  async (locale: Locale): Promise<{ partners: Partner[]; sponsors: Partner[] }> => {
+    const docs = await fetchCollection("partners", { locale });
+    const all: Partner[] = docs.map((d) => ({
+      name: d.name,
+      type: d.type,
+      description: d.description,
+      logo: resolveImageUrl(d.logo),
+      url: opt(d.url),
+    }));
+    return {
+      partners: all.filter((p) => p.type === "partner"),
+      sponsors: all.filter((p) => p.type === "sponsor"),
+    };
+  }
+);
+
+const mapPost = (d: PostDoc): Post => ({
+  title: d.title,
+  slug: d.slug,
+  date: d.date,
+  summary: d.summary,
+  body: d.body,
+  image: resolveImageUrl(d.image),
+});
+
+export const getPosts = cache(async (locale: Locale): Promise<Post[]> => {
+  const docs = await fetchCollection("posts", { sort: "-date", locale });
+  return docs.map(mapPost);
+});
+
+export const getPostBySlug = cache(async (slug: string, locale: Locale): Promise<Post | null> => {
+  const doc = await fetchBySlug("posts", slug, locale);
+  return doc ? mapPost(doc) : null;
+});
+
+const mapEvent = (d: EventDoc): EventItem => ({
+  title: d.title,
+  date: d.date,
+  location: opt(d.location),
+  description: d.description,
+});
+
+/** Upcoming events, soonest first. Also feeds the AttentionBanner. */
+export const getUpcomingEvents = cache(async (locale: Locale): Promise<EventItem[]> => {
+  const docs = await fetchCollection("events", {
+    sort: "date",
+    where: { date: { greater_than: new Date().toISOString() } },
+    locale,
+  });
+  return docs.map(mapEvent);
+});
+
+const mapProject = (d: ProjectDoc): Project => ({
+  title: d.title,
+  slug: d.slug,
+  category: d.category,
+  summary: d.summary,
+  body: d.body,
+  image: resolveImageUrl(d.image),
+  featured: d.featured ?? false,
+});
+
+export const getProjects = cache(async (locale: Locale): Promise<Project[]> => {
+  const docs = await fetchCollection("projects", { sort: "category", locale });
+  return docs.map(mapProject);
+});
+
+export const getProjectBySlug = cache(async (slug: string, locale: Locale): Promise<Project | null> => {
+  const doc = await fetchBySlug("projects", slug, locale);
+  return doc ? mapProject(doc) : null;
+});
+
+export const getNetworks = cache(async (locale: Locale): Promise<Network[]> => {
+  const docs = await fetchCollection("networks", { sort: "order", locale });
+  return docs.map((d) => ({ name: d.name, slug: d.slug, description: d.description, image: resolveImageUrl(d.image) }));
+});
+
+export const getWertBySlug = cache(async (slug: string, locale: Locale): Promise<Wert | null> => {
+  const doc = await fetchBySlug("werte", slug, locale);
+  return doc ? { title: doc.title, slug: doc.slug, body: doc.body } : null;
+});
+
+export const getAllWerte = cache(async (locale: Locale): Promise<Wert[]> => {
+  const docs = await fetchCollection("werte", { sort: "createdAt", locale });
+  return docs.map((d) => ({ title: d.title, slug: d.slug, body: d.body }));
+});
+
+export const getCourses = cache(async (locale: Locale): Promise<Course[]> => {
+  const docs = await fetchCollection("courses", { sort: "order", locale });
+  return docs.map((d) => ({ name: d.name, description: d.description }));
+});
+
+export const getPageBySlug = cache(async (slug: string, locale: Locale): Promise<Page | null> => {
+  const doc = await fetchBySlug("pages", slug, locale);
+  return doc ? { title: doc.title, slug: doc.slug, body: doc.body } : null;
+});
+
+export const getNavigation = cache(async (locale: Locale): Promise<NavItem[]> => {
+  const nav = await fetchGlobal("navigation", locale);
+  return (nav.items ?? []).map((item) => ({
+    label: item.label,
+    href: opt(item.href),
+    openInNewTab: item.openInNewTab ?? false,
+    children: (item.children ?? []).map((c) => ({ label: c.label, href: c.href })),
   }));
-}
+});
 
-export async function getFAQs(): Promise<FAQ[]> {
-  const docs = await fetchCollection<any>("faqs", { sort: "order" });
-  return docs.map((d: any) => ({ question: d.question, answer: d.answer }));
-}
-
-export async function getPartners(): Promise<{ partners: Partner[]; sponsors: Partner[] }> {
-  const docs = await fetchCollection<any>("partners");
-  const all = docs.map((d: any) => ({
-    name: d.name, type: d.type, description: d.description, logo: resolveImageUrl(d.logo), url: d.url,
-  }));
-  return { partners: all.filter((p) => p.type === "partner"), sponsors: all.filter((p) => p.type === "sponsor") };
-}
-
-export async function getPosts(): Promise<Post[]> {
-  const docs = await fetchCollection<any>("posts", { sort: "-date" });
-  return docs.map((d: any) => ({ title: d.title, slug: d.slug, date: d.date, summary: d.summary, body: d.body, image: resolveImageUrl(d.image) }));
-}
-
-export async function getEvents(): Promise<Event[]> {
-  const docs = await fetchCollection<any>("events", { sort: "date", where: { date: { greater_than: new Date().toISOString() } } });
-  return docs.map((d: any) => ({ title: d.title, date: d.date, location: d.location, description: d.description }));
-}
-
-export async function getProjects(): Promise<Project[]> {
-  const docs = await fetchCollection<any>("projects", { sort: "category" });
-  return docs.map((d: any) => ({
-    title: d.title, slug: d.slug, category: d.category, summary: d.summary, body: d.body, image: resolveImageUrl(d.image), featured: d.featured,
-  }));
-}
-
-export async function getProjectBySlug(slug: string): Promise<Project | null> {
-  const doc = await fetchBySlug<any>("projects", slug);
-  if (!doc) return null;
-  return { title: doc.title, slug: doc.slug, category: doc.category, summary: doc.summary, body: doc.body, image: resolveImageUrl(doc.image), featured: doc.featured };
-}
-
-export async function getNetworks(): Promise<Network[]> {
-  const docs = await fetchCollection<any>("networks", { sort: "order" });
-  return docs.map((d: any) => ({ name: d.name, slug: d.slug, description: d.description, image: resolveImageUrl(d.image), order: d.order }));
-}
-
-export async function getWertBySlug(slug: string): Promise<Wert | null> {
-  const doc = await fetchBySlug<any>("werte", slug);
-  if (!doc) return null;
-  return { title: doc.title, slug: doc.slug, body: doc.body };
-}
-
-export async function getAllWerte(): Promise<Wert[]> {
-  const docs = await fetchCollection<any>("werte");
-  return docs.map((d: any) => ({ title: d.title, slug: d.slug, body: d.body }));
-}
-
-export async function getCourses(): Promise<Course[]> {
-  const docs = await fetchCollection<any>("courses", { sort: "order" });
-  return docs.map((d: any) => ({ name: d.name, description: d.description, order: d.order }));
-}
-
-export async function getPageBySlug(slug: string): Promise<Page | null> {
-  const doc = await fetchBySlug<any>("pages", slug);
-  if (!doc) return null;
-  return { title: doc.title, slug: doc.slug, body: doc.body };
-}
-
-export async function getNavigation(): Promise<NavItem[]> {
-  const docs = await fetchCollection<any>("navigation", { sort: "order" });
-  return docs.map((d: any) => ({
-    label: d.label,
-    href: d.href || undefined,
-    order: d.order || 0,
-    openInNewTab: d.openInNewTab || false,
-    children: (d.children || []).map((c: any) => ({ label: c.label, href: c.href })),
-  }));
-}
-
-export async function getBannerEvents(): Promise<{ title: string; date: string }[]> {
-  const docs = await fetchCollection<any>("events", { sort: "date", where: { date: { greater_than: new Date().toISOString() } } });
-  return docs.map((d: any) => ({ title: d.title, date: d.date }));
-}
-
-export async function getHomepage(): Promise<HomepageData | null> {
-  const docs = await fetchCollection<any>("homepage", { limit: 1 });
-  const d = docs[0];
-  if (!d) return null;
+export const getHomepage = cache(async (locale: Locale): Promise<HomepageData | null> => {
+  const d = await fetchGlobal("homepage", locale);
+  if (!d?.hero?.title) return null;
   return {
-    hero: { title: d.hero?.title || "", subtitle: d.hero?.subtitle, ctaText: d.hero?.ctaText, ctaHref: d.hero?.ctaHref, image: resolveImageUrl(d.hero?.image) },
-    about: { eyebrow: d.about?.eyebrow, title: d.about?.title || "", text: d.about?.text || "", ctaText: d.about?.ctaText, ctaHref: d.about?.ctaHref },
-    tasks: { title: d.tasks?.title || "", cards: (d.tasks?.cards || []).map((c: any) => ({ title: c.title, text: c.text, buttonText: c.buttonText, buttonHref: c.buttonHref, image: resolveImageUrl(c.image) })) },
-    cta: { title: d.cta?.title || "", text: d.cta?.text, buttonText: d.cta?.buttonText, buttonHref: d.cta?.buttonHref },
+    hero: {
+      title: d.hero.title,
+      subtitle: opt(d.hero.subtitle),
+      ctaText: opt(d.hero.ctaText),
+      ctaHref: opt(d.hero.ctaHref),
+      image: resolveImageUrl(d.hero.image),
+    },
+    about: {
+      eyebrow: opt(d.about?.eyebrow),
+      title: d.about?.title ?? "",
+      text: d.about?.text ?? "",
+      ctaText: opt(d.about?.ctaText),
+      ctaHref: opt(d.about?.ctaHref),
+    },
+    tasks: {
+      title: d.tasks?.title ?? "",
+      cards: (d.tasks?.cards ?? []).map((c) => ({
+        title: c.title,
+        text: c.text,
+        buttonText: opt(c.buttonText),
+        buttonHref: opt(c.buttonHref),
+        image: resolveImageUrl(c.image),
+      })),
+    },
+    cta: {
+      title: d.cta?.title ?? "",
+      text: opt(d.cta?.text),
+      buttonText: opt(d.cta?.buttonText),
+      buttonHref: opt(d.cta?.buttonHref),
+    },
   };
-}
+});

@@ -1,5 +1,9 @@
+import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { PersonCard } from "@/components/ui/PersonCard";
+import { lexicalFixture } from "./fixtures/richtext";
+
+const BIO = lexicalFixture("Some bio text");
 
 describe("PersonCard", () => {
   it("renders name and role", () => {
@@ -19,7 +23,7 @@ describe("PersonCard", () => {
   });
 
   it("shows learn-more link when bio is provided", () => {
-    render(<PersonCard name="Max" role="CEO" bio="Some bio text" />);
+    render(<PersonCard name="Max" role="CEO" bio={BIO} />);
     // Mock useTranslations returns the key: t("moreInfo") → "moreInfo"
     expect(screen.getByText("moreInfo")).toBeInTheDocument();
   });
@@ -29,9 +33,19 @@ describe("PersonCard", () => {
     expect(screen.queryByText("moreInfo")).not.toBeInTheDocument();
   });
 
-  it("opens bio modal on click", () => {
-    render(<PersonCard name="Max" role="CEO" bio="Some bio text" />);
+  it("opens an accessible bio modal on click and closes on Escape", () => {
+    render(<PersonCard name="Max" role="CEO" bio={BIO} />);
     fireEvent.click(screen.getByText("Max"));
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toHaveAttribute("aria-modal", "true");
     expect(screen.getByText("Some bio text")).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("opens the modal with the keyboard (Enter)", () => {
+    render(<PersonCard name="Max" role="CEO" bio={BIO} />);
+    fireEvent.keyDown(screen.getByRole("button"), { key: "Enter" });
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 });

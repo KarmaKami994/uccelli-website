@@ -1,21 +1,35 @@
 import type { Metadata } from "next";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Hero } from "@/components/sections/Hero";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { StaggerReveal } from "@/components/ui/StaggerReveal";
 import { SponsorBanner } from "@/components/sections/SponsorBanner";
-import { getHomepage } from "@/lib/data";
+import { getHomepage, getPartners } from "@/lib/data";
+import { toLocale } from "@/lib/payload";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Uccelli Society – Gemeinschaft. Integrität. Generativität.",
-  description: "Verein Uccelli: Ein Netzwerk für Bildung, sozialen Austausch und persönliche Entwicklung in Zürich.",
-  openGraph: { title: "Uccelli Society", description: "Gemeinschaft. Integrität. Generativität.", type: "website" },
-};
+type Params = { params: Promise<{ locale: string }> };
 
-export default async function HomePage() {
-  const data = await getHomepage();
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const locale = toLocale((await params).locale);
+  return pageMetadata({
+    title: "Uccelli Society – Gemeinschaft. Integrität. Generativität.",
+    description: "Verein Uccelli: Ein Netzwerk für Bildung, sozialen Austausch und persönliche Entwicklung in Zürich.",
+    path: "/",
+    locale,
+  });
+}
+
+export default async function HomePage({ params }: Params) {
+  const locale = toLocale((await params).locale);
+  setRequestLocale(locale);
+  const t = await getTranslations("home");
+  const [data, { partners, sponsors }] = await Promise.all([getHomepage(locale), getPartners(locale)]);
   if (!data) return <p className="py-20 text-center text-neutral-400">Homepage-Inhalt wird geladen... Bitte Payload befüllen.</p>;
+
+  const sponsorNames = [...partners, ...sponsors].map((p) => p.name);
 
   return (
     <>
@@ -66,7 +80,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      <SponsorBanner />
+      <SponsorBanner title={t("sponsorTitle")} names={sponsorNames} />
 
       {/* CTA */}
       <section className="py-24 lg:py-36 px-6 lg:px-10 bg-black text-white text-center">

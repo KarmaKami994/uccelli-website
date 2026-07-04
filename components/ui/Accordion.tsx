@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface AccordionItem {
   question: string;
-  answer: string;
+  /** Plain string or already-rendered rich text (e.g. <RichTextRenderer …/>). */
+  answer: ReactNode;
 }
 
 export function Accordion({ items }: { items: AccordionItem[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const baseId = useId();
 
   return (
     <div className="divide-y divide-neutral-200">
@@ -18,6 +20,8 @@ export function Accordion({ items }: { items: AccordionItem[] }) {
         <div key={i}>
           <button
             onClick={() => setOpenIndex(openIndex === i ? null : i)}
+            aria-expanded={openIndex === i}
+            aria-controls={`${baseId}-panel-${i}`}
             className="w-full flex items-center justify-between py-5 text-left cursor-pointer group"
           >
             <span className="text-[16px] font-medium pr-8 group-hover:text-neutral-600 transition-colors">{item.question}</span>
@@ -29,13 +33,14 @@ export function Accordion({ items }: { items: AccordionItem[] }) {
           <AnimatePresence>
             {openIndex === i && (
               <motion.div
+                id={`${baseId}-panel-${i}`}
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.25 }}
                 className="overflow-hidden"
               >
-                <p className="pb-6 text-[15px] text-neutral-600 leading-relaxed max-w-3xl">{item.answer}</p>
+                <div className="pb-6 text-[15px] text-neutral-600 leading-relaxed max-w-3xl">{item.answer}</div>
               </motion.div>
             )}
           </AnimatePresence>

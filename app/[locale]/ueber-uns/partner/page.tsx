@@ -1,16 +1,31 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Hero } from "@/components/sections/Hero";
 import { Button } from "@/components/ui/Button";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { StaggerReveal } from "@/components/ui/StaggerReveal";
+import { RichTextRenderer } from "@/components/ui/RichTextRenderer";
 import { getPartners } from "@/lib/data";
+import { toLocale } from "@/lib/payload";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Partner & Sponsoren – Uccelli Society", description: "Unsere Partner und Sponsoren." };
+type Params = { params: Promise<{ locale: string }> };
 
-export default async function PartnerPage() {
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const locale = toLocale((await params).locale);
+  return pageMetadata({
+    title: "Partner & Sponsoren – Uccelli Society",
+    description: "Unsere Partner und Sponsoren.",
+    path: "/ueber-uns/partner",
+    locale,
+  });
+}
+
+export default async function PartnerPage({ params }: Params) {
+  const locale = toLocale((await params).locale);
+  setRequestLocale(locale);
   const t = await getTranslations("partner");
-  const { partners, sponsors } = await getPartners();
+  const { partners, sponsors } = await getPartners(locale);
 
   return (
     <>
@@ -28,8 +43,8 @@ export default async function PartnerPage() {
             {partners.map((p) => (
               <div key={p.name} className="bg-white p-8 rounded-[12px] border border-neutral-200">
                 <h4 className="text-lg font-bold mb-3">{p.name}</h4>
-                <p className="text-[15px] text-neutral-600 leading-relaxed mb-5">{p.description}</p>
-                <Button variant="primary">{t("toPartner")}</Button>
+                <RichTextRenderer content={p.description} className="text-[15px] text-neutral-600 leading-relaxed mb-5" />
+                {p.url && <Button variant="primary" href={p.url}>{t("toPartner")}</Button>}
               </div>
             ))}
           </StaggerReveal>
@@ -42,8 +57,8 @@ export default async function PartnerPage() {
             {sponsors.map((s) => (
               <div key={s.name} className="bg-neutral-900 p-8 rounded-[12px] border border-neutral-800">
                 <h4 className="text-lg font-bold mb-3">{s.name}</h4>
-                <p className="text-[15px] text-neutral-400 leading-relaxed mb-5">{s.description}</p>
-                <Button variant="secondary">{t("toSponsor")}</Button>
+                <RichTextRenderer content={s.description} className="text-[15px] text-neutral-400 leading-relaxed mb-5" />
+                {s.url && <Button variant="secondary" href={s.url}>{t("toSponsor")}</Button>}
               </div>
             ))}
           </StaggerReveal>

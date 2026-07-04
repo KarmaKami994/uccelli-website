@@ -1,15 +1,29 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Hero } from "@/components/sections/Hero";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { StaggerReveal } from "@/components/ui/StaggerReveal";
 import { getCourses } from "@/lib/data";
+import { toLocale } from "@/lib/payload";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Kursangebote – Uccelli Society", description: "Kurse zu Psychologie, Sport, Finanzen und IT." };
+type Params = { params: Promise<{ locale: string }> };
 
-export default async function KursangebotePage() {
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const locale = toLocale((await params).locale);
+  return pageMetadata({
+    title: "Kursangebote – Uccelli Society",
+    description: "Kurse zu Psychologie, Sport, Finanzen und IT.",
+    path: "/programm/kursangebote",
+    locale,
+  });
+}
+
+export default async function KursangebotePage({ params }: Params) {
+  const locale = toLocale((await params).locale);
+  setRequestLocale(locale);
   const t = await getTranslations("kursangebote");
-  const courses = await getCourses();
+  const courses = await getCourses(locale);
 
   return (
     <>

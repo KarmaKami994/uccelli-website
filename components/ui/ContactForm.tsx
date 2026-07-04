@@ -1,29 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useTranslations } from "next-intl";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Button } from "./Button";
+import { createContactSchema, type ContactFormData } from "@/lib/contact-schema";
 
-type ContactFormData = {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-};
+interface ContactFormProps {
+  /** Cloudflare Turnstile site key (public). When unset, the widget is not rendered (dev). */
+  turnstileSiteKey?: string;
+}
 
-export function ContactForm() {
+export function ContactForm({ turnstileSiteKey }: ContactFormProps) {
   const t = useTranslations("kontakt.form");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [serverError, setServerError] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = useRef<TurnstileInstance | null>(null);
 
-  const contactSchema = z.object({
-    name: z.string().min(2, t("valName")),
-    email: z.string().email(t("valEmail")),
-    subject: z.string().min(3, t("valSubject")),
-    message: z.string().min(10, t("valMessage")),
+  const contactSchema = createContactSchema({
+    name: t("valName"),
+    email: t("valEmail"),
+    subject: t("valSubject"),
+    message: t("valMessage"),
   });
 
   const {
@@ -42,7 +43,7 @@ export function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, turnstileToken: "" }),
+        body: JSON.stringify({ ...data, turnstileToken }),
       });
 
       const result = await res.json();
@@ -50,6 +51,9 @@ export function ContactForm() {
       if (!res.ok) {
         setServerError(result.error || t("errorGeneric"));
         setStatus("error");
+        // Turnstile tokens are single-use — get a fresh one for the retry.
+        turnstileRef.current?.reset();
+        setTurnstileToken("");
         return;
       }
 
@@ -57,6 +61,8 @@ export function ContactForm() {
     } catch {
       setServerError(t("errorConnection"));
       setStatus("error");
+      turnstileRef.current?.reset();
+      setTurnstileToken("");
     }
   }
 
@@ -76,8 +82,10 @@ export function ContactForm() {
     { name: "subject" as const, label: t("subject"), type: "text" },
   ] as const;
 
+  const waitingForTurnstile = Boolean(turnstileSiteKey) && turnstileToken === "";
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
+    <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} noValidate>
       <div className="space-y-5">
         {fields.map((field) => (
           <div key={field.name}>
@@ -106,7 +114,7 @@ export function ContactForm() {
             id="message"
             rows={5}
             {...register("message")}
-            className={`w-full border-b bg-transparent py-2.5 text-[15px] outline-none resize-none transition-colors ${
+            className={`w-full border-b bg-transparent py-2.5 text-[15px] outline-none transition-colors resize-y ${
               errors.message ? "border-red-400 focus:border-red-500" : "border-neutral-300 focus:border-black"
             }`}
           />
@@ -115,13 +123,21 @@ export function ContactForm() {
           )}
         </div>
 
-        {serverError && (
-          <div className="bg-red-50 text-red-700 text-[13px] px-4 py-3 rounded-[8px]" role="alert">
-            {serverError}
-          </div>
+        {turnstileSiteKey && (
+          <Turnstile
+            ref={turnstileRef}
+            siteKey={turnstileSiteKey}
+            onSuccess={setTurnstileToken}
+            onExpire={() => setTurnstileToken("")}
+            options={{ theme: "light" }}
+          />
         )}
 
-        <Button type="submit" variant="primary" disabled={status === "sending"}>
+        {serverError && (
+          <p className="text-red-500 text-[13px]" role="alert">{serverError}</p>
+        )}
+
+        <Button type="submit" variant="primary" disabled={status === "sending" || waitingForTurnstile}>
           {status === "sending" ? t("sending") : t("send")}
         </Button>
       </div>

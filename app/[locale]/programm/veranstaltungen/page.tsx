@@ -1,36 +1,57 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Hero } from "@/components/sections/Hero";
-import { getEvents } from "@/lib/data";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
+import { StaggerReveal } from "@/components/ui/StaggerReveal";
+import { RichTextRenderer } from "@/components/ui/RichTextRenderer";
+import { getUpcomingEvents } from "@/lib/data";
+import { formatEventDate } from "@/lib/format";
+import { toLocale } from "@/lib/payload";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Veranstaltungen – Uccelli Society", description: "Kommende Events des Verein Uccelli." };
+type Params = { params: Promise<{ locale: string }> };
 
-export default async function VeranstaltungenPage() {
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const locale = toLocale((await params).locale);
+  return pageMetadata({
+    title: "Veranstaltungen – Uccelli Society",
+    description: "Kommende Veranstaltungen und Events des Verein Uccelli.",
+    path: "/programm/veranstaltungen",
+    locale,
+  });
+}
+
+export default async function VeranstaltungenPage({ params }: Params) {
+  const locale = toLocale((await params).locale);
+  setRequestLocale(locale);
   const t = await getTranslations("events");
-  const events = await getEvents();
+  const events = await getUpcomingEvents(locale);
 
   return (
     <>
       <Hero title="VERANSTALTUNGEN" variant="split" subtitle={t("subtitle")} />
-      <section className="py-20 lg:py-28 px-6 lg:px-10">
+      <section className="py-16 lg:py-24 px-6 lg:px-10">
         <div className="max-w-[900px] mx-auto">
-          {events.length > 0 ? (
-            <div className="space-y-4">
-              {events.map((e, i) => (
-                <div key={i} className="p-6 border border-neutral-200 rounded-[12px] flex justify-between items-start">
-                  <div>
-                    <h3 className="font-bold text-lg">{e.title}</h3>
-                    {e.location && <p className="text-neutral-500 text-[14px] mt-1">{e.location}</p>}
-                  </div>
-                  <span className="text-[13px] font-bold uppercase tracking-wide text-neutral-400 flex-shrink-0 ml-4">{e.date}</span>
-                </div>
-              ))}
-            </div>
+          {events.length === 0 ? (
+            <ScrollReveal className="text-center py-16 border border-dashed border-neutral-300 rounded-[12px]">
+              <p className="text-lg font-bold mb-2">{t("empty")}</p>
+              <p className="text-neutral-500">{t("emptyHint")}</p>
+            </ScrollReveal>
           ) : (
-            <div className="py-16 border border-dashed border-neutral-300 rounded-[12px] text-center">
-              <p className="text-neutral-400 text-lg">{t("empty")}</p>
-              <p className="text-neutral-400 text-[14px] mt-2">{t("emptyHint")}</p>
-            </div>
+            <StaggerReveal className="space-y-6">
+              {events.map((event) => (
+                <article key={`${event.title}-${event.date}`} className="border border-neutral-200 rounded-[12px] p-8 hover:border-neutral-400 transition-colors">
+                  <p className="text-[12px] font-bold uppercase tracking-[0.15em] text-brand-accent-accessible mb-2">
+                    {formatEventDate(event.date, locale)}
+                    {event.location && <span className="text-neutral-400"> · {event.location}</span>}
+                  </p>
+                  <h2 className="text-xl font-bold mb-3">{event.title}</h2>
+                  {event.description && (
+                    <RichTextRenderer content={event.description} className="text-[15px] text-neutral-600 leading-relaxed" />
+                  )}
+                </article>
+              ))}
+            </StaggerReveal>
           )}
         </div>
       </section>

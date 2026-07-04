@@ -56,7 +56,8 @@
       "title": "Grow together",
       "text": "Interested? Get in touch with us.",
       "button": "CONTACT"
-    }
+    },
+    "sponsorTitle": "Our partners & sponsors"
   },
   "about": {
     "history": {
@@ -198,18 +199,7 @@
     "unterstuetzenText": "We are very grateful if you would like to support our association. Our details are:",
     "empfaenger": "Recipient",
     "kontoNr": "Account No",
-    "download": "DOWNLOAD",
-    "vereinsstatuten": "Association statutes",
-    "socials": "SOCIALS",
-    "copyright": "Copyright © 2026",
-    "werteLabels": {
-      "schutz-der-umwelt": "Environmental Protection",
-      "datenschutz": "Data Protection",
-      "diskriminierungsverbot": "Anti-Discrimination",
-      "freiheit-und-autonomie": "Freedom and Autonomy",
-      "solidaritaet-und-kohaesion": "Solidarity and Cohesion",
-      "integritaet": "Integrity"
-    }
+    "copyright": "Copyright © 2026"
   },
   "common": {
     "moreInfo": "Learn more →",
@@ -235,5 +225,13 @@
     "accept": "Accept",
     "reject": "Decline",
     "ariaLabel": "Cookie settings"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "text": "The page could not be loaded. Please try again or come back later.",
+    "retry": "Try again"
+  },
+  "werte": {
+    "more": "More values"
   }
 }

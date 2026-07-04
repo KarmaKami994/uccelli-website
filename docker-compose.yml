@@ -7,10 +7,19 @@ services:
       - "3100:3000"
     environment:
       - DATABASE_URI=file:/app/data/uccelli.db
-      - PAYLOAD_SECRET=${PAYLOAD_SECRET:-change-me-mindestens-32-zeichen-lang}
+      # No insecure fallback: the container refuses to start when
+      # PAYLOAD_SECRET is missing (fail fast instead of fail open).
+      - PAYLOAD_SECRET=${PAYLOAD_SECRET:?PAYLOAD_SECRET muss gesetzt sein (.env)}
+      - SITE_URL=${SITE_URL:-https://uccelli-society.ch}
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-}
       - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY:-}
     volumes:
-      - ./data:/app/data       # SQLite DB — persistent
-      - ./media:/app/media     # Payload Uploads — persistent
+      - ./data:/app/data
+      - ./media:/app/media
+    networks:
+      - npm
+
+networks:
+  npm:
+    external: true

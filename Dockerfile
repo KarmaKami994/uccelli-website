@@ -1,37 +1,40 @@
-FROM node:22-alpine AS base
-
-# --- Build Stage ---
-FROM base AS builder
+# ── Build stage ──────────────────────────────────────────
+FROM node:22-alpine AS builder
 WORKDIR /app
+
+RUN apk add --no-cache libc6-compat
 
 COPY package.json package-lock.json ./
-RUN npm ci
+# Reproducible install from the lockfile (fails fast if out of sync)
+RUN npm ci --no-audit --no-fund
 
 COPY . .
+# The build tolerates a missing PAYLOAD_SECRET (NEXT_PHASE guard in
+# payload.config.ts); the real secret is required at runtime.
 RUN npm run build
+# Strip devDependencies from the final node_modules
+RUN npm prune --omit=dev
 
-# --- Production Stage ---
-FROM base AS runner
+# ── Runtime stage ────────────────────────────────────────
+FROM node:22-alpine
 WORKDIR /app
 
+RUN apk add --no-cache libc6-compat
+
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+COPY --from=builder --chown=node:node /app ./
+RUN mkdir -p /app/data /app/media && chown -R node:node /app/data /app/media
 
-# Copy built app
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-
-# Create persistent directories
-RUN mkdir -p /app/data /app/media && chown -R nextjs:nodejs /app/data /app/media
-
-USER nextjs
+# Run as unprivileged user (host volumes must be owned by UID 1000, see RUNBOOK)
+USER node
 
 EXPOSE 3000
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1
+
+# Apply pending DB migrations, then start the server
+CMD ["sh", "-c", "npx payload migrate && npx next start"]

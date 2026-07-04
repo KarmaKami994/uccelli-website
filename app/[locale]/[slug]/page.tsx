@@ -1,19 +1,28 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { setRequestLocale } from "next-intl/server";
 import { Hero } from "@/components/sections/Hero";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { RichTextRenderer } from "@/components/ui/RichTextRenderer";
 import { getPageBySlug } from "@/lib/data";
+import { toLocale } from "@/lib/payload";
+import { pageMetadata } from "@/lib/seo";
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
-  const page = await getPageBySlug(slug);
-  return { title: page ? `${page.title} – Uccelli Society` : "Seite nicht gefunden" };
+type Params = { params: Promise<{ locale: string; slug: string }> };
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const { locale: rawLocale, slug } = await params;
+  const locale = toLocale(rawLocale);
+  const page = await getPageBySlug(slug, locale);
+  if (!page) return { title: "Seite nicht gefunden" };
+  return pageMetadata({ title: `${page.title} – Uccelli Society`, path: `/${slug}`, locale });
 }
 
-export default async function DynamicPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const page = await getPageBySlug(slug);
+export default async function DynamicPage({ params }: Params) {
+  const { locale: rawLocale, slug } = await params;
+  const locale = toLocale(rawLocale);
+  setRequestLocale(locale);
+  const page = await getPageBySlug(slug, locale);
   if (!page) notFound();
 
   return (

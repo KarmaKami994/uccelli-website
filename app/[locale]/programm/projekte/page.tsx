@@ -1,25 +1,35 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Hero } from "@/components/sections/Hero";
 import { Card } from "@/components/ui/Card";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { StaggerReveal } from "@/components/ui/StaggerReveal";
 import { getProjects } from "@/lib/data";
+import { toLocale } from "@/lib/payload";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Projekte – Uccelli Society", description: "Sozialprojekte, Bildungsprojekte und Gemeinschaftsprojekte." };
+type Params = { params: Promise<{ locale: string }> };
 
-export default async function ProjektePage() {
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const locale = toLocale((await params).locale);
+  return pageMetadata({
+    title: "Projekte – Uccelli Society",
+    description: "Sozialprojekte, Bildungsprojekte und Gemeinschaftsprojekte.",
+    path: "/programm/projekte",
+    locale,
+  });
+}
+
+export default async function ProjektePage({ params }: Params) {
+  const locale = toLocale((await params).locale);
+  setRequestLocale(locale);
   const t = await getTranslations("projekte");
-  const projects = await getProjects();
-
-  const sozial = projects.filter((p) => p.category === "sozial");
-  const bildung = projects.filter((p) => p.category === "bildung");
-  const gemeinschaft = projects.filter((p) => p.category === "gemeinschaft");
+  const projects = await getProjects(locale);
 
   const sections = [
-    { label: t("sozial"), items: sozial, bg: "" },
-    { label: t("bildung"), items: bildung, bg: "bg-brand-accent text-white" },
-    { label: t("gemeinschaft"), items: gemeinschaft, bg: "" },
+    { label: t("sozial"), items: projects.filter((p) => p.category === "sozial"), bg: "" },
+    { label: t("bildung"), items: projects.filter((p) => p.category === "bildung"), bg: "bg-brand-accent text-white" },
+    { label: t("gemeinschaft"), items: projects.filter((p) => p.category === "gemeinschaft"), bg: "" },
   ];
 
   return (

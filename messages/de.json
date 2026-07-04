@@ -56,7 +56,8 @@
       "title": "Gemeinsam wachsen",
       "text": "Interessiert? Nimm Kontakt mit uns auf.",
       "button": "KONTAKT"
-    }
+    },
+    "sponsorTitle": "Unsere Partner & Sponsoren"
   },
   "about": {
     "history": {
@@ -198,18 +199,7 @@
     "unterstuetzenText": "Wir sind euch sehr dankbar wenn ihr unseren Verein unterstützen wollt, unsere Angaben wären:",
     "empfaenger": "Empfänger",
     "kontoNr": "Konto Nr",
-    "download": "DOWNLOAD",
-    "vereinsstatuten": "Vereinsstatuten",
-    "socials": "SOCIALS",
-    "copyright": "Copyright © 2026",
-    "werteLabels": {
-      "schutz-der-umwelt": "Schutz der Umwelt",
-      "datenschutz": "Datenschutz",
-      "diskriminierungsverbot": "Diskriminierungsverbot",
-      "freiheit-und-autonomie": "Freiheit und Autonomie",
-      "solidaritaet-und-kohaesion": "Solidarität und Kohäsion",
-      "integritaet": "Integrität"
-    }
+    "copyright": "Copyright © 2026"
   },
   "common": {
     "moreInfo": "Mehr erfahren →",
@@ -235,5 +225,13 @@
     "accept": "Akzeptieren",
     "reject": "Ablehnen",
     "ariaLabel": "Cookie-Einstellungen"
+  },
+  "error": {
+    "title": "Etwas ist schiefgelaufen",
+    "text": "Die Seite konnte nicht geladen werden. Bitte versuche es erneut oder komme später zurück.",
+    "retry": "Erneut versuchen"
+  },
+  "werte": {
+    "more": "Weitere Werte"
   }
 }

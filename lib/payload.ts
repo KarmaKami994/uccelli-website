@@ -1,46 +1,84 @@
-import { getPayload } from "payload";
+import { getPayload, type Payload, type Where } from "payload";
 import config from "@payload-config";
+import type { Config } from "@/payload-types";
 
-export async function getPayloadClient() {
-  return getPayload({ config });
+export type Locale = Config["locale"]; // "de" | "en"
+export const LOCALES: Locale[] = ["de", "en"];
+export const DEFAULT_LOCALE: Locale = "de";
+
+export function toLocale(value: string): Locale {
+  return (LOCALES as string[]).includes(value) ? (value as Locale) : DEFAULT_LOCALE;
 }
 
-// Helper: Fetch all documents from a collection
-export async function fetchCollection<T = Record<string, unknown>>(
+let payloadPromise: Promise<Payload> | null = null;
+
+/**
+ * Shared Payload Local API client.
+ *
+ * Errors are intentionally NOT swallowed here: a broken database should
+ * surface through Next's error boundary instead of rendering an empty
+ * (but seemingly healthy) website.
+ */
+export function getPayloadClient(): Promise<Payload> {
+  if (!payloadPromise) payloadPromise = getPayload({ config });
+  return payloadPromise;
+}
+
+type CollectionSlug = keyof Config["collections"];
+type CollectionDoc<S extends CollectionSlug> = Config["collections"][S];
+type GlobalSlug = keyof Config["globals"];
+type GlobalDoc<S extends GlobalSlug> = Config["globals"][S];
+
+interface FindOptions {
+  where?: Where;
+  sort?: string;
+  limit?: number;
+  locale: Locale;
+}
+
+/** Fetch documents from a collection in the given locale (EN falls back to DE). */
+export async function fetchCollection<S extends CollectionSlug>(
+  slug: S,
+  options: FindOptions
+): Promise<CollectionDoc<S>[]> {
+  const payload = await getPayloadClient();
+  const result = await payload.find({
+    collection: slug,
+    where: options.where,
+    sort: options.sort ?? "-createdAt",
+    limit: options.limit ?? 100,
+    locale: options.locale,
+    fallbackLocale: DEFAULT_LOCALE,
+  });
+  return result.docs as CollectionDoc<S>[];
+}
+
+/** Fetch a single document by its (locale-independent) slug field. */
+export async function fetchBySlug<S extends CollectionSlug>(
+  collection: S,
   slug: string,
-  options?: { where?: Record<string, unknown>; sort?: string; limit?: number; locale?: string }
-): Promise<T[]> {
-  try {
-    const payload = await getPayloadClient();
-    const result = await payload.find({
-      collection: slug as any,
-      where: (options?.where || {}) as any,
-      sort: options?.sort || "-createdAt" as any,
-      limit: options?.limit || 100,
-    });
-    return result.docs as T[];
-  } catch {
-    // Fallback: return empty array if DB not connected
-    console.warn(`[Payload] Could not fetch ${slug} — using fallback data`);
-    return [];
-  }
+  locale: Locale
+): Promise<CollectionDoc<S> | null> {
+  const payload = await getPayloadClient();
+  const result = await payload.find({
+    collection,
+    where: { slug: { equals: slug } },
+    limit: 1,
+    locale,
+    fallbackLocale: DEFAULT_LOCALE,
+  });
+  return (result.docs[0] as CollectionDoc<S>) ?? null;
 }
 
-// Helper: Fetch single document by slug
-export async function fetchBySlug<T = Record<string, unknown>>(
-  collection: string,
-  slug: string
-): Promise<T | null> {
-  try {
-    const payload = await getPayloadClient();
-    const result = await payload.find({
-      collection: collection as any,
-      where: { slug: { equals: slug } } as any,
-      limit: 1,
-    });
-    return (result.docs[0] as T) || null;
-  } catch {
-    console.warn(`[Payload] Could not fetch ${collection}/${slug} — using fallback`);
-    return null;
-  }
+/** Fetch a Global (Homepage, Navigation) in the given locale. */
+export async function fetchGlobal<S extends GlobalSlug>(
+  slug: S,
+  locale: Locale
+): Promise<GlobalDoc<S>> {
+  const payload = await getPayloadClient();
+  return (await payload.findGlobal({
+    slug,
+    locale,
+    fallbackLocale: DEFAULT_LOCALE,
+  })) as GlobalDoc<S>;
 }

@@ -6,15 +6,15 @@ import Link from "next/link";
 import { Menu, X, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-
-type NavChild = { label: string; href: string };
-type NavItem = { label: string; href?: string; order: number; openInNewTab?: boolean; children: NavChild[] };
+import type { NavItem } from "@/lib/data";
 
 function Logo({ className = "" }: { className?: string }) {
   return <span className={`font-bold tracking-[0.15em] uppercase ${className}`}>Uccelli</span>;
 }
 
 // ─── Desktop Dropdown ────────────────────────────────────
+// Opens on hover AND on keyboard focus (focus-within), closes on Escape —
+// submenu links are fully reachable without a mouse.
 
 function DesktopDropdown({ item }: { item: NavItem }) {
   const [open, setOpen] = useState(false);
@@ -29,8 +29,21 @@ function DesktopDropdown({ item }: { item: NavItem }) {
   }
 
   return (
-    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+    <div
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) setOpen(false);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") setOpen(false);
+      }}
+    >
       <Link href={item.href || item.children[0]?.href || "/"}
+        aria-haspopup="menu"
+        aria-expanded={open}
         className="text-[13px] font-medium tracking-wide uppercase hover:opacity-60 transition-opacity py-2 flex items-center gap-1">
         {item.label}
         <ChevronDown size={14} className={`transition-transform ${open ? "rotate-180" : ""}`} />
@@ -75,7 +88,8 @@ function MobileAccordion({ item, onNavigate }: { item: NavItem; onNavigate: () =
           className="flex-1 py-4 text-[17px] font-medium">
           {item.label}
         </Link>
-        <button onClick={() => setOpen(!open)} className="p-3 cursor-pointer" aria-label={open ? "Untermenü schliessen" : "Untermenü öffnen"}>
+        <button onClick={() => setOpen(!open)} className="p-3 cursor-pointer" aria-expanded={open}
+          aria-label={open ? "Untermenü schliessen" : "Untermenü öffnen"}>
           {open ? <ChevronUp size={18} className="text-neutral-400" /> : <ChevronDown size={18} className="text-neutral-400" />}
         </button>
       </div>
@@ -109,7 +123,17 @@ export function Header({ navItems = [] }: { navItems?: NavItem[] }) {
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  // Split nav items for the split-menu layout: left half + right half + last item
+  // Close the mobile overlay with Escape.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setMobileOpen(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
+
+  // Split nav items for the split-menu layout: left half + right half
   const midpoint = Math.ceil(navItems.length / 2);
   const leftItems = navItems.slice(0, midpoint);
   const rightItems = navItems.slice(midpoint);
@@ -136,6 +160,7 @@ export function Header({ navItems = [] }: { navItems?: NavItem[] }) {
       <header className="lg:hidden border-b border-neutral-100">
         <div className="px-5 h-[60px] flex items-center justify-between">
           <button onClick={() => setMobileOpen(!mobileOpen)} className="p-1.5 -ml-1.5 cursor-pointer"
+            aria-expanded={mobileOpen}
             aria-label={mobileOpen ? t("menuClose") : t("menuOpen")}>
             {mobileOpen ? <X size={22} /> : <Menu size={22} />}
           </button>

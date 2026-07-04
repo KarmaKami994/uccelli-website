@@ -1,13 +1,15 @@
 import type { CollectionConfig } from "payload";
+import { contentAccess } from "../lib/access";
 
 export const Projects: CollectionConfig = {
   slug: "projects",
+  access: contentAccess,
   admin: {
     useAsTitle: "title",
-    defaultColumns: ["title", "category", "locale", "updatedAt"],
+    defaultColumns: ["title", "category", "updatedAt"],
   },
   fields: [
-    { name: "title", type: "text", required: true },
+    { name: "title", type: "text", required: true, localized: true },
     { name: "slug", type: "text", required: true, unique: true, admin: { position: "sidebar" } },
     {
       name: "category",
@@ -19,10 +21,9 @@ export const Projects: CollectionConfig = {
         { label: "Gemeinschaftsprojekt", value: "gemeinschaft" },
       ],
     },
-    { name: "summary", type: "textarea", required: true },
-    { name: "body", type: "richText" },
+    { name: "summary", type: "textarea", required: true, localized: true },
+    { name: "body", type: "richText", localized: true },
     { name: "image", type: "upload", relationTo: "media" },
-    { name: "locale", type: "select", options: ["de", "en"], defaultValue: "de", admin: { position: "sidebar" } },
     { name: "featured", type: "checkbox", defaultValue: false, admin: { position: "sidebar" } },
   ],
 };

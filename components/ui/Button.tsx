@@ -25,7 +25,7 @@ const sizes: Record<ButtonSize, string> = {
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "default", children, href, ...props }, ref) => {
     const cls = cn(
-      "inline-flex items-center justify-center font-bold uppercase tracking-[0.12em] rounded-[12px] transition-all duration-200",
+      "inline-flex items-center justify-center font-bold uppercase tracking-[0.12em] rounded-[12px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
       "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent",
       variants[variant],
       sizes[size],

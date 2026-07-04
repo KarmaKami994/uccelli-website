@@ -1,18 +1,31 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Hero } from "@/components/sections/Hero";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { StaggerReveal } from "@/components/ui/StaggerReveal";
 import { RichTextRenderer } from "@/components/ui/RichTextRenderer";
 import { getPageBySlug, getAllWerte } from "@/lib/data";
+import { toLocale } from "@/lib/payload";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Über uns – Uccelli Society", description: "Geschichte, Mission und Vision des Vereins Uccelli." };
+type Params = { params: Promise<{ locale: string }> };
 
-export default async function UeberUnsPage() {
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const locale = toLocale((await params).locale);
+  return pageMetadata({
+    title: "Über uns – Uccelli Society",
+    description: "Geschichte, Mission und Vision des Vereins Uccelli.",
+    path: "/ueber-uns",
+    locale,
+  });
+}
+
+export default async function UeberUnsPage({ params }: Params) {
+  const locale = toLocale((await params).locale);
+  setRequestLocale(locale);
   const t = await getTranslations("about");
-  const page = await getPageBySlug("ueber-uns");
-  const werte = await getAllWerte();
+  const [page, werte] = await Promise.all([getPageBySlug("ueber-uns", locale), getAllWerte(locale)]);
 
   return (
     <>

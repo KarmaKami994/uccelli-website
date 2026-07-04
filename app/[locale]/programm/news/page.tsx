@@ -1,15 +1,29 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Hero } from "@/components/sections/Hero";
 import { Card } from "@/components/ui/Card";
 import { StaggerReveal } from "@/components/ui/StaggerReveal";
 import { getPosts } from "@/lib/data";
+import { toLocale } from "@/lib/payload";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "News – Uccelli Society", description: "Neuigkeiten aus der Uccelli Society." };
+type Params = { params: Promise<{ locale: string }> };
 
-export default async function NewsPage() {
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const locale = toLocale((await params).locale);
+  return pageMetadata({
+    title: "News – Uccelli Society",
+    description: "Neuigkeiten aus der Uccelli Society.",
+    path: "/programm/news",
+    locale,
+  });
+}
+
+export default async function NewsPage({ params }: Params) {
+  const locale = toLocale((await params).locale);
+  setRequestLocale(locale);
   const t = await getTranslations("news");
-  const posts = await getPosts();
+  const posts = await getPosts(locale);
 
   return (
     <>

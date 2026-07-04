@@ -1,15 +1,29 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Hero } from "@/components/sections/Hero";
 import { PersonCard } from "@/components/ui/PersonCard";
 import { StaggerReveal } from "@/components/ui/StaggerReveal";
 import { getTeam } from "@/lib/data";
+import { toLocale } from "@/lib/payload";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Der Vorstand – Uccelli Society", description: "Lernen Sie den Vorstand des Verein Uccelli kennen." };
+type Params = { params: Promise<{ locale: string }> };
 
-export default async function VorstandPage() {
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const locale = toLocale((await params).locale);
+  return pageMetadata({
+    title: "Der Vorstand – Uccelli Society",
+    description: "Lernen Sie den Vorstand des Verein Uccelli kennen.",
+    path: "/ueber-uns/vorstand",
+    locale,
+  });
+}
+
+export default async function VorstandPage({ params }: Params) {
+  const locale = toLocale((await params).locale);
+  setRequestLocale(locale);
   const t = await getTranslations("vorstand");
-  const team = await getTeam();
+  const team = await getTeam(locale);
 
   return (
     <>

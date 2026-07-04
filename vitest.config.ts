@@ -13,6 +13,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      "@payload-config": path.resolve(__dirname, "tests/mocks/payload-config.ts"),
       "@": path.resolve(__dirname, "."),
     },
   },

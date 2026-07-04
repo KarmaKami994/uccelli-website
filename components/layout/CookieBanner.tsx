@@ -14,12 +14,13 @@ export function CookieBanner() {
   const [consent, setConsent] = useState<ConsentState>("accepted"); // Default to accepted to avoid flash
 
   useEffect(() => {
-    const stored = localStorage.getItem(CONSENT_KEY);
-    if (!stored) {
-      setConsent("pending");
-    } else {
-      setConsent(stored as ConsentState);
-    }
+    // Deferred so the state update doesn't run synchronously inside the
+    // effect flush (react-hooks lint: avoids cascading renders).
+    const id = window.setTimeout(() => {
+      const stored = localStorage.getItem(CONSENT_KEY) as ConsentState | null;
+      setConsent(stored ?? "pending");
+    }, 0);
+    return () => window.clearTimeout(id);
   }, []);
 
   function handleAccept() {

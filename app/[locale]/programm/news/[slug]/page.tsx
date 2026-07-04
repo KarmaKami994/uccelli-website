@@ -1,59 +1,54 @@
-import { Button } from "@/components/ui/Button";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { setRequestLocale, getTranslations } from "next-intl/server";
+import { ArrowLeft } from "lucide-react";
+import { RichTextRenderer } from "@/components/ui/RichTextRenderer";
+import { getPostBySlug } from "@/lib/data";
+import { formatEventDate } from "@/lib/format";
+import { toLocale } from "@/lib/payload";
+import { pageMetadata } from "@/lib/seo";
 
-const posts: Record<string, { title: string; date: string; body: string[] }> = {
-  "partnerschaft-royal-studio": {
-    title: "Neue Partnerschaft mit Royal Studio",
-    date: "15. April 2025",
-    body: [
-      "Wir dürfen eine aufregende neue Partnerschaft bekannt geben, die die Art und Weise, wie wir Erlebnisse schaffen und festhalten, auf ein neues Level heben wird.",
-      "Royal Studio ist spezialisiert auf innovativen Foto- und Videobooth-Entertainment, das Events zu unvergesslichen Erlebnissen macht. Zusammen werden wir unsere Veranstaltungen mit kreativen visuellen Erlebnissen bereichern.",
-      "Diese Partnerschaft ist ein weiterer Schritt in unserer Mission, unseren Mitgliedern einzigartige und bereichernde Erfahrungen zu bieten. Wir freuen uns auf die gemeinsame Zukunft!",
-    ],
-  },
-  "danke-gruendungsmitglieder": {
-    title: "Danke an unsere Gründungsmitglieder",
-    date: "20. März 2025",
-    body: [
-      "In der Hektik neuer Projekte vergisst man manchmal, innezuhalten und denen zu danken, die von Anfang an da waren. Die, die das Fundament legen.",
-      "Unsere Gründungsmitglieder haben mit ihrer Vision, ihrem Engagement und ihrem Vertrauen den Grundstein für alles gelegt, was Uccelli heute ist. Ohne sie gäbe es dieses Netzwerk nicht.",
-      "Danke an jeden Einzelnen von euch. Ihr seid der Grund, warum wir jeden Tag weitermachen.",
-    ],
-  },
-  "partnerschaft-anker-swiss": {
-    title: "Partnerschaft mit Anker Swiss AG",
-    date: "28. Februar 2025",
-    body: [
-      "Wir bei Uccelli Society arbeiten jeden Tag daran, unser Netzwerk zu erweitern, um euch die bestmögliche Unterstützung auf eurem Weg zu bieten.",
-      "Mit der Anker Swiss AG haben wir einen starken Partner an unserer Seite, der sich auf die Vermittlung von qualifizierten Fachkräften spezialisiert hat. Gemeinsam können wir unseren Mitgliedern noch bessere Karrieremöglichkeiten eröffnen.",
-      "Die Anker Swiss AG teilt unsere Werte von Integrität und Gemeinschaft, was diese Partnerschaft besonders wertvoll macht.",
-    ],
-  },
-};
+type Params = { params: Promise<{ locale: string; slug: string }> };
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
-  const post = posts[slug];
-  return { title: post?.title ?? "Artikel nicht gefunden", description: post?.body[0]?.slice(0, 160) };
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const { locale: rawLocale, slug } = await params;
+  const locale = toLocale(rawLocale);
+  const post = await getPostBySlug(slug, locale);
+  if (!post) return { title: "Artikel nicht gefunden" };
+  return pageMetadata({
+    title: `${post.title} – Uccelli Society`,
+    description: post.summary,
+    path: `/programm/news/${slug}`,
+    locale,
+  });
 }
 
-export default async function NewsDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const post = posts[slug];
+/**
+ * News article detail — reads from the Payload `posts` collection
+ * (previously three hardcoded articles that shadowed the CMS).
+ */
+export default async function NewsArticlePage({ params }: Params) {
+  const { locale: rawLocale, slug } = await params;
+  const locale = toLocale(rawLocale);
+  setRequestLocale(locale);
+  const t = await getTranslations("news");
+  const post = await getPostBySlug(slug, locale);
   if (!post) notFound();
 
   return (
-    <article className="py-20 lg:py-28 px-6 lg:px-10">
+    <article className="py-16 lg:py-24 px-6 lg:px-10">
       <div className="max-w-[700px] mx-auto">
-        <p className="text-[12px] font-bold uppercase tracking-[0.15em] text-neutral-400 mb-4">{post.date}</p>
-        <h1 className="text-[clamp(1.75rem,5vw,2.75rem)] font-bold leading-tight mb-10">{post.title}</h1>
-        <div className="space-y-5 text-[16px] text-neutral-700 leading-[1.8]">
-          {post.body.map((p, i) => <p key={i}>{p}</p>)}
-        </div>
-        <div className="mt-16 pt-8 border-t border-neutral-200">
-          <Button variant="primary" href="/programm/news">← ZURÜCK ZU NEWS</Button>
-        </div>
+        <Link href="/programm/news" className="inline-flex items-center gap-2 text-[13px] font-bold uppercase tracking-wide text-neutral-400 hover:text-black transition-colors mb-10">
+          <ArrowLeft size={14} /> {t("back")}
+        </Link>
+        <p className="text-[12px] font-bold uppercase tracking-[0.15em] text-brand-accent-accessible mb-3">
+          {formatEventDate(post.date, locale)}
+        </p>
+        <h1 className="text-[clamp(1.75rem,5vw,2.75rem)] font-bold leading-tight mb-4">{post.title}</h1>
+        <p className="text-[17px] text-neutral-500 leading-relaxed mb-10">{post.summary}</p>
+        <div className="w-20 h-[3px] bg-black mb-10" />
+        <RichTextRenderer content={post.body} className="text-[16px] text-neutral-700 leading-[1.8]" />
       </div>
     </article>
   );

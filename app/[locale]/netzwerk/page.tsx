@@ -1,15 +1,29 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Hero } from "@/components/sections/Hero";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { RichTextRenderer } from "@/components/ui/RichTextRenderer";
 import { getNetworks } from "@/lib/data";
+import { toLocale } from "@/lib/payload";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Netzwerk – Uccelli Society", description: "Unsere Netzwerke: Uccelli Ghana, Women, FC und Nightshift Music." };
+type Params = { params: Promise<{ locale: string }> };
 
-export default async function NetzwerkPage() {
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const locale = toLocale((await params).locale);
+  return pageMetadata({
+    title: "Netzwerk – Uccelli Society",
+    description: "Unsere Netzwerke: Uccelli Ghana, Women, FC und Nightshift Music.",
+    path: "/netzwerk",
+    locale,
+  });
+}
+
+export default async function NetzwerkPage({ params }: Params) {
+  const locale = toLocale((await params).locale);
+  setRequestLocale(locale);
   const t = await getTranslations("netzwerk");
-  const networks = await getNetworks();
+  const networks = await getNetworks(locale);
 
   return (
     <>

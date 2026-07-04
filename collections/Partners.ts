@@ -1,7 +1,9 @@
 import type { CollectionConfig } from "payload";
+import { contentAccess } from "../lib/access";
 
 export const Partners: CollectionConfig = {
   slug: "partners",
+  access: contentAccess,
   admin: {
     useAsTitle: "name",
     defaultColumns: ["name", "type", "updatedAt"],
@@ -17,7 +19,7 @@ export const Partners: CollectionConfig = {
         { label: "Sponsor", value: "sponsor" },
       ],
     },
-    { name: "description", type: "richText", required: true, label: "Beschreibung" },
+    { name: "description", type: "richText", required: true, label: "Beschreibung", localized: true },
     { name: "logo", type: "upload", relationTo: "media" },
     { name: "url", type: "text", label: "Website URL" },
     {
