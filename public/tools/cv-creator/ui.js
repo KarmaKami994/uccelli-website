@@ -37,7 +37,7 @@ async function generatePDF() {
 
     if (!res.ok) {
       let detail = '';
-      try { detail = await res.text(); } catch (_) {}
+      try { detail = await res.text(); } catch {}
       showStatus('error', `${copy.compilerError} (HTTP ${res.status}). ${detail.slice(0, 400)}`);
       return;
     }
@@ -179,17 +179,21 @@ function removeCard(btn) { btn.closest('.card').remove(); saveData(); }
 
 // ---------- Persistence ----------
 function saveData() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(collectData())); } catch (_) {}
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(collectData())); } catch {}
 }
 
 function loadData() {
   let data;
-  try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (_) {}
+  try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch {}
   if (data) applyData(data);
 }
 
 function applyData(data) {
-  if (data._template) { const ts = document.getElementById('templateSel'); if (ts) ts.value = data._template; }
+  const importedTemplate = data._template ?? data.selectedTemplate;
+  if (importedTemplate != null) {
+    const ts = document.getElementById('templateSel');
+    if (ts) ts.value = String(importedTemplate);
+  }
   document.getElementById('name').value = data.basics?.name || '';
   document.getElementById('email').value = data.basics?.email || '';
   document.getElementById('phone').value = data.basics?.phone || '';
@@ -213,7 +217,9 @@ function exportJSON() {
   const blob = new Blob([JSON.stringify(collectData(), null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'resumake-data.json'; a.click();
+  a.href = url;
+  a.download = 'resumake-data.json';
+  a.click();
   URL.revokeObjectURL(url);
 }
 
