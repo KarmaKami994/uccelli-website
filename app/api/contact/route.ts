@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getPayload } from "payload";
 import { Resend } from "resend";
+import config from "@payload-config";
 import { contactSchema } from "@/lib/contact-schema";
 
 const RATE_LIMIT_MAP = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_MAX = 5;
-const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
+const RATE_LIMIT_WINDOW = 15 * 60 * 1000;
 
 function getClientIp(request: NextRequest): string {
-  // Behind Nginx Proxy Manager the *last* entry is the one our trusted
-  // proxy appended; earlier entries are client-controlled and spoofable.
   const xff = request.headers.get("x-forwarded-for");
   if (xff) {
-    const parts = xff.split(",").map((p) => p.trim()).filter(Boolean);
+    const parts = xff.split(",").map((part) => part.trim()).filter(Boolean);
     if (parts.length > 0) return parts[parts.length - 1];
   }
   return request.headers.get("x-real-ip") ?? "unknown";
@@ -19,7 +19,6 @@ function getClientIp(request: NextRequest): string {
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
-  // Sweep expired entries so the map cannot grow unbounded.
   for (const [key, entry] of RATE_LIMIT_MAP) {
     if (now > entry.resetAt) RATE_LIMIT_MAP.delete(key);
   }
@@ -37,16 +36,21 @@ async function verifyTurnstile(secret: string, token: string, ip: string): Promi
   try {
     const body = new URLSearchParams({ secret, response: token });
     if (ip !== "unknown") body.set("remoteip", ip);
-    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
       body,
     });
-    const data = (await res.json()) as { success?: boolean };
+    const data = (await response.json()) as { success?: boolean };
     return data.success === true;
   } catch (error) {
     console.error("[contact] Turnstile verification failed:", error);
     return false;
   }
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message.slice(0, 2000);
+  return String(error).slice(0, 2000);
 }
 
 export async function POST(request: NextRequest) {
@@ -74,10 +78,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const { name, email, subject, message } = parsed.data;
 
-    // Bot verification: when a Turnstile secret is configured, a valid
-    // token is REQUIRED — omitting it must not bypass the check.
+    const { name, email, subject, message, interest, project } = parsed.data;
+    const source = parsed.data.source ?? "contact";
+    const locale = parsed.data.locale ?? "de";
+
     const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
     if (turnstileSecret) {
       const token = (raw as { turnstileToken?: unknown }).turnstileToken;
@@ -87,21 +92,82 @@ export async function POST(request: NextRequest) {
     }
 
     const resendKey = process.env.RESEND_API_KEY;
-    if (resendKey) {
+    const payload = await getPayload({ config });
+    const submission = await payload.create({
+      collection: "contact-submissions",
+      overrideAccess: true,
+      data: {
+        source,
+        locale,
+        name,
+        email,
+        subject,
+        message,
+        interest,
+        project,
+        status: "new",
+        emailStatus: resendKey ? "pending" : "skipped",
+      },
+    });
+
+    if (!resendKey) {
+      console.log("[Contact Form saved]", { id: submission.id, source, name, email, subject });
+      return NextResponse.json({
+        success: true,
+        emailSent: false,
+        message: "Anfrage erfolgreich gespeichert.",
+      });
+    }
+
+    try {
       const resend = new Resend(resendKey);
-      await resend.emails.send({
+      const formLabel = source === "join" ? "Teil werden" : "Kontaktformular";
+      const result = await resend.emails.send({
         from: "Uccelli Website <noreply@uccelli-society.ch>",
         to: "uccelli.society@gmail.com",
         replyTo: email,
-        subject: `[Kontaktformular] ${subject.replace(/[\r\n]+/g, " ")}`,
-        text: `Name: ${name}\nE-Mail: ${email}\nBetreff: ${subject}\n\nNachricht:\n${message}`,
+        subject: `[${formLabel}] ${subject.replace(/[\r\n]+/g, " ")}`,
+        text: `Formular: ${formLabel}\nSprache: ${locale}\nName: ${name}\nE-Mail: ${email}\nBetreff: ${subject}\nInteresse: ${interest ?? "–"}\nProjekt: ${project ?? "–"}\n\nNachricht:\n${message}`,
       });
-    } else {
-      // Dev mode: log to console
-      console.log("[Contact Form]", { name, email, subject });
-    }
 
-    return NextResponse.json({ success: true, message: "Nachricht erfolgreich gesendet." });
+      if (result.error) throw new Error(result.error.message);
+
+      await payload.update({
+        collection: "contact-submissions",
+        id: submission.id,
+        overrideAccess: true,
+        data: {
+          emailStatus: "sent",
+          emailId: result.data?.id,
+          emailError: null,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        emailSent: true,
+        message: "Anfrage erfolgreich gespeichert und versendet.",
+      });
+    } catch (emailError) {
+      const emailErrorMessage = getErrorMessage(emailError);
+      console.error("[contact] Notification email failed:", emailError);
+
+      await payload.update({
+        collection: "contact-submissions",
+        id: submission.id,
+        overrideAccess: true,
+        data: {
+          emailStatus: "failed",
+          emailError: emailErrorMessage,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        emailSent: false,
+        message: "Anfrage gespeichert. Die E-Mail-Benachrichtigung konnte nicht versendet werden.",
+      });
+    }
   } catch (error) {
     console.error("Contact form error:", error);
     return NextResponse.json({ error: "Ein Fehler ist aufgetreten." }, { status: 500 });
