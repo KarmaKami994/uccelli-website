@@ -122,6 +122,20 @@ ${entries}
 \\end{cvhonors}`;
 }
 
+function safeCvItemsEnvironment_t2() {
+  return `\\renewenvironment{cvitems}{
+  \\vspace{-1mm}
+  \\begin{justify}
+  \\begin{itemize}[leftmargin=2ex, topsep=0pt, partopsep=0pt, parsep=0pt, itemsep=0.35mm]
+  \\setlength{\\parskip}{0pt}
+  \\renewcommand{\\labelitemi}{\\bullet}
+}{
+  \\end{itemize}
+  \\end{justify}
+  \\vspace{1mm}
+}`;
+}
+
 function buildTex_t2(values) {
   const headings = values.headings || {};
   const sectionsOut = values.sections.map(section => {
@@ -143,6 +157,7 @@ function buildTex_t2(values) {
 \\fontdir[fonts/]
 \\newcommand*{\\sectiondir}{resume/}
 \\colorlet{awesome}{awesome-red}
+${safeCvItemsEnvironment_t2()}
 \\begin{document}
 ${sectionsOut}
 \\ 
