@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:cv-external": "node scripts/smoke-cv-external.mjs",
     "typecheck": "payload generate:types && tsc --noEmit",
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap",
