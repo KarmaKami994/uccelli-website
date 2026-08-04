@@ -89,24 +89,10 @@ function applyStaticCopy() {
   document.getElementById('texPreview').textContent = copy.latexEmpty;
 }
 
-
 // ---------- LaTeX escaping (nachgebaut aus sanitize-latex) ----------
 function escapeLatex(str) {
   if (str == null) return '';
   str = String(str);
-  const replacements = [
-    [/\\/g, '\\textbackslash{}'],
-    [/&/g, '\\&'],
-    [/%/g, '\\%'],
-    [/\$/g, '\\$'],
-    [/#/g, '\\#'],
-    [/_/g, '\\_'],
-    [/\{/g, '\\{'],
-    [/\}/g, '\\}'],
-    [/~/g, '\\textasciitilde{}'],
-    [/\^/g, '\\textasciicircum{}'],
-  ];
-  // textbackslash placeholder trick to avoid double-escaping braces it introduces
   str = str.replace(/\\/g, '\u0000');
   str = str
     .replace(/&/g, '\\&')
@@ -118,8 +104,7 @@ function escapeLatex(str) {
     .replace(/\}/g, '\\}')
     .replace(/~/g, '\\textasciitilde{}')
     .replace(/\^/g, '\\textasciicircum{}');
-  str = str.replace(/\u0000/g, '\\textbackslash{}');
-  return str;
+  return str.replace(/\u0000/g, '\\textbackslash{}');
 }
 
 // ---------- Collect form data ----------
@@ -170,15 +155,17 @@ function collectData() {
     summary: cval(c, 'summary'),
   }));
 
+  const template = currentTemplate();
   return {
     basics, education, work, skills, projects, awards,
     sections: ['profile', 'education', 'work', 'skills', 'projects', 'awards'],
     headings: { education: copy.education, work: copy.work, skills: copy.skills, projects: copy.projects, awards: copy.awards },
-    _template: currentTemplate(),
+    selectedTemplate: Number(template),
+    _template: template,
   };
 }
 
 function val(id) { return document.getElementById(id).value.trim(); }
 function cval(card, name) { const el = card.querySelector(`[data-field="${name}"]`); return el ? el.value.trim() : ''; }
 
-// ---------- Template 1 generator (ported from resumake.io) ----------
+// Template generators are loaded from the following script files.
