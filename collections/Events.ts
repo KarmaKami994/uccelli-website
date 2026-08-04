@@ -3,8 +3,10 @@ import { contentAccess } from "../lib/access";
 
 export const Events: CollectionConfig = {
   slug: "events",
+  labels: { singular: "Veranstaltung (Archiv)", plural: "Veranstaltungen (Archiv)" },
   access: contentAccess,
   admin: {
+    group: false,
     useAsTitle: "title",
     defaultColumns: ["title", "date", "location"],
   },
