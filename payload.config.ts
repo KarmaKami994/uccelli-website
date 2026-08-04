@@ -8,6 +8,7 @@ import { lexicalEditor, FixedToolbarFeature, HeadingFeature } from "@payloadcms/
 
 import { Projects } from "./collections/Projects";
 import { Posts } from "./collections/Posts";
+import { CommunityItems } from "./collections/CommunityItems";
 import { Events } from "./collections/Events";
 import { TeamMembers } from "./collections/TeamMembers";
 import { Partners } from "./collections/Partners";
@@ -21,10 +22,6 @@ import { Homepage } from "./globals/Homepage";
 import { Navigation } from "./globals/Navigation";
 import { adminOnly, adminOrSelf, adminOnlyField, authenticated } from "./lib/access";
 
-// ─── Secret handling ─────────────────────────────────────
-// Fail fast at runtime if PAYLOAD_SECRET is missing in production.
-// (During `next build` a placeholder is tolerated — the real secret is
-// read from the environment when the server starts.)
 const secret = process.env.PAYLOAD_SECRET;
 const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
 if (!secret && process.env.NODE_ENV === "production" && !isBuildPhase) {
@@ -36,9 +33,7 @@ if (!secret && process.env.NODE_ENV === "production" && !isBuildPhase) {
 export default buildConfig({
   admin: {
     user: "users",
-    meta: {
-      titleSuffix: " – Uccelli CMS",
-    },
+    meta: { titleSuffix: " – Uccelli CMS" },
   },
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [
@@ -48,13 +43,8 @@ export default buildConfig({
     ],
   }),
   db: sqliteAdapter({
-    client: {
-      url: process.env.DATABASE_URI || "file:./data/uccelli.db",
-    },
+    client: { url: process.env.DATABASE_URI || "file:./data/uccelli.db" },
   }),
-  // Native content localization: one document per entity, translated fields.
-  // The frontend requests documents with `locale`; missing EN translations
-  // fall back to German.
   localization: {
     locales: [
       { label: "Deutsch", code: "de" },
@@ -64,9 +54,9 @@ export default buildConfig({
     fallback: true,
   },
   collections: [
-    // Content
     Projects,
     Posts,
+    CommunityItems,
     Events,
     TeamMembers,
     Partners,
@@ -76,7 +66,6 @@ export default buildConfig({
     Courses,
     Pages,
     Media,
-    // Auth — role-based: editors manage content, only admins manage users.
     {
       slug: "users",
       auth: true,
@@ -95,15 +84,12 @@ export default buildConfig({
           options: ["admin", "editor"],
           defaultValue: "editor",
           saveToJWT: true,
-          // Editors may update their own profile, but never their role.
           access: { create: adminOnlyField, update: adminOnlyField },
         },
       ],
     },
   ],
   globals: [Homepage, Navigation],
-  typescript: {
-    outputFile: path.resolve(dirname, "payload-types.ts"),
-  },
+  typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },
   secret: secret || "insecure-dev-only-secret",
 });
