@@ -7,10 +7,14 @@ export interface ContactMessages {
   message?: string;
 }
 
+export const contactSources = ["contact", "join"] as const;
+export const contactInterests = ["project", "volunteer", "membership", "partnership", "support", "general"] as const;
+export const contactLocales = ["de", "en"] as const;
+
 /**
  * Contact form schema — the single source of truth for both the client
- * (with translated messages) and the API route (default messages).
- * Length ceilings keep the endpoint from being used as a mail cannon.
+ * and the API route. Length ceilings keep the endpoint from being used
+ * as a mail cannon while optional metadata feeds the CMS inbox.
  */
 export function createContactSchema(m: ContactMessages = {}) {
   return z.object({
@@ -18,6 +22,10 @@ export function createContactSchema(m: ContactMessages = {}) {
     email: z.string().email(m.email).max(200, m.email),
     subject: z.string().min(3, m.subject).max(150, m.subject),
     message: z.string().min(10, m.message).max(5000, m.message),
+    source: z.enum(contactSources).optional(),
+    interest: z.enum(contactInterests).optional(),
+    project: z.string().max(200).optional(),
+    locale: z.enum(contactLocales).optional(),
   });
 }
 
