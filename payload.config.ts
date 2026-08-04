@@ -9,6 +9,7 @@ import { lexicalEditor, FixedToolbarFeature, HeadingFeature } from "@payloadcms/
 import { Projects } from "./collections/Projects";
 import { Posts } from "./collections/Posts";
 import { CommunityItems } from "./collections/CommunityItems";
+import { ContactSubmissions } from "./collections/ContactSubmissions";
 import { Events } from "./collections/Events";
 import { TeamMembers } from "./collections/TeamMembers";
 import { Partners } from "./collections/Partners";
@@ -33,7 +34,10 @@ if (!secret && process.env.NODE_ENV === "production" && !isBuildPhase) {
 export default buildConfig({
   admin: {
     user: "users",
-    meta: { titleSuffix: " – Uccelli CMS" },
+    meta: {
+      titleSuffix: " – Uccelli CMS",
+      description: "Redaktionssystem für die Website des Vereins Uccelli.",
+    },
   },
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [
@@ -55,19 +59,24 @@ export default buildConfig({
   },
   collections: [
     Projects,
-    Posts,
     CommunityItems,
-    Events,
+    Posts,
+    Pages,
     TeamMembers,
     Partners,
     FAQs,
+    ContactSubmissions,
+    Media,
+    Events,
     Networks,
     Werte,
     Courses,
-    Pages,
-    Media,
     {
       slug: "users",
+      labels: {
+        singular: "Benutzer",
+        plural: "Benutzer",
+      },
       auth: true,
       access: {
         read: authenticated,
@@ -75,13 +84,23 @@ export default buildConfig({
         update: adminOrSelf,
         delete: adminOnly,
       },
-      admin: { useAsTitle: "email" },
+      admin: {
+        group: "Verwaltung",
+        useAsTitle: "email",
+        defaultColumns: ["email", "name", "role", "updatedAt"],
+        description: "Zugänge und Rollen für das Uccelli CMS.",
+        hideAPIURL: true,
+      },
       fields: [
-        { name: "name", type: "text" },
+        { name: "name", type: "text", label: "Name" },
         {
           name: "role",
           type: "select",
-          options: ["admin", "editor"],
+          label: "Rolle",
+          options: [
+            { label: "Administrator", value: "admin" },
+            { label: "Redaktion", value: "editor" },
+          ],
           defaultValue: "editor",
           saveToJWT: true,
           access: { create: adminOnlyField, update: adminOnlyField },
