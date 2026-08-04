@@ -17,7 +17,7 @@
     "migrate": "payload migrate",
     "migrate:create": "payload migrate:create",
     "seed": "tsx scripts/seed.ts",
-    "content:sync": "tsx scripts/sync-content.ts"
+    "content:sync": "payload run scripts/sync-content.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
