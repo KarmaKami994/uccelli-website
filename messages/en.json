@@ -1,16 +1,23 @@
 {
   "meta": {
-    "title": "Uccelli Society – Community. Integrity. Generativity.",
-    "description": "Uccelli Society: A network for education, social exchange and personal development in Zurich."
+    "title": "Uccelli Society – Creating impact together",
+    "description": "An inclusive network for education, exchange, projects and personal development in Zurich."
   },
   "nav": {
     "home": "Home",
+    "projects": "Projects",
+    "community": "Community",
+    "news": "News",
+    "about": "About us",
+    "join": "Join",
+    "primaryNavigation": "Main navigation",
+    "menuOpen": "Open menu",
+    "menuClose": "Close menu",
     "skills4growth": "Skills4Growth",
     "programm": "Program",
     "projekte": "Projects",
     "veranstaltungen": "Events",
     "kursangebote": "Courses",
-    "news": "News",
     "netzwerk": "Network",
     "uccelliWomen": "Uccelli Women",
     "uccelliGhana": "Uccelli Ghana",
@@ -21,11 +28,42 @@
     "formular": "Forms",
     "partnerSponsoren": "Partners/Sponsors",
     "faq": "FAQ",
-    "kontakt": "Contact",
-    "menuOpen": "Open menu",
-    "menuClose": "Close menu"
+    "kontakt": "Contact"
   },
   "home": {
+    "contentMissing": "The homepage content is being prepared.",
+    "projectsEyebrow": "What we do",
+    "projectsTitle": "Featured projects",
+    "projectsIntro": "Our projects combine education, social engagement and community activities with practical ways to participate.",
+    "allProjects": "All projects",
+    "viewProject": "View project",
+    "projectCategories": {
+      "sozial": "Social project",
+      "bildung": "Educational project",
+      "gemeinschaft": "Community project"
+    },
+    "communityEyebrow": "Community Hub",
+    "communityTitle": "Tools, games and resources",
+    "communityIntro": "Digital services that support our community in everyday life, applications, learning and shared discovery.",
+    "allCommunity": "Explore Community",
+    "communityTypes": {
+      "tool": "Tool",
+      "game": "Game",
+      "resource": "Resource"
+    },
+    "communityStatuses": {
+      "available": "Available",
+      "beta": "Beta",
+      "coming-soon": "Coming soon"
+    },
+    "openCommunity": "Open",
+    "communityDetails": "Learn more",
+    "newsEyebrow": "Updates",
+    "newsTitle": "News from Uccelli",
+    "newsIntro": "Official announcements, project updates, partnerships and stories remain available here over time.",
+    "allNews": "All news",
+    "readMore": "Read more",
+    "partnerTitle": "Our partners and supporters",
     "hero": {
       "title": "UCCELLI SOCIETY",
       "claim": "Community. Integrity. Generativity.",
@@ -33,132 +71,203 @@
     },
     "about": {
       "eyebrow": "About us",
-      "title": "Our mission & vision",
-      "text": "Our goal is to build a network that brings together and consolidates knowledge from various fields. This knowledge should enable members to achieve their individual goals and concerns.",
+      "title": "Our mission and vision",
+      "text": "Our goal is to build a network that brings together knowledge from different fields.",
       "cta": "LEARN MORE"
     },
     "tasks": {
       "title": "Our core activities",
-      "bildung": {
-        "title": "Education",
-        "text": "We want to provide access to education and information to help those in need improve their standard of living."
-      },
-      "soziales": {
-        "title": "Social",
-        "text": "We promote social exchange and address current social issues while supporting those affected."
-      },
-      "community": {
-        "title": "Community",
-        "text": "We offer members the opportunity to work together on personal projects and strengthen the bond within the Uccelli family."
-      }
+      "bildung": { "title": "Education", "text": "We create access to education and information." },
+      "soziales": { "title": "Social", "text": "We promote social exchange and mutual support." },
+      "community": { "title": "Community", "text": "We create room for shared ideas and projects." }
     },
     "cta": {
       "title": "Grow together",
       "text": "Interested? Get in touch with us.",
       "button": "CONTACT"
     },
-    "sponsorTitle": "Our partners & sponsors"
+    "sponsorTitle": "Our partners and sponsors"
   },
-  "about": {
-    "history": {
-      "title": "How it all began",
-      "p1": "What is today the Uccelli Society began with a simple encounter and many great conversations. From the desire for belonging, exchange and a community for people with different perspectives, a small group of friends first emerged.",
-      "p2": "Over time, this idea became more: a vision for an open, inclusive association that connects people, promotes potential and creates space for personal development. After years of exchange, the Uccelli association was officially founded in 2021.",
-      "p3": "The name 'Uccelli' – inspired by the Italian word for 'birds' – stands to this day for individuality, freedom and the conviction that diversity is a strength."
+  "projects": {
+    "title": "PROJECTS",
+    "subtitle": "Growing, learning and creating impact together",
+    "intro": "Discover the Uccelli Society's initiatives. Use the filters to view social, educational or community projects.",
+    "filters": {
+      "all": "All projects",
+      "sozial": "Social projects",
+      "bildung": "Educational projects",
+      "gemeinschaft": "Community projects"
     },
-    "mission": "Uccelli creates an integrative network that promotes education, exchange and personal development — open to all, regardless of background or social class.",
-    "vision": "To build a network over the next 5 years where people from different backgrounds come together, exchange ideas and inspire each other.",
-    "team": {
-      "title": "Behind every vision are people",
-      "text": "Meet the personalities who help shape the Uccelli Society, drive projects forward and bring our vision to life every day.",
-      "cta": "THE BOARD"
-    },
-    "pillars": "Our pillars",
-    "moreInfo": "Learn more →",
-    "subtitle": "History, mission and vision of the Uccelli Society."
-  },
-  "vorstand": {
-    "title": "THE BOARD"
-  },
-  "faq": {
-    "title": "FAQ",
-    "subtitle": "We're here to help!",
-    "items": [
-      {
-        "q": "What is the Uccelli Society?",
-        "a": "The Uccelli Society is an integrative network based in Zurich that promotes education, social exchange and personal development. We are open to everyone, regardless of background or social class."
-      },
-      {
-        "q": "How can I become a member?",
-        "a": "You can register via our contact form or directly by email to uccelli.society@gmail.com. We look forward to every new member!"
-      },
-      {
-        "q": "What does a membership cost?",
-        "a": "Membership is free. We finance ourselves through donations, sponsors and partnerships."
-      },
-      {
-        "q": "What projects does Uccelli offer?",
-        "a": "We offer social projects, educational projects like LifeLab and community projects like the Nightshift Music concert series. You can find current projects on our projects page."
-      },
-      {
-        "q": "Where do the events take place?",
-        "a": "Most of our events take place in Zurich, often at GZ Höngg or at changing locations. Details can be found with the respective events."
-      },
-      {
-        "q": "Can I support the association financially?",
-        "a": "Yes! You can support us via bank transfer. Recipient: Verein Uccelli, Account No: 1148-5358.899, IBAN: CH53 0070 0114 8053 5889 9."
-      },
-      {
-        "q": "What does the name Uccelli mean?",
-        "a": "'Uccelli' is the Italian word for 'birds'. The name stands for freedom, individuality and the conviction that diversity is a strength."
-      }
-    ]
-  },
-  "partner": {
-    "intro": {
-      "title": "Achieving Great Things Together",
-      "text": "Strong partnerships are the key to success. We are delighted to work with companies that share our vision and support us in achieving our goals."
-    },
-    "partnerLabel": "Partners",
-    "sponsorLabel": "Sponsors",
-    "toPartner": "TO PARTNER",
-    "toSponsor": "TO SPONSOR"
-  },
-  "projekte": {
-    "subtitle": "Growing, learning and connecting together",
-    "intro": "Our projects create spaces for exchange, education and personal development. Whether psychological counseling, IT and business courses or creative offerings — we bring people together, promote new perspectives and support individual goals.",
-    "sozial": "Social projects",
-    "bildung": "Educational projects",
-    "gemeinschaft": "Community projects",
-    "moreInfo": "LEARN MORE"
-  },
-  "kursangebote": {
-    "subtitle": "Learn. Grow. Connect.",
-    "intro": "Our courses offer more than knowledge — they create opportunities. From IT and business to creative workshops, we support people in developing new skills, sharing experiences and achieving their personal and professional goals."
-  },
-  "netzwerk": {
-    "subtitle": "People. Ideas. Possibilities.",
-    "intro": "Our network brings together people who want to make a difference, learn and grow. In our various groups, different experiences, perspectives and interests meet — and from this, new ideas, exciting projects and valuable connections emerge.",
-    "ghana": {
-      "name": "Uccelli Ghana",
-      "desc": "Our commitment to strengthening the community extends beyond national borders. This initiative focuses on building self-efficacy and encouraging people to support each other."
-    },
-    "women": {
-      "name": "Uccelli Women",
-      "desc": "We aim to create an independent sub-group called Uccelli Women. This group serves as a dedicated network for our female members, providing a space for women within the association."
-    },
-    "fc": {
-      "name": "Uccelli FC",
-      "desc": "Building Uccelli FC was about more than just creating a football team — it was about the realization that football connects people."
-    },
-    "nightshift": {
-      "name": "Nightshift Music",
-      "desc": "Nightshift Music is our concert and music platform that gives emerging artists a stage. Through regular events, we create space for creative expression."
+    "viewProject": "View project",
+    "empty": "No projects are currently published in this category.",
+    "back": "Back to projects",
+    "detail": {
+      "joinTitle": "Would you like to join this project?",
+      "joinText": "Tell us briefly how you would like to contribute. We will contact you with the next opportunities.",
+      "joinButton": "Join the project"
     }
   },
+  "community": {
+    "title": "COMMUNITY HUB",
+    "subtitle": "Digital tools, games and resources for our community",
+    "intro": "This is where practical services are being created to support people, connect them and provide new access to knowledge and shared activities.",
+    "filters": {
+      "all": "All services",
+      "tool": "Tools",
+      "game": "Games",
+      "resource": "Resources"
+    },
+    "types": {
+      "tool": "Tool",
+      "game": "Game",
+      "resource": "Resource"
+    },
+    "statuses": {
+      "available": "Available",
+      "beta": "Beta",
+      "coming-soon": "Coming soon"
+    },
+    "open": "Open service",
+    "details": "View details",
+    "empty": "No services have been published for this filter yet.",
+    "back": "Back to the Community Hub",
+    "comingSoonTitle": "This service is in preparation",
+    "comingSoonText": "We are developing the concept and technical implementation step by step. People with suitable ideas or skills are welcome to participate.",
+    "contribute": "Help with development"
+  },
+  "news": {
+    "title": "NEWS",
+    "subtitle": "News from the Uccelli Society",
+    "intro": "Here we publish official announcements, progress from our projects, new partnerships and stories from special moments.",
+    "back": "Back to news",
+    "readMore": "Read more",
+    "related": "More news",
+    "empty": "No news items are currently published."
+  },
+  "about": {
+    "title": "ABOUT US",
+    "subtitle": "The history, mission, values and people behind Uccelli",
+    "sectionNavigation": "Sections on this page",
+    "nav": {
+      "mission": "Mission",
+      "history": "History",
+      "values": "Values",
+      "team": "Team",
+      "partners": "Partners",
+      "faq": "FAQ"
+    },
+    "missionEyebrow": "Our mission",
+    "missionTitle": "Connecting people and strengthening potential",
+    "mission": "Uccelli creates an inclusive network that supports education, social exchange, career orientation and personal development. A particular focus is placed on people who have less access to opportunities and supportive networks because of their background or social situation.",
+    "visionEyebrow": "Our vision",
+    "visionTitle": "A community that passes opportunities on",
+    "vision": "We want to build a sustainable network in which people from different backgrounds learn from one another, realise their own ideas and use their skills to strengthen others as well.",
+    "historyTitle": "How encounters grew into a community",
+    "history": {
+      "p1": "The idea began in 2015 around Meierhofplatz in Zurich-Höngg. Conversations, shared interests and a desire for belonging led to the group called ‘Strana Uccelli’.",
+      "p2": "Over time, this developed into the vision of an open association that connects people, supports potential and creates room for their own projects. The Uccelli Society was officially founded on 16 July 2021.",
+      "p3": "Uccelli is the Italian word for birds. The name represents freedom, individuality and the belief that different perspectives make a community stronger."
+    },
+    "valuesEyebrow": "Our foundation",
+    "valuesTitle": "Values that guide our actions",
+    "valuesIntro": "Our projects and relationships are guided by responsibility, openness and mutual respect.",
+    "values": {
+      "integrity": { "title": "Integrity", "text": "We act transparently, reliably and in line with the association's goals." },
+      "freedom": { "title": "Freedom and autonomy", "text": "People should be able to make their own decisions, take responsibility and shape their personal path." },
+      "solidarity": { "title": "Solidarity and cohesion", "text": "We support one another and create connections that also provide strength in challenging situations." },
+      "inclusion": { "title": "Inclusion and anti-discrimination", "text": "Everyone is welcome, regardless of origin, gender, religion, sexual orientation or social situation." },
+      "environment": { "title": "Environmental awareness", "text": "We consider ecological impact and promote responsible use of resources." },
+      "privacy": { "title": "Privacy and respect", "text": "We handle personal information carefully and treat people respectfully and as equals." }
+    },
+    "teamEyebrow": "People behind Uccelli",
+    "teamTitle": "Behind every vision are people",
+    "teamIntro": "The team develops projects, maintains partnerships and creates the organisational foundations for the Uccelli community.",
+    "partnersEyebrow": "Stronger together",
+    "partnersTitle": "Partners and supporters",
+    "partnersIntro": "Partnerships give our projects access to rooms, expertise, networks and resources. We therefore show not only who we work with, but also what each collaboration contributes.",
+    "visitPartner": "Visit partner",
+    "faqTitle": "Frequently asked questions",
+    "pillars": "Our pillars",
+    "moreInfo": "Learn more →"
+  },
+  "join": {
+    "title": "JOIN UCCELLI",
+    "subtitle": "Participate, contribute your skills and create impact together",
+    "intro": "There are different ways to become part of the Uccelli Society. Choose the option that suits you and tell us briefly about your interest in the form.",
+    "paths": {
+      "project": { "eyebrow": "Participate", "title": "Join a project", "text": "Meet new people and explore practical content through a project." },
+      "volunteer": { "eyebrow": "Co-create", "title": "Contribute your skills", "text": "Support a project with your time, experience or a concrete idea." },
+      "membership": { "eyebrow": "Belong", "title": "Become a member", "text": "Join the association and help shape its development." },
+      "partnership": { "eyebrow": "Collaborate", "title": "Become a partner", "text": "Connect your organisation with Uccelli's projects and target groups." },
+      "support": { "eyebrow": "Enable", "title": "Support the association", "text": "Help make services possible through a donation or long-term support." }
+    },
+    "membershipTitle": "Become a member for free",
+    "membershipText": "Regular membership is free. Members can participate in the general assembly, contribute ideas and help shape the development of the Uccelli Society.",
+    "supportText": "Financial support is voluntary. Patrons, partners and sponsors help us finance projects, infrastructure and new community services sustainably.",
+    "formTitle": "Your interest",
+    "formIntro": "Complete the short form. We will contact you personally.",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "interest": "I am interested in",
+      "project": "Project, optional",
+      "none": "No specific project",
+      "message": "Message",
+      "send": "Send enquiry",
+      "sending": "Sending...",
+      "required": "Please complete this field.",
+      "emailInvalid": "Please enter a valid email address.",
+      "messageShort": "Please write at least 10 characters.",
+      "successTitle": "Thank you!",
+      "successText": "We have received your enquiry and will get back to you as soon as possible.",
+      "errorConnection": "Connection error. Please try again.",
+      "errorGeneric": "An error occurred.",
+      "interests": {
+        "project": "Project participation",
+        "volunteer": "Volunteering",
+        "membership": "Membership",
+        "partnership": "Partnership",
+        "support": "Financial support",
+        "general": "General enquiry"
+      }
+    }
+  },
+  "footer": {
+    "intro": "Learn together, build projects and create opportunities for others.",
+    "discover": "Discover",
+    "projects": "Projects",
+    "community": "Community",
+    "news": "News",
+    "about": "About us",
+    "participate": "Take part",
+    "join": "Participate and become a member",
+    "contact": "Contact",
+    "statutes": "Association statutes",
+    "privacy": "Privacy policy",
+    "imprint": "Imprint",
+    "support": "Support us",
+    "supportText": "Your support helps us develop projects and community services.",
+    "recipient": "Recipient",
+    "account": "Account No.",
+    "copyright": "Copyright © 2026 Uccelli Society",
+    "kontakt": "CONTACT",
+    "faq": "FAQ",
+    "email": "Send us an email",
+    "findUs": "Find us here",
+    "werte": "OUR VALUES",
+    "unterstuetzen": "SUPPORT US",
+    "unterstuetzenText": "We are grateful if you would like to support our association.",
+    "empfaenger": "Recipient",
+    "kontoNr": "Account No."
+  },
+  "legal": {
+    "privacy": "PRIVACY POLICY",
+    "imprint": "IMPRINT",
+    "contentPending": "The content is being prepared."
+  },
   "kontakt": {
-    "title": "Get in Touch with Us",
-    "subtitle": "Feel free to contact us, we will get back to you as soon as possible.",
+    "title": "Contact us",
+    "subtitle": "Feel free to contact us. We will get back to you as soon as possible.",
     "address": "Where to find us",
     "email": "Send us an email",
     "social": "Social media",
@@ -179,27 +288,43 @@
       "valMessage": "Message must be at least 10 characters."
     }
   },
+  "projekte": {
+    "subtitle": "Growing, learning and connecting together",
+    "intro": "Our projects create spaces for exchange, education and personal development.",
+    "sozial": "Social projects",
+    "bildung": "Educational projects",
+    "gemeinschaft": "Community projects",
+    "moreInfo": "LEARN MORE"
+  },
+  "kursangebote": {
+    "subtitle": "Learn. Grow. Connect.",
+    "intro": "Our courses create opportunities to develop new skills."
+  },
+  "netzwerk": {
+    "subtitle": "People. Ideas. Possibilities.",
+    "intro": "Our network brings together people who want to make a difference, learn and grow.",
+    "ghana": { "name": "Uccelli Ghana", "desc": "An international initiative for self-efficacy and vocational skills." },
+    "women": { "name": "Uccelli Women", "desc": "A network and contact point for women within the association." },
+    "fc": { "name": "Uccelli FC", "desc": "Football connects people and promotes team spirit." },
+    "nightshift": { "name": "Nightshift Music", "desc": "Our music platform for emerging artists." }
+  },
   "events": {
     "subtitle": "Our upcoming events",
     "empty": "No upcoming events.",
-    "emptyHint": "Follow us on Instagram for updates."
+    "emptyHint": "Follow us on Instagram for current announcements."
   },
-  "news": {
-    "subtitle": "News from the Uccelli Society",
-    "back": "← BACK TO NEWS",
-    "readMore": "READ MORE"
+  "vorstand": { "title": "THE BOARD" },
+  "faq": {
+    "title": "FAQ",
+    "subtitle": "We are here to help!",
+    "items": []
   },
-  "footer": {
-    "kontakt": "CONTACT",
-    "faq": "FAQ",
-    "email": "Send us an email",
-    "findUs": "Find us here",
-    "werte": "OUR VALUES",
-    "unterstuetzen": "SUPPORT US",
-    "unterstuetzenText": "We are very grateful if you would like to support our association. Our details are:",
-    "empfaenger": "Recipient",
-    "kontoNr": "Account No",
-    "copyright": "Copyright © 2026"
+  "partner": {
+    "intro": { "title": "Achieving great things together", "text": "Strong partnerships are key to success." },
+    "partnerLabel": "Partners",
+    "sponsorLabel": "Sponsors",
+    "toPartner": "TO PARTNER",
+    "toSponsor": "TO SPONSOR"
   },
   "common": {
     "moreInfo": "Learn more →",
@@ -221,7 +346,7 @@
   "cookie": {
     "title": "We respect your privacy",
     "text": "This website only uses technically necessary cookies. We do not use tracking cookies.",
-    "privacy": "Privacy Policy",
+    "privacy": "Privacy policy",
     "accept": "Accept",
     "reject": "Decline",
     "ariaLabel": "Cookie settings"
@@ -231,7 +356,5 @@
     "text": "The page could not be loaded. Please try again or come back later.",
     "retry": "Try again"
   },
-  "werte": {
-    "more": "More values"
-  }
+  "werte": { "more": "More values" }
 }
