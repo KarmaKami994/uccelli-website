@@ -57,6 +57,16 @@ describe("CV Creator static application", () => {
     expect(res).toContain("\\\\documentclass[line,margin]{res}");
   });
 
+  it("uses safe Awesome-CV list spacing for wrapped experience bullets", () => {
+    const awesome = read("template-awesome.js");
+
+    expect(awesome).toContain("function safeCvItemsEnvironment_t2");
+    expect(awesome).toContain("\\\\renewenvironment{cvitems}");
+    expect(awesome).toContain("itemsep=0.35mm");
+    expect(awesome).toContain("\\\\vspace{1mm}");
+    expect(awesome).not.toContain("\\\\vspace{-4mm}");
+  });
+
   it("contains syntactically valid browser scripts", () => {
     for (const script of scripts) {
       expect(() =>
