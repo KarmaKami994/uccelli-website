@@ -15,7 +15,10 @@ interface LexicalNode {
   fields?: { url?: string; linkType?: string };
 }
 
-// Format flags (bitmask used by Lexical)
+interface LexicalDocument {
+  root?: LexicalNode;
+}
+
 const IS_BOLD = 1;
 const IS_ITALIC = 2;
 const IS_STRIKETHROUGH = 4;
@@ -66,12 +69,12 @@ function renderNode(node: LexicalNode): string {
 }
 
 interface LexicalRendererProps {
-  data: any;
+  data: LexicalDocument | null | undefined;
   className?: string;
 }
 
 export function LexicalRenderer({ data, className = "" }: LexicalRendererProps) {
-  if (!data || !data.root) return null;
+  if (!data?.root) return null;
   const html = renderNode(data.root);
 
   return (
