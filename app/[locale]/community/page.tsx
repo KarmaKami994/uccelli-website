@@ -5,6 +5,7 @@ import { Hero } from "@/components/sections/Hero";
 import { CommunityCard } from "@/components/community/CommunityCard";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { StaggerReveal } from "@/components/ui/StaggerReveal";
+import { ensureCvCreator } from "@/lib/cv-creator";
 import { getCommunityItems } from "@/lib/data";
 import { toLocale } from "@/lib/payload";
 import { localizedPath, pageMetadata } from "@/lib/seo";
@@ -20,8 +21,11 @@ type Params = {
 export async function generateMetadata({ params }: Pick<Params, "params">): Promise<Metadata> {
   const locale = toLocale((await params).locale);
   return pageMetadata({
-    title: locale === "de" ? "Community Hub – Uccelli Society" : "Community Hub – Uccelli Society",
-    description: locale === "de" ? "Digitale Tools, Spiele und Ressourcen für die Uccelli Community." : "Digital tools, games and resources for the Uccelli community.",
+    title: "Community Hub – Uccelli Society",
+    description:
+      locale === "de"
+        ? "Digitale Tools, Spiele und Ressourcen für die Uccelli Community."
+        : "Digital tools, games and resources for the Uccelli community.",
     path: "/community",
     locale,
   });
@@ -31,7 +35,7 @@ export default async function CommunityPage({ params, searchParams }: Params) {
   const locale = toLocale((await params).locale);
   setRequestLocale(locale);
   const t = await getTranslations("community");
-  const items = await getCommunityItems(locale);
+  const items = ensureCvCreator(await getCommunityItems(locale), locale);
   const rawType = (await searchParams).typ;
   const requested = Array.isArray(rawType) ? rawType[0] : rawType;
   const active: Filter = filterValues.includes(requested as Filter) ? (requested as Filter) : "all";
@@ -48,7 +52,14 @@ export default async function CommunityPage({ params, searchParams }: Params) {
               const href = value === "all" ? localizedPath("/community", locale) : `${localizedPath("/community", locale)}?typ=${value}`;
               const selected = value === active;
               return (
-                <Link key={value} href={href} aria-current={selected ? "page" : undefined} className={`rounded-full border px-4 py-2 text-[12px] font-bold uppercase tracking-wide transition-colors ${selected ? "bg-black text-white border-black" : "bg-white border-neutral-200 hover:border-neutral-400"}`}>
+                <Link
+                  key={value}
+                  href={href}
+                  aria-current={selected ? "page" : undefined}
+                  className={`rounded-full border px-4 py-2 text-[12px] font-bold uppercase tracking-wide transition-colors ${
+                    selected ? "bg-black text-white border-black" : "bg-white border-neutral-200 hover:border-neutral-400"
+                  }`}
+                >
                   {t(`filters.${value}`)}
                 </Link>
               );
