@@ -3,11 +3,11 @@ import { anyone, authenticated } from "../lib/access";
 
 export const Navigation: GlobalConfig = {
   slug: "navigation",
-  label: "Navigation",
+  label: "Navigation (Archiv)",
   access: { read: anyone, update: authenticated },
   admin: {
-    description:
-      "Haupt-Navigation der Website. Reihenfolge per Drag & Drop. Labels sind pro Sprache übersetzbar (DE/EN oben rechts umschalten).",
+    group: false,
+    description: "Historische Navigationsdaten. Die öffentliche Hauptnavigation wird aktuell aus der vereinfachten Website-Struktur erzeugt.",
   },
   fields: [
     {
@@ -16,21 +16,12 @@ export const Navigation: GlobalConfig = {
       label: "Menüpunkte",
       fields: [
         { name: "label", type: "text", required: true, label: "Menü-Label", localized: true },
-        {
-          name: "href",
-          type: "text",
-          label: "Link URL",
-          admin: {
-            description:
-              "Wohin der Titel selbst verlinkt (z.B. /programm/projekte). Leer lassen wenn nur Dropdown.",
-          },
-        },
+        { name: "href", type: "text", label: "Link URL" },
         { name: "openInNewTab", type: "checkbox", defaultValue: false },
         {
           name: "children",
           type: "array",
           label: "Untermenü-Einträge",
-          admin: { description: "Sub-Navigation (Dropdown auf Desktop, Akkordeon auf Mobile)" },
           fields: [
             { name: "label", type: "text", required: true, label: "Label", localized: true },
             { name: "href", type: "text", required: true, label: "Link URL" },
