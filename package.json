@@ -4,18 +4,20 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "payload generate:types",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "payload generate:types && tsc --noEmit",
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap",
     "migrate": "payload migrate",
     "migrate:create": "payload migrate:create",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "content:sync": "tsx scripts/sync-content.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
