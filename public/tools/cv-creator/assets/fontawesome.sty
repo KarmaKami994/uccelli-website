@@ -1,0 +1,15 @@
+%% Minimal Font Awesome bindings required by Awesome-CV v1.3.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{fontawesome}[2015/11/04 minimal v4.4.0 bindings]
+\usepackage{fontspec}
+\newfontfamily{\FA}[Path=fonts/]{FontAwesome}
+\newcommand*{\faicon}[1]{{\FA\csname faicon@#1\endcsname}}
+\expandafter\def\csname faicon@envelope\endcsname {\symbol{"F0E0}} \def\faEnvelope {{\FA\csname faicon@envelope\endcsname}}
+\expandafter\def\csname faicon@github-square\endcsname {\symbol{"F092}} \def\faGithubSquare {{\FA\csname faicon@github-square\endcsname}}
+\expandafter\def\csname faicon@link\endcsname {\symbol{"F0C1}} \def\faLink {{\FA\csname faicon@link\endcsname}}
+\expandafter\def\csname faicon@linkedin-square\endcsname {\symbol{"F08C}} \def\faLinkedinSquare {{\FA\csname faicon@linkedin-square\endcsname}}
+\expandafter\def\csname faicon@map-marker\endcsname {\symbol{"F041}} \def\faMapMarker {{\FA\csname faicon@map-marker\endcsname}}
+\expandafter\def\csname faicon@mobile\endcsname {\symbol{"F10B}} \def\faMobile {{\FA\csname faicon@mobile\endcsname}}
+\expandafter\def\csname faicon@skype\endcsname {\symbol{"F17E}} \def\faSkype {{\FA\csname faicon@skype\endcsname}}
+\expandafter\def\csname faicon@stack-overflow\endcsname {\symbol{"F16C}} \def\faStackOverflow {{\FA\csname faicon@stack-overflow\endcsname}}
+\expandafter\def\csname faicon@twitter\endcsname {\symbol{"F099}} \def\faTwitter {{\FA\csname faicon@twitter\endcsname}}
