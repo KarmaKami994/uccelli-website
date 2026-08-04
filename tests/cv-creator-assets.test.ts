@@ -34,8 +34,10 @@ describe("CV Creator static application", () => {
 
     expect(core).toContain("uccelli_cv_generator_v1");
     expect(core).toContain("YtoTech");
+    expect(core).toContain("selectedTemplate: Number(template)");
     expect(ui).toContain("exportJSON");
     expect(ui).toContain("importJSON");
+    expect(ui).toContain("data._template ?? data.selectedTemplate");
     expect(ui).toContain("localStorage");
     expect(ui).toContain("https://latex.ytotech.com/builds/sync");
     expect(sources).toContain("awesome-cv.cls");
