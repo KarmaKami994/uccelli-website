@@ -66,6 +66,14 @@ jobs:
       - name: External CV compiler smoke test
         run: npm run test:cv-external
 
+      - name: Upload CV spacing artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cv-spacing-smoke
+          path: artifacts/cv-spacing-smoke.*
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Production build
         run: npm run build
 
