@@ -77,7 +77,6 @@ Die zusätzliche Datei `/opt/uccelli-website/uccelli.db` ist nicht das von Docke
 
 ```bash
 cd /opt/uccelli-website
-mkdir -p backups/$(date +%Y%m%d-%H%M%S)
 backup_dir="backups/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$backup_dir"
 cp -a data "$backup_dir/"
