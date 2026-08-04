@@ -46,6 +46,11 @@ async function load(resourcePath, source) {
     throw new Error(`${resourcePath}: HTTP ${response.status} from ${source}`);
   }
 
+  const cors = response.headers.get("access-control-allow-origin");
+  if (cors !== "*") {
+    throw new Error(`${resourcePath}: missing browser-compatible CORS header from ${source}`);
+  }
+
   return Buffer.from(await response.arrayBuffer()).toString("base64");
 }
 
