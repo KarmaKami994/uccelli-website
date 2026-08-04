@@ -134,4 +134,9 @@ if (bytes.length < 10_000) {
   throw new Error(`Compiler returned an unexpectedly small PDF (${bytes.length} bytes)`);
 }
 
+const artifactDir = path.resolve("artifacts");
+fs.mkdirSync(artifactDir, { recursive: true });
+fs.writeFileSync(path.join(artifactDir, "cv-spacing-smoke.pdf"), bytes);
+fs.writeFileSync(path.join(artifactDir, "cv-spacing-smoke.tex"), tex);
+
 console.log(`External long-form Awesome-CV compilation succeeded (${bytes.length} bytes).`);
