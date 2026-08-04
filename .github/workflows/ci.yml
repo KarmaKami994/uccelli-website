@@ -14,7 +14,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     env:
       PAYLOAD_SECRET: ci-only-payload-secret-with-sufficient-length
       DATABASE_URI: file:./data/ci.db
@@ -62,3 +62,25 @@ jobs:
 
       - name: Docker image build
         run: docker build --tag uccelli-website:ci .
+
+      - name: Production container smoke test
+        run: |
+          docker run -d --name uccelli-ci -p 3000:3000 \
+            -e PAYLOAD_SECRET=ci-only-payload-secret-with-sufficient-length \
+            -e DATABASE_URI=file:/app/data/uccelli.db \
+            -e SITE_URL=http://localhost:3000 \
+            uccelli-website:ci
+
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3000/api/health > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+
+          docker logs uccelli-ci
+          exit 1
+
+      - name: Remove smoke-test container
+        if: always()
+        run: docker rm -f uccelli-ci 2>/dev/null || true
