@@ -4,7 +4,6 @@ import config from "@payload-config";
 import { richText } from "../content/legacy";
 
 const VERSION_KEY = "uccelli-content:2026-08-cv-creator-v1";
-
 type Locale = "de" | "en";
 
 const content = {
@@ -56,6 +55,15 @@ const content = {
   },
 } satisfies Record<Locale, { title: string; summary: string; body: ReturnType<typeof richText> }>;
 
+const base = {
+  slug: "cv-creator",
+  type: "tool",
+  status: "available",
+  href: "/community/cv-creator",
+  featured: true,
+  order: 1,
+} as const;
+
 async function run() {
   const payload = await getPayload({ config });
   const cms = payload as any;
@@ -66,10 +74,6 @@ async function run() {
     limit: 1,
     overrideAccess: true,
   });
-  if (marker.docs.length > 0) {
-    console.log(`[cv-creator] ${VERSION_KEY} already applied`);
-    process.exit(0);
-  }
 
   const found = await cms.find({
     collection: "community-items",
@@ -80,36 +84,67 @@ async function run() {
     overrideAccess: true,
   });
 
-  if (!found.docs[0]) {
-    throw new Error("Community item cv-creator was not created by the canonical content sync.");
-  }
+  const existing = found.docs[0];
 
-  const id = found.docs[0].id;
-  for (const locale of ["de", "en"] as Locale[]) {
+  if (marker.docs[0] && existing) {
     await cms.update({
       collection: "community-items",
-      id,
-      locale,
+      id: existing.id,
+      locale: "de",
       overrideAccess: true,
-      data: {
-        slug: "cv-creator",
-        type: "tool",
-        status: "available",
-        href: "/community/cv-creator",
-        featured: true,
-        order: 1,
-        ...content[locale],
-      },
+      data: base,
+    });
+    console.log(`[cv-creator] ${VERSION_KEY} already applied; availability verified`);
+    process.exit(0);
+  }
+
+  const document = existing
+    ? await cms.update({
+        collection: "community-items",
+        id: existing.id,
+        locale: "de",
+        overrideAccess: true,
+        data: { ...base, ...content.de },
+      })
+    : await cms.create({
+        collection: "community-items",
+        locale: "de",
+        overrideAccess: true,
+        data: { ...base, ...content.de },
+      });
+
+  await cms.update({
+    collection: "community-items",
+    id: document.id,
+    locale: "en",
+    overrideAccess: true,
+    data: { ...base, ...content.en },
+  });
+
+  const markerData = {
+    key: VERSION_KEY,
+    data: {
+      appliedAt: new Date().toISOString(),
+      repairedMissingEntry: Boolean(marker.docs[0] && !existing),
+    },
+  };
+
+  if (marker.docs[0]) {
+    await cms.update({
+      collection: "payload-kv",
+      id: marker.docs[0].id,
+      overrideAccess: true,
+      data: markerData,
+    });
+  } else {
+    await cms.create({
+      collection: "payload-kv",
+      overrideAccess: true,
+      data: markerData,
     });
   }
 
-  await cms.create({
-    collection: "payload-kv",
-    overrideAccess: true,
-    data: { key: VERSION_KEY, data: { appliedAt: new Date().toISOString() } },
-  });
-
-  console.log(`[cv-creator] applied ${VERSION_KEY}`);
+  console.log(`[cv-creator] applied ${VERSION_KEY}${existing ? "" : " and created the missing CMS entry"}`);
   process.exit(0);
 }
 
