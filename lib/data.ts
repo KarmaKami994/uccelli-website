@@ -4,16 +4,28 @@ import type {
   Media,
   Project as ProjectDoc,
   Post as PostDoc,
+  CommunityItem as CommunityItemDoc,
   Event as EventDoc,
 } from "@/payload-types";
 import type { RichTextContent } from "./richtext";
 
-// ─── View types (what the components consume) ────────────
 export type TeamMember = { name: string; role: string; image?: string; bio?: RichTextContent | null };
 export type FAQ = { question: string; answer: RichTextContent };
 export type Partner = { name: string; type: "partner" | "sponsor"; description: RichTextContent; logo?: string; url?: string };
 export type Project = { title: string; slug: string; category: ProjectDoc["category"]; summary: string; body?: RichTextContent | null; image?: string; featured?: boolean };
 export type Post = { title: string; slug: string; date: string; summary: string; body?: RichTextContent | null; image?: string };
+export type CommunityItem = {
+  title: string;
+  slug: string;
+  type: CommunityItemDoc["type"];
+  status: CommunityItemDoc["status"];
+  summary: string;
+  body?: RichTextContent | null;
+  image?: string;
+  href?: string;
+  featured?: boolean;
+  order: number;
+};
 export type EventItem = { title: string; date: string; location?: string; description?: RichTextContent | null };
 export type Network = { name: string; slug: string; description: RichTextContent; image?: string };
 export type Wert = { title: string; slug: string; body?: RichTextContent | null };
@@ -28,9 +40,6 @@ export type HomepageData = {
   cta: { title: string; text?: string; buttonText?: string; buttonHref?: string };
 };
 
-// ─── Helpers ─────────────────────────────────────────────
-
-/** Extract a usable URL from a Payload media relation. */
 export function resolveImageUrl(media: number | Media | null | undefined): string | undefined {
   if (!media || typeof media === "number") return undefined;
   if (media.url) return media.url;
@@ -38,46 +47,40 @@ export function resolveImageUrl(media: number | Media | null | undefined): strin
   return undefined;
 }
 
-const opt = (v: string | null | undefined): string | undefined => v ?? undefined;
-
-// ─── Data fetching ───────────────────────────────────────
-// Every getter is wrapped in React.cache() so identical calls within one
-// request (e.g. generateMetadata + page component) hit the DB only once.
+const opt = (value: string | null | undefined): string | undefined => value ?? undefined;
 
 export const getTeam = cache(async (locale: Locale): Promise<TeamMember[]> => {
   const docs = await fetchCollection("team-members", { sort: "order", locale });
-  return docs.map((d) => ({ name: d.name, role: d.role, bio: d.bio, image: resolveImageUrl(d.image) }));
+  return docs.map((doc) => ({ name: doc.name, role: doc.role, bio: doc.bio, image: resolveImageUrl(doc.image) }));
 });
 
 export const getFAQs = cache(async (locale: Locale): Promise<FAQ[]> => {
   const docs = await fetchCollection("faqs", { sort: "order", locale });
-  return docs.map((d) => ({ question: d.question, answer: d.answer }));
+  return docs.map((doc) => ({ question: doc.question, answer: doc.answer }));
 });
 
-export const getPartners = cache(
-  async (locale: Locale): Promise<{ partners: Partner[]; sponsors: Partner[] }> => {
-    const docs = await fetchCollection("partners", { locale });
-    const all: Partner[] = docs.map((d) => ({
-      name: d.name,
-      type: d.type,
-      description: d.description,
-      logo: resolveImageUrl(d.logo),
-      url: opt(d.url),
-    }));
-    return {
-      partners: all.filter((p) => p.type === "partner"),
-      sponsors: all.filter((p) => p.type === "sponsor"),
-    };
-  }
-);
+export const getPartners = cache(async (locale: Locale): Promise<{ partners: Partner[]; sponsors: Partner[] }> => {
+  const docs = await fetchCollection("partners", { locale });
+  const all: Partner[] = docs.map((doc) => ({
+    name: doc.name,
+    type: doc.type,
+    description: doc.description,
+    logo: resolveImageUrl(doc.logo),
+    url: opt(doc.url),
+  }));
+  return {
+    partners: all.filter((partner) => partner.type === "partner"),
+    sponsors: all.filter((partner) => partner.type === "sponsor"),
+  };
+});
 
-const mapPost = (d: PostDoc): Post => ({
-  title: d.title,
-  slug: d.slug,
-  date: d.date,
-  summary: d.summary,
-  body: d.body,
-  image: resolveImageUrl(d.image),
+const mapPost = (doc: PostDoc): Post => ({
+  title: doc.title,
+  slug: doc.slug,
+  date: doc.date,
+  summary: doc.summary,
+  body: doc.body,
+  image: resolveImageUrl(doc.image),
 });
 
 export const getPosts = cache(async (locale: Locale): Promise<Post[]> => {
@@ -90,14 +93,36 @@ export const getPostBySlug = cache(async (slug: string, locale: Locale): Promise
   return doc ? mapPost(doc) : null;
 });
 
-const mapEvent = (d: EventDoc): EventItem => ({
-  title: d.title,
-  date: d.date,
-  location: opt(d.location),
-  description: d.description,
+const mapCommunityItem = (doc: CommunityItemDoc): CommunityItem => ({
+  title: doc.title,
+  slug: doc.slug,
+  type: doc.type,
+  status: doc.status,
+  summary: doc.summary,
+  body: doc.body,
+  image: resolveImageUrl(doc.image),
+  href: opt(doc.href),
+  featured: doc.featured ?? false,
+  order: doc.order ?? 0,
 });
 
-/** Upcoming events, soonest first. Also feeds the AttentionBanner. */
+export const getCommunityItems = cache(async (locale: Locale): Promise<CommunityItem[]> => {
+  const docs = await fetchCollection("community-items", { sort: "order", locale });
+  return docs.map(mapCommunityItem);
+});
+
+export const getCommunityItemBySlug = cache(async (slug: string, locale: Locale): Promise<CommunityItem | null> => {
+  const doc = await fetchBySlug("community-items", slug, locale);
+  return doc ? mapCommunityItem(doc) : null;
+});
+
+const mapEvent = (doc: EventDoc): EventItem => ({
+  title: doc.title,
+  date: doc.date,
+  location: opt(doc.location),
+  description: doc.description,
+});
+
 export const getUpcomingEvents = cache(async (locale: Locale): Promise<EventItem[]> => {
   const docs = await fetchCollection("events", {
     sort: "date",
@@ -107,14 +132,14 @@ export const getUpcomingEvents = cache(async (locale: Locale): Promise<EventItem
   return docs.map(mapEvent);
 });
 
-const mapProject = (d: ProjectDoc): Project => ({
-  title: d.title,
-  slug: d.slug,
-  category: d.category,
-  summary: d.summary,
-  body: d.body,
-  image: resolveImageUrl(d.image),
-  featured: d.featured ?? false,
+const mapProject = (doc: ProjectDoc): Project => ({
+  title: doc.title,
+  slug: doc.slug,
+  category: doc.category,
+  summary: doc.summary,
+  body: doc.body,
+  image: resolveImageUrl(doc.image),
+  featured: doc.featured ?? false,
 });
 
 export const getProjects = cache(async (locale: Locale): Promise<Project[]> => {
@@ -129,7 +154,7 @@ export const getProjectBySlug = cache(async (slug: string, locale: Locale): Prom
 
 export const getNetworks = cache(async (locale: Locale): Promise<Network[]> => {
   const docs = await fetchCollection("networks", { sort: "order", locale });
-  return docs.map((d) => ({ name: d.name, slug: d.slug, description: d.description, image: resolveImageUrl(d.image) }));
+  return docs.map((doc) => ({ name: doc.name, slug: doc.slug, description: doc.description, image: resolveImageUrl(doc.image) }));
 });
 
 export const getWertBySlug = cache(async (slug: string, locale: Locale): Promise<Wert | null> => {
@@ -139,12 +164,12 @@ export const getWertBySlug = cache(async (slug: string, locale: Locale): Promise
 
 export const getAllWerte = cache(async (locale: Locale): Promise<Wert[]> => {
   const docs = await fetchCollection("werte", { sort: "createdAt", locale });
-  return docs.map((d) => ({ title: d.title, slug: d.slug, body: d.body }));
+  return docs.map((doc) => ({ title: doc.title, slug: doc.slug, body: doc.body }));
 });
 
 export const getCourses = cache(async (locale: Locale): Promise<Course[]> => {
   const docs = await fetchCollection("courses", { sort: "order", locale });
-  return docs.map((d) => ({ name: d.name, description: d.description }));
+  return docs.map((doc) => ({ name: doc.name, description: doc.description }));
 });
 
 export const getPageBySlug = cache(async (slug: string, locale: Locale): Promise<Page | null> => {
@@ -158,43 +183,43 @@ export const getNavigation = cache(async (locale: Locale): Promise<NavItem[]> =>
     label: item.label,
     href: opt(item.href),
     openInNewTab: item.openInNewTab ?? false,
-    children: (item.children ?? []).map((c) => ({ label: c.label, href: c.href })),
+    children: (item.children ?? []).map((child) => ({ label: child.label, href: child.href })),
   }));
 });
 
 export const getHomepage = cache(async (locale: Locale): Promise<HomepageData | null> => {
-  const d = await fetchGlobal("homepage", locale);
-  if (!d?.hero?.title) return null;
+  const doc = await fetchGlobal("homepage", locale);
+  if (!doc?.hero?.title) return null;
   return {
     hero: {
-      title: d.hero.title,
-      subtitle: opt(d.hero.subtitle),
-      ctaText: opt(d.hero.ctaText),
-      ctaHref: opt(d.hero.ctaHref),
-      image: resolveImageUrl(d.hero.image),
+      title: doc.hero.title,
+      subtitle: opt(doc.hero.subtitle),
+      ctaText: opt(doc.hero.ctaText),
+      ctaHref: opt(doc.hero.ctaHref),
+      image: resolveImageUrl(doc.hero.image),
     },
     about: {
-      eyebrow: opt(d.about?.eyebrow),
-      title: d.about?.title ?? "",
-      text: d.about?.text ?? "",
-      ctaText: opt(d.about?.ctaText),
-      ctaHref: opt(d.about?.ctaHref),
+      eyebrow: opt(doc.about?.eyebrow),
+      title: doc.about?.title ?? "",
+      text: doc.about?.text ?? "",
+      ctaText: opt(doc.about?.ctaText),
+      ctaHref: opt(doc.about?.ctaHref),
     },
     tasks: {
-      title: d.tasks?.title ?? "",
-      cards: (d.tasks?.cards ?? []).map((c) => ({
-        title: c.title,
-        text: c.text,
-        buttonText: opt(c.buttonText),
-        buttonHref: opt(c.buttonHref),
-        image: resolveImageUrl(c.image),
+      title: doc.tasks?.title ?? "",
+      cards: (doc.tasks?.cards ?? []).map((card) => ({
+        title: card.title,
+        text: card.text,
+        buttonText: opt(card.buttonText),
+        buttonHref: opt(card.buttonHref),
+        image: resolveImageUrl(card.image),
       })),
     },
     cta: {
-      title: d.cta?.title ?? "",
-      text: opt(d.cta?.text),
-      buttonText: opt(d.cta?.buttonText),
-      buttonHref: opt(d.cta?.buttonHref),
+      title: doc.cta?.title ?? "",
+      text: opt(doc.cta?.text),
+      buttonText: opt(doc.cta?.buttonText),
+      buttonHref: opt(doc.cta?.buttonHref),
     },
   };
 });
