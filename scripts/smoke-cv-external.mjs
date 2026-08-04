@@ -15,7 +15,7 @@ const overrides = fs.readFileSync(path.join(root, "asset-overrides.js"), "utf8")
 vm.runInNewContext(overrides, { ASSET_SOURCES });
 
 const templateContext = vm.createContext({
-  copy: { current: "Present" },
+  copy: { current: "Aktuell" },
   e: (value) => String(value ?? ""),
 });
 vm.runInContext(fs.readFileSync(path.join(root, "template-awesome.js"), "utf8"), templateContext);
@@ -30,45 +30,45 @@ templateContext.values = {
   },
   work: [
     {
-      company: "Example Public Administration",
+      company: "Beispielverwaltung Kanton Zürich",
       position: "Solution Architect Security",
-      location: "Zürich",
+      location: "Stadt Zürich",
       startDate: "September 2024",
-      endDate: "Present",
+      endDate: "Aktuell",
       highlights: [
-        "Security governance: developed policies, standards and compliance requirements across a complex public-sector environment.",
-        "Advised internal teams and senior stakeholders on security architecture decisions, risks and practical mitigations.",
-        "Designed a data-governance strategy including classification, sensitivity labels and information protection.",
-        "Configured data-loss-prevention policies, retention labels and eDiscovery for regulatory requirements.",
-        "Integrated cloud services into a central governance overview while preserving operational responsibilities.",
-        "Designed and implemented a public key infrastructure with root and issuing certification authorities.",
-        "Automated certificate management and documented certificate policies and practice statements.",
+        "Security Governance: Aufbau und Weiterentwicklung von Richtlinien, Standards und Compliance-Anforderungen für eine komplexe Organisation mit mehreren internen Fachbereichen, technischen Plattformen und regulatorischen Verantwortlichkeiten.",
+        "Stakeholder-Beratung: Beratung interner Teams und Führungskräfte zu sicherheitsrelevanten Architekturentscheidungen, Abhängigkeiten, Risiken und praktisch umsetzbaren Massnahmen über mehrere Projekte hinweg.",
+        "Einführung einer Data-Governance-Strategie inklusive Klassifizierung, Sensitivity Labels, Informationsschutz und klarer Verantwortlichkeiten für Betrieb, Fachbereiche und zentrale Governance-Stellen.",
+        "Konfiguration von Data-Loss-Prevention-Richtlinien, Retention Labels und eDiscovery zur Einhaltung regulatorischer Anforderungen sowie zur nachvollziehbaren Bearbeitung komplexer Informationsschutzfälle.",
+        "Integration verschiedener Cloud-Dienste in eine zentrale Governance-Übersicht unter Beibehaltung der operativen Zuständigkeiten und bestehenden Betriebsprozesse.",
+        "Konzeption und Implementierung einer internen Public Key Infrastructure mit Root- und Issuing-Zertifizierungsstellen für unterschiedliche technische Anwendungsfälle.",
+        "Automatisierung des Zertifikatsmanagements und Erstellung von Certificate Policies und Certificate Practice Statements.",
       ],
     },
     {
-      company: "Example Engineering AG",
+      company: "Beispiel Engineering AG",
       position: "Cloud Engineer",
       location: "Oerlikon, Zürich",
       startDate: "August 2021",
       endDate: "August 2023",
       highlights: [
-        "Operated and troubleshot cloud environments across second- and third-level support including demanding incidents.",
-        "Built identity, governance and compliance controls for a multi-service cloud platform.",
-        "Automated operational processes with command-line tooling and infrastructure-as-code practices.",
-        "Created operating manuals, technical documentation and reusable knowledge-base articles.",
-        "Worked closely with internal teams to integrate cloud solutions into existing systems and processes.",
+        "Betrieb, Support und Fehleranalyse in Cloud-Umgebungen im zweiten und dritten Support-Level inklusive anspruchsvoller Incidents, bereichsübergreifender Koordination und verständlicher Kommunikation mit betroffenen Anwendergruppen.",
+        "Aufbau von Identity-, Governance- und Compliance-Kontrollen für eine Plattform mit mehreren Diensten und unterschiedlichen Schutzanforderungen.",
+        "Automatisierung von Betriebsabläufen mit Kommandozeilenwerkzeugen und Infrastructure-as-Code sowie Dokumentation der wiederverwendbaren Vorgehensweisen für weitere Teams.",
+        "Erstellung von Betriebshandbüchern, technischer Dokumentation und einer strukturierten Knowledgebase für wiederkehrende Störungen und Änderungen.",
+        "Enge Zusammenarbeit mit internen Teams zur Integration neuer Cloud-Lösungen in bestehende Systeme, Prozesse und organisatorische Verantwortlichkeiten.",
       ],
     },
     {
-      company: "Example Technology GmbH",
+      company: "Beispiel Technologie GmbH",
       position: "System Administrator",
       location: "Zürich",
       startDate: "2018",
       endDate: "2021",
       highlights: [
-        "Maintained cloud workloads, networks and resources and supported business-critical infrastructure.",
-        "Improved system efficiency with scripts and reduced repetitive manual interventions.",
-        "Delivered technical support and maintained clear operational documentation.",
+        "Betrieb und Wartung von Cloud-Workloads, Netzwerken und Ressourcen sowie Unterstützung geschäftskritischer Infrastruktur.",
+        "Steigerung der Systemeffizienz mit Skripten und Reduktion repetitiver manueller Eingriffe.",
+        "Technischer Support und Pflege einer klaren, nachvollziehbaren Betriebsdokumentation.",
       ],
     },
   ],
@@ -77,7 +77,7 @@ templateContext.values = {
   projects: [],
   awards: [],
   sections: ["profile", "work"],
-  headings: { work: "Experience" },
+  headings: { work: "Berufserfahrung" },
 };
 
 const tex = vm.runInContext("buildTex_t2(values)", templateContext);
@@ -139,4 +139,4 @@ fs.mkdirSync(artifactDir, { recursive: true });
 fs.writeFileSync(path.join(artifactDir, "cv-spacing-smoke.pdf"), bytes);
 fs.writeFileSync(path.join(artifactDir, "cv-spacing-smoke.tex"), tex);
 
-console.log(`External long-form Awesome-CV compilation succeeded (${bytes.length} bytes).`);
+console.log(`External wrapped-bullet Awesome-CV compilation succeeded (${bytes.length} bytes).`);
