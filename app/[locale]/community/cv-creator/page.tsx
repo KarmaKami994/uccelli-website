@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft, ExternalLink, FileText, ShieldCheck } from "lucide-react";
 import { setRequestLocale } from "next-intl/server";
 import { Hero } from "@/components/sections/Hero";
 import { RichTextRenderer } from "@/components/ui/RichTextRenderer";
+import { getCvCreatorFallback } from "@/lib/cv-creator";
 import { getCommunityItemBySlug } from "@/lib/data";
 import { toLocale } from "@/lib/payload";
 import { localizedPath, pageMetadata } from "@/lib/seo";
@@ -13,26 +13,21 @@ type Params = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const locale = toLocale((await params).locale);
-  const item = await getCommunityItemBySlug("cv-creator", locale);
+  const item = (await getCommunityItemBySlug("cv-creator", locale)) ?? getCvCreatorFallback(locale);
 
   return pageMetadata({
     title: "CV Creator – Uccelli Society",
-    description:
-      item?.summary ??
-      (locale === "de"
-        ? "Erstelle, speichere und exportiere deinen Lebenslauf direkt im Browser."
-        : "Create, save and export your CV directly in the browser."),
+    description: item.summary,
     path: "/community/cv-creator",
     locale,
-    image: item?.image,
+    image: item.image,
   });
 }
 
 export default async function CvCreatorPage({ params }: Params) {
   const locale = toLocale((await params).locale);
   setRequestLocale(locale);
-  const item = await getCommunityItemBySlug("cv-creator", locale);
-  if (!item) notFound();
+  const item = (await getCommunityItemBySlug("cv-creator", locale)) ?? getCvCreatorFallback(locale);
 
   const copy = locale === "de"
     ? {
