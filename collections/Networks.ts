@@ -3,8 +3,10 @@ import { contentAccess } from "../lib/access";
 
 export const Networks: CollectionConfig = {
   slug: "networks",
+  labels: { singular: "Netzwerk (Archiv)", plural: "Netzwerke (Archiv)" },
   access: contentAccess,
   admin: {
+    group: false,
     useAsTitle: "name",
     defaultColumns: ["name", "order"],
   },
