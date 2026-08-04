@@ -3,7 +3,7 @@ import { anyone, authenticated } from "../lib/access";
 
 export const Media: CollectionConfig = {
   slug: "media",
-  // Public read is required so the website (and /api/media/file/*) works for anonymous visitors.
+  labels: { singular: "Medium", plural: "Medien" },
   access: {
     read: anyone,
     create: authenticated,
@@ -14,9 +14,20 @@ export const Media: CollectionConfig = {
     mimeTypes: ["image/*", "application/pdf"],
   },
   admin: {
+    group: "Kommunikation",
     useAsTitle: "alt",
+    defaultColumns: ["filename", "alt", "mimeType", "updatedAt"],
+    description: "Zentrale Bibliothek für Bilder, Logos und PDF-Dateien.",
+    hideAPIURL: true,
   },
   fields: [
-    { name: "alt", type: "text", required: true, localized: true },
+    {
+      name: "alt",
+      type: "text",
+      label: "Alternativtext",
+      required: true,
+      localized: true,
+      admin: { description: "Beschreibt den Bildinhalt für Barrierefreiheit und Suchmaschinen." },
+    },
   ],
 };
