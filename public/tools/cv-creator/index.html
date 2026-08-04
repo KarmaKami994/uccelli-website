@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Uccelli CV Creator</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="tool-shell">
+    <div class="tool-toolbar">
+      <div>
+        <p class="eyebrow">Uccelli Community Tool</p>
+        <h1>CV Creator</h1>
+      </div>
+      <div class="toolbar-actions">
+        <button class="button secondary" type="button" onclick="exportJSON()" data-i18n="exportJson"></button>
+        <button class="button secondary" type="button" onclick="document.getElementById('importFile').click()" data-i18n="importJson"></button>
+        <input type="file" id="importFile" accept="application/json" hidden onchange="importJSON(event)">
+        <button class="button secondary" type="button" onclick="clearAll()" data-i18n="reset"></button>
+        <button class="button primary" type="button" onclick="generatePDF()" id="genBtn" data-i18n="generate"></button>
+      </div>
+    </div>
+
+    <div class="privacy-note" role="note">
+      <div class="privacy-mark">i</div>
+      <div><strong data-i18n="privacy"></strong><p data-i18n="privacyText"></p></div>
+    </div>
+
+    <div class="layout">
+      <main class="form-col">
+        <section class="form-section"><h2 data-i18n="profile"></h2>
+          <div class="row"><div><label for="name" data-i18n="name"></label><input id="name" type="text" placeholder="Max Mustermann"></div><div><label for="email" data-i18n="email"></label><input id="email" type="email" placeholder="max@example.com"></div></div>
+          <div class="row"><div><label for="phone" data-i18n="phone"></label><input id="phone" type="tel" placeholder="+41 79 000 00 00"></div><div><label for="address" data-i18n="location"></label><input id="address" type="text" placeholder="Zürich, Schweiz"></div></div>
+          <label for="website" data-i18n="website"></label><input id="website" type="url" placeholder="maxmustermann.ch">
+        </section>
+        <section class="form-section"><h2 data-i18n="education"></h2><div id="educationList"></div><button class="button add" type="button" onclick="addEducation()" data-i18n="addEducation"></button></section>
+        <section class="form-section"><h2 data-i18n="work"></h2><div id="workList"></div><button class="button add" type="button" onclick="addWork()" data-i18n="addWork"></button></section>
+        <section class="form-section"><h2 data-i18n="skills"></h2><div id="skillsList"></div><button class="button add" type="button" onclick="addSkill()" data-i18n="addSkill"></button></section>
+        <section class="form-section"><h2 data-i18n="projects"></h2><div id="projectsList"></div><button class="button add" type="button" onclick="addProject()" data-i18n="addProject"></button></section>
+        <section class="form-section"><h2 data-i18n="awards"></h2><div id="awardsList"></div><button class="button add" type="button" onclick="addAward()" data-i18n="addAward"></button></section>
+        <section class="form-section"><h2 data-i18n="settings"></h2>
+          <label for="templateSel" data-i18n="template"></label>
+          <select id="templateSel" onchange="saveData()"><option value="2" data-i18n="template2"></option><option value="5" data-i18n="template5"></option><option value="1" data-i18n="template1"></option></select>
+          <details class="advanced"><summary data-i18n="advanced"></summary><div class="advanced-body"><label for="apiUrl" data-i18n="api"></label><input id="apiUrl" type="url" value="https://latex.ytotech.com/builds/sync"><p class="hint" data-i18n="apiHint"></p><details><summary data-i18n="latexCode"></summary><pre id="texPreview"></pre></details></div></details>
+        </section>
+      </main>
+
+      <aside class="preview-col">
+        <div class="preview-header"><h2 data-i18n="preview"></h2><button class="button primary compact" id="downloadBtn" type="button" onclick="downloadPDF()" style="display:none" data-i18n="download"></button></div>
+        <div id="status" class="status"></div>
+        <div id="emptyPreview" class="empty-preview"></div>
+        <iframe id="pdfFrame" title="CV PDF preview" style="display:none"></iframe>
+      </aside>
+    </div>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>
