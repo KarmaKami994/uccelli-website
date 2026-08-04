@@ -1,5 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
+
+const payloadMocks = vi.hoisted(() => ({
+  create: vi.fn(async () => ({ id: 42 })),
+  update: vi.fn(async () => ({ id: 42 })),
+}));
+
+vi.mock("payload", () => ({
+  getPayload: vi.fn(async () => ({
+    create: payloadMocks.create,
+    update: payloadMocks.update,
+  })),
+}));
+
 import { POST } from "@/app/api/contact/route";
 
 const VALID = {
@@ -16,8 +29,6 @@ function post(body: unknown, ip?: string): NextRequest {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      // Each test gets its own IP so the module-level rate limiter
-      // doesn't leak state between tests.
       "x-forwarded-for": ip ?? `10.0.0.${ipCounter}`,
     },
     body: JSON.stringify(body),
@@ -26,6 +37,8 @@ function post(body: unknown, ip?: string): NextRequest {
 
 beforeEach(() => {
   vi.unstubAllEnvs();
+  payloadMocks.create.mockClear();
+  payloadMocks.update.mockClear();
 });
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -33,11 +46,40 @@ afterEach(() => {
 });
 
 describe("POST /api/contact", () => {
-  it("accepts a valid submission (no Turnstile configured)", async () => {
+  it("accepts and stores a valid submission without email configuration", async () => {
     const res = await POST(post(VALID));
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.success).toBe(true);
+    expect(json.emailSent).toBe(false);
+    expect(payloadMocks.create).toHaveBeenCalledWith(expect.objectContaining({
+      collection: "contact-submissions",
+      data: expect.objectContaining({
+        source: "contact",
+        locale: "de",
+        emailStatus: "skipped",
+      }),
+    }));
+  });
+
+  it("stores structured join metadata", async () => {
+    const res = await POST(post({
+      ...VALID,
+      source: "join",
+      interest: "membership",
+      project: "LifeLab",
+      locale: "en",
+    }));
+
+    expect(res.status).toBe(200);
+    expect(payloadMocks.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        source: "join",
+        interest: "membership",
+        project: "LifeLab",
+        locale: "en",
+      }),
+    }));
   });
 
   it("rejects invalid payloads with field issues", async () => {
@@ -63,11 +105,11 @@ describe("POST /api/contact", () => {
     expect(res.status).toBe(400);
   });
 
-  it("REQUIRES a Turnstile token when the secret is configured", async () => {
+  it("requires a Turnstile token when the secret is configured", async () => {
     vi.stubEnv("TURNSTILE_SECRET_KEY", "test-secret");
-    // No token at all → must be rejected (this was the original bypass bug)
     const res = await POST(post(VALID));
     expect(res.status).toBe(403);
+    expect(payloadMocks.create).not.toHaveBeenCalled();
   });
 
   it("rejects an invalid Turnstile token", async () => {
@@ -98,9 +140,7 @@ describe("POST /api/contact", () => {
     expect(blocked.status).toBe(429);
   });
 
-  it("uses the LAST x-forwarded-for entry (spoof-resistant)", async () => {
-    // Same trusted-proxy IP, different client-controlled prefixes:
-    // must all count against the same bucket.
+  it("uses the last x-forwarded-for entry", async () => {
     const trusted = "198.51.100.5";
     for (let i = 0; i < 5; i++) {
       await POST(post(VALID, `1.2.3.${i}, ${trusted}`));
