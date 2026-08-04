@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
 import type { Locale } from "./payload";
 
-export const SITE_URL = process.env.SITE_URL || "https://uccelli-society.ch";
+export const SITE_URL = process.env.SITE_URL || "https://uccelli.qrwed.uk";
 
-/** Public URL for a path in a given locale (DE has no prefix — localePrefix "as-needed"). */
+export function localizedPath(path: string, locale: Locale): string {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  if (locale === "de") return normalized;
+  return normalized === "/" ? `/${locale}` : `/${locale}${normalized}`;
+}
+
 export function localizedUrl(path: string, locale: Locale): string {
-  const clean = path === "/" ? "" : path;
-  return locale === "de" ? `${SITE_URL}${clean || "/"}` : `${SITE_URL}/en${clean}`;
+  return `${SITE_URL}${localizedPath(path, locale)}`;
 }
 
 interface PageMetadataInput {
@@ -14,10 +18,11 @@ interface PageMetadataInput {
   description?: string;
   path: string;
   locale: Locale;
+  image?: string;
+  type?: "website" | "article";
 }
 
-/** Metadata with canonical + hreflang alternates for every page. */
-export function pageMetadata({ title, description, path, locale }: PageMetadataInput): Metadata {
+export function pageMetadata({ title, description, path, locale, image, type = "website" }: PageMetadataInput): Metadata {
   return {
     title,
     description,
@@ -29,6 +34,12 @@ export function pageMetadata({ title, description, path, locale }: PageMetadataI
         "x-default": localizedUrl(path, "de"),
       },
     },
-    openGraph: description ? { title, description, type: "website" } : undefined,
+    openGraph: {
+      title,
+      description,
+      type,
+      url: localizedUrl(path, locale),
+      ...(image ? { images: [{ url: image }] } : {}),
+    },
   };
 }
