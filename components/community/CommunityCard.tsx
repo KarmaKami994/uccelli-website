@@ -6,8 +6,13 @@ import { localizedPath } from "@/lib/seo";
 
 export function CommunityCard({ item, locale, labels }: { item: CommunityItem; locale: Locale; labels: { type: string; status: string; open: string; details: string } }) {
   const internalHref = localizedPath(`/community/${item.slug}`, locale);
-  const href = item.status === "available" && item.href ? item.href : internalHref;
-  const external = href.startsWith("http");
+  const configuredHref = item.status === "available" ? item.href : undefined;
+  const external = Boolean(configuredHref?.startsWith("http"));
+  const href = configuredHref
+    ? external
+      ? configuredHref
+      : localizedPath(configuredHref, locale)
+    : internalHref;
 
   return (
     <article className="group border border-neutral-200 rounded-[12px] overflow-hidden bg-white flex flex-col hover:shadow-lg hover:border-neutral-300 transition-all">
