@@ -9,10 +9,16 @@ import { CommunityCard } from "@/components/community/CommunityCard";
 import { NewsCard } from "@/components/news/NewsCard";
 import { PartnerMarquee } from "@/components/partners/PartnerMarquee";
 import { getCommunityItems, getHomepage, getPartners, getPosts, getProjects } from "@/lib/data";
-import { toLocale } from "@/lib/payload";
+import { toLocale, type Locale } from "@/lib/payload";
 import { localizedPath, pageMetadata } from "@/lib/seo";
 
 type Params = { params: Promise<{ locale: string }> };
+
+function localizeCmsHref(href: string | undefined, locale: Locale): string | undefined {
+  if (!href || href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("#")) return href;
+  const withoutLocale = href.replace(/^\/en(?=\/|$)/, "") || "/";
+  return localizedPath(withoutLocale, locale);
+}
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const locale = toLocale((await params).locale);
@@ -36,9 +42,7 @@ export default async function HomePage({ params }: Params) {
     getPartners(locale),
   ]);
 
-  if (!homepage) {
-    return <p className="py-20 text-center text-neutral-500">{t("contentMissing")}</p>;
-  }
+  if (!homepage) return <p className="py-20 text-center text-neutral-500">{t("contentMissing")}</p>;
 
   const featuredProjects = projects.filter((project) => project.featured).slice(0, 4);
   const projectSelection = featuredProjects.length > 0 ? featuredProjects : projects.slice(0, 4);
@@ -58,7 +62,7 @@ export default async function HomePage({ params }: Params) {
         title={homepage.hero.title}
         subtitle={homepage.hero.subtitle}
         ctaText={homepage.hero.ctaText}
-        ctaHref={homepage.hero.ctaHref}
+        ctaHref={localizeCmsHref(homepage.hero.ctaHref, locale)}
         variant="gradient"
         imageSrc={homepage.hero.image}
       />
@@ -74,9 +78,7 @@ export default async function HomePage({ params }: Params) {
             <Button href={localizedPath("/projekte", locale)} variant="secondary">{t("allProjects")}</Button>
           </ScrollReveal>
           <StaggerReveal className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-            {projectSelection.map((project) => (
-              <ProjectCard key={project.slug} project={project} locale={locale} categoryLabel={categoryLabels[project.category]} ctaLabel={t("viewProject")} />
-            ))}
+            {projectSelection.map((project) => <ProjectCard key={project.slug} project={project} locale={locale} categoryLabel={categoryLabels[project.category]} ctaLabel={t("viewProject")} />)}
           </StaggerReveal>
         </div>
       </section>
@@ -93,17 +95,7 @@ export default async function HomePage({ params }: Params) {
           </ScrollReveal>
           <StaggerReveal className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {communitySelection.map((item) => (
-              <CommunityCard
-                key={item.slug}
-                item={item}
-                locale={locale}
-                labels={{
-                  type: t(`communityTypes.${item.type}`),
-                  status: t(`communityStatuses.${item.status}`),
-                  open: t("openCommunity"),
-                  details: t("communityDetails"),
-                }}
-              />
+              <CommunityCard key={item.slug} item={item} locale={locale} labels={{ type: t(`communityTypes.${item.type}`), status: t(`communityStatuses.${item.status}`), open: t("openCommunity"), details: t("communityDetails") }} />
             ))}
           </StaggerReveal>
         </div>
@@ -130,7 +122,7 @@ export default async function HomePage({ params }: Params) {
           {homepage.about.eyebrow && <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-500 mb-4 font-bold">{homepage.about.eyebrow}</p>}
           <h2 className="text-[clamp(1.75rem,5vw,3rem)] font-bold mb-6 max-w-2xl leading-tight">{homepage.about.title}</h2>
           <p className="text-[17px] text-neutral-400 max-w-3xl mb-9 leading-[1.75]">{homepage.about.text}</p>
-          {homepage.about.ctaText && homepage.about.ctaHref && <Button variant="secondary" href={homepage.about.ctaHref}>{homepage.about.ctaText}</Button>}
+          {homepage.about.ctaText && homepage.about.ctaHref && <Button variant="secondary" href={localizeCmsHref(homepage.about.ctaHref, locale)}>{homepage.about.ctaText}</Button>}
         </ScrollReveal>
       </section>
 
@@ -140,7 +132,7 @@ export default async function HomePage({ params }: Params) {
         <ScrollReveal className="max-w-[680px] mx-auto">
           <h2 className="text-[clamp(1.75rem,5vw,3rem)] font-bold mb-5 leading-tight">{homepage.cta.title}</h2>
           {homepage.cta.text && <p className="text-[17px] text-neutral-600 mb-10 leading-relaxed">{homepage.cta.text}</p>}
-          {homepage.cta.buttonText && homepage.cta.buttonHref && <Button size="lg" href={homepage.cta.buttonHref}>{homepage.cta.buttonText}</Button>}
+          {homepage.cta.buttonText && homepage.cta.buttonHref && <Button size="lg" href={localizeCmsHref(homepage.cta.buttonHref, locale)}>{homepage.cta.buttonText}</Button>}
         </ScrollReveal>
       </section>
     </>
