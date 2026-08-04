@@ -3,8 +3,10 @@ import { contentAccess } from "../lib/access";
 
 export const Werte: CollectionConfig = {
   slug: "werte",
+  labels: { singular: "Wert (Archiv)", plural: "Werte (Archiv)" },
   access: contentAccess,
   admin: {
+    group: false,
     useAsTitle: "title",
     defaultColumns: ["title", "slug"],
   },
