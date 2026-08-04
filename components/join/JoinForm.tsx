@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Button } from "@/components/ui/Button";
 
@@ -29,6 +29,7 @@ export function JoinForm({
   turnstileSiteKey?: string;
 }) {
   const t = useTranslations("join.form");
+  const locale = useLocale() === "en" ? "en" : "de";
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [serverError, setServerError] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
@@ -51,7 +52,17 @@ export function JoinForm({
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: data.name, email: data.email, subject, message, turnstileToken }),
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          subject,
+          message,
+          source: "join",
+          interest: data.interest,
+          project: projectTitle,
+          locale,
+          turnstileToken,
+        }),
       });
       const result = await response.json();
       if (!response.ok) {
