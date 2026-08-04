@@ -3,18 +3,18 @@
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Button } from "./Button";
 import { createContactSchema, type ContactFormData } from "@/lib/contact-schema";
 
 interface ContactFormProps {
-  /** Cloudflare Turnstile site key (public). When unset, the widget is not rendered (dev). */
   turnstileSiteKey?: string;
 }
 
 export function ContactForm({ turnstileSiteKey }: ContactFormProps) {
   const t = useTranslations("kontakt.form");
+  const locale = useLocale() === "en" ? "en" : "de";
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [serverError, setServerError] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
@@ -43,7 +43,7 @@ export function ContactForm({ turnstileSiteKey }: ContactFormProps) {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, turnstileToken }),
+        body: JSON.stringify({ ...data, source: "contact", locale, turnstileToken }),
       });
 
       const result = await res.json();
@@ -51,7 +51,6 @@ export function ContactForm({ turnstileSiteKey }: ContactFormProps) {
       if (!res.ok) {
         setServerError(result.error || t("errorGeneric"));
         setStatus("error");
-        // Turnstile tokens are single-use — get a fresh one for the retry.
         turnstileRef.current?.reset();
         setTurnstileToken("");
         return;
@@ -69,7 +68,7 @@ export function ContactForm({ turnstileSiteKey }: ContactFormProps) {
   if (status === "sent") {
     return (
       <div className="py-12 text-center border border-dashed border-neutral-300 rounded-[12px]">
-        <div className="text-2xl mb-3">✓</div>
+        <div className="text-2xl mb-3" aria-hidden="true">✓</div>
         <p className="text-lg font-bold mb-2">{t("successTitle")}</p>
         <p className="text-neutral-500">{t("successText")}</p>
       </div>
@@ -85,7 +84,7 @@ export function ContactForm({ turnstileSiteKey }: ContactFormProps) {
   const waitingForTurnstile = Boolean(turnstileSiteKey) && turnstileToken === "";
 
   return (
-    <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} noValidate>
+    <form onSubmit={(event) => void handleSubmit(onSubmit)(event)} noValidate>
       <div className="space-y-5">
         {fields.map((field) => (
           <div key={field.name}>
@@ -133,9 +132,7 @@ export function ContactForm({ turnstileSiteKey }: ContactFormProps) {
           />
         )}
 
-        {serverError && (
-          <p className="text-red-500 text-[13px]" role="alert">{serverError}</p>
-        )}
+        {serverError && <p className="text-red-500 text-[13px]" role="alert">{serverError}</p>}
 
         <Button type="submit" variant="primary" disabled={status === "sending" || waitingForTurnstile}>
           {status === "sending" ? t("sending") : t("send")}
