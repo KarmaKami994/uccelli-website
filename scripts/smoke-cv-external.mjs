@@ -14,27 +14,79 @@ const ASSET_SOURCES = vm.runInNewContext(`(${block[1]})`);
 const overrides = fs.readFileSync(path.join(root, "asset-overrides.js"), "utf8");
 vm.runInNewContext(overrides, { ASSET_SOURCES });
 
-const tex = String.raw`%!TEX TS-program = xelatex
-\documentclass[]{awesome-cv}
-\usepackage{textcomp}
-\fontdir[fonts/]
-\colorlet{awesome}{awesome-red}
-\begin{document}
-\begin{center}
-\headerfirstnamestyle{Test} \headerlastnamestyle{Person} \\
-\vspace{2mm}
-{\faEnvelope\ test@example.com} | {\faMobile\ +41 79 000 00 00} | {\faMapMarker\ Zürich}
-\end{center}
-\cvsection{Experience}
-\begin{cventries}
-\cventry
-{Software Engineer}
-{Example AG}
-{Zürich}
-{2024 -- Present}
-{\begin{cvitems}\item {Built a neutral integration test.}\end{cvitems}}
-\end{cventries}
-\end{document}`;
+const templateContext = vm.createContext({
+  copy: { current: "Present" },
+  e: (value) => String(value ?? ""),
+});
+vm.runInContext(fs.readFileSync(path.join(root, "template-awesome.js"), "utf8"), templateContext);
+
+templateContext.values = {
+  basics: {
+    name: "Test Person",
+    email: "test@example.com",
+    phone: "+41 79 000 00 00",
+    location: { address: "Zürich" },
+    website: "example.com",
+  },
+  work: [
+    {
+      company: "Example Public Administration",
+      position: "Solution Architect Security",
+      location: "Zürich",
+      startDate: "September 2024",
+      endDate: "Present",
+      highlights: [
+        "Security governance: developed policies, standards and compliance requirements across a complex public-sector environment.",
+        "Advised internal teams and senior stakeholders on security architecture decisions, risks and practical mitigations.",
+        "Designed a data-governance strategy including classification, sensitivity labels and information protection.",
+        "Configured data-loss-prevention policies, retention labels and eDiscovery for regulatory requirements.",
+        "Integrated cloud services into a central governance overview while preserving operational responsibilities.",
+        "Designed and implemented a public key infrastructure with root and issuing certification authorities.",
+        "Automated certificate management and documented certificate policies and practice statements.",
+      ],
+    },
+    {
+      company: "Example Engineering AG",
+      position: "Cloud Engineer",
+      location: "Oerlikon, Zürich",
+      startDate: "August 2021",
+      endDate: "August 2023",
+      highlights: [
+        "Operated and troubleshot cloud environments across second- and third-level support including demanding incidents.",
+        "Built identity, governance and compliance controls for a multi-service cloud platform.",
+        "Automated operational processes with command-line tooling and infrastructure-as-code practices.",
+        "Created operating manuals, technical documentation and reusable knowledge-base articles.",
+        "Worked closely with internal teams to integrate cloud solutions into existing systems and processes.",
+      ],
+    },
+    {
+      company: "Example Technology GmbH",
+      position: "System Administrator",
+      location: "Zürich",
+      startDate: "2018",
+      endDate: "2021",
+      highlights: [
+        "Maintained cloud workloads, networks and resources and supported business-critical infrastructure.",
+        "Improved system efficiency with scripts and reduced repetitive manual interventions.",
+        "Delivered technical support and maintained clear operational documentation.",
+      ],
+    },
+  ],
+  education: [],
+  skills: [],
+  projects: [],
+  awards: [],
+  sections: ["profile", "work"],
+  headings: { work: "Experience" },
+};
+
+const tex = vm.runInContext("buildTex_t2(values)", templateContext);
+if (!tex.includes("\\renewenvironment{cvitems}")) {
+  throw new Error("Generated Awesome-CV document is missing the safe cvitems spacing override");
+}
+if (tex.includes("\\vspace{-4mm}")) {
+  throw new Error("Generated Awesome-CV document still contains the overlapping legacy list spacing");
+}
 
 async function load(resourcePath, source) {
   if (source.startsWith("./")) {
@@ -78,4 +130,8 @@ if (bytes.subarray(0, 4).toString() !== "%PDF") {
   throw new Error(`Compiler did not return a PDF: ${bytes.toString("utf8", 0, 1000)}`);
 }
 
-console.log(`External Awesome-CV compilation succeeded (${bytes.length} bytes).`);
+if (bytes.length < 10_000) {
+  throw new Error(`Compiler returned an unexpectedly small PDF (${bytes.length} bytes)`);
+}
+
+console.log(`External long-form Awesome-CV compilation succeeded (${bytes.length} bytes).`);
