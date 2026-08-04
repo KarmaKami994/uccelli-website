@@ -7,10 +7,8 @@ services:
       - "3100:3000"
     environment:
       - DATABASE_URI=file:/app/data/uccelli.db
-      # No insecure fallback: the container refuses to start when
-      # PAYLOAD_SECRET is missing (fail fast instead of fail open).
       - PAYLOAD_SECRET=${PAYLOAD_SECRET:?PAYLOAD_SECRET muss gesetzt sein (.env)}
-      - SITE_URL=${SITE_URL:-https://uccelli-society.ch}
+      - SITE_URL=${SITE_URL:-https://uccelli.qrwed.uk}
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-}
       - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY:-}
