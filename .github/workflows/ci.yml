@@ -48,6 +48,12 @@ jobs:
       - name: Generate Payload types
         run: npm run generate:types
 
+      - name: Validate CV Creator scripts
+        run: |
+          for file in public/tools/cv-creator/*.js; do
+            node --check "$file"
+          done
+
       - name: Lint
         run: npm run lint
 
