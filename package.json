@@ -18,7 +18,7 @@
     "migrate": "payload migrate",
     "migrate:create": "payload migrate:create",
     "seed": "tsx scripts/seed.ts",
-    "content:projects-en": "payload run scripts/import-projects-en.ts",
+    "content:projects-en": "tsx scripts/run-projects-en.ts",
     "content:sync": "payload run scripts/sync-content.ts && payload run scripts/activate-cv-creator.ts"
   },
   "dependencies": {
