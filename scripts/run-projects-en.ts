@@ -44,6 +44,61 @@ async function buildRuntimeSource() {
 
   source = source.replace(oldEntrypoint, newEntrypoint);
 
+  const oldProjectLookup = [
+    "    if (found.totalDocs !== 1 || !found.docs[0]) {",
+    "      throw new Error(",
+    "        `Expected exactly one project with slug ${project.slug}, found ${found.totalDocs}` ,",
+    "      );",
+    "    }",
+    "",
+    "    const id = found.docs[0].id;",
+  ].join("\n").replace("}` ,", "}`," );
+
+  const newProjectLookup = [
+    "    if (found.totalDocs > 1) {",
+    "      throw new Error(",
+    "        `Expected at most one project with slug ${project.slug}, found ${found.totalDocs}` ,",
+    "      );",
+    "    }",
+    "",
+    "    let document = found.docs[0];",
+    "",
+    "    if (!document) {",
+    "      if (project.slug !== \"steuern-versicherung\") {",
+    "        throw new Error(`Project with slug ${project.slug} is missing`);",
+    "      }",
+    "",
+    "      document = await cms.create({",
+    "        collection: \"projects\" ,",
+    "        locale: \"de\" ,",
+    "        overrideAccess: true,",
+    "        data: {",
+    "          slug: \"steuern-versicherung\" ,",
+    "          category: \"bildung\" ,",
+    "          featured: false,",
+    "          title: \"Steuern & Versicherungs Schulung\" ,",
+    "          summary:",
+    "            \"Die Steuer- und Finanzschulung vermittelt praxisnahes Wissen zum Schweizer Steuersystem, zu Versicherungen, Vorsorge und persönlicher Finanzplanung.\" ,",
+    "        },",
+    "      });",
+    "",
+    "      payload.logger.info(",
+    "        \"CREATED DE BASE: steuern-versicherung -> Steuern & Versicherungs Schulung\" ,",
+    "      );",
+    "    }",
+    "",
+    "    const id = document.id;",
+  ]
+    .join("\n")
+    .replaceAll("}` ,", "}`,")
+    .replaceAll("\" ,", "\",");
+
+  if (!source.includes(oldProjectLookup)) {
+    throw new Error("Could not find the expected project lookup block");
+  }
+
+  source = source.replace(oldProjectLookup, newProjectLookup);
+
   const oldEnding = ["  process.exit(0);", "};"].join("\n");
   const trimmed = source.trimEnd();
 
