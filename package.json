@@ -18,8 +18,8 @@
     "migrate": "payload migrate",
     "migrate:create": "payload migrate:create",
     "seed": "tsx scripts/seed.ts",
-    "content:projects-en": "tsx scripts/run-projects-en.ts",
-    "content:sync": "tsx scripts/sync-content.ts && tsx scripts/activate-cv-creator.ts"
+    "content:projects-en": "NODE_ENV=production tsx scripts/run-projects-en.ts",
+    "content:sync": "NODE_ENV=production tsx scripts/sync-content.ts && NODE_ENV=production tsx scripts/activate-cv-creator.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
