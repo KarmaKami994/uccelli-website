@@ -6,7 +6,10 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
-    files: ["scripts/sync-content.ts"],
+    files: [
+      "scripts/sync-content.ts",
+      "scripts/import-projects-en.ts",
+    ],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
     },
