@@ -44,6 +44,41 @@ jobs:
       - name: Sync canonical content
         run: npm run content:sync
 
+      - name: Import English project translations
+        run: npm run content:projects-en
+
+      - name: Verify English project rows in SQLite
+        run: |
+          python3 <<'PY'
+          import sqlite3
+
+          conn = sqlite3.connect("data/ci.db")
+          rows = conn.execute(
+              """
+              SELECT p.slug, pl.title, pl.summary, pl.body
+              FROM projects AS p
+              JOIN projects_locales AS pl ON pl._parent_id = p.id
+              WHERE pl._locale = 'en'
+              ORDER BY p.slug
+              """
+          ).fetchall()
+
+          expected = {
+              "kleidersammelaktion",
+              "lifelab",
+              "nightshift-music",
+              "skills4growth",
+              "steuern-versicherung",
+              "uccelli-liga",
+          }
+
+          found = {row[0] for row in rows}
+          assert found == expected, (found, expected)
+          assert all(row[1] and row[2] and row[3] for row in rows), rows
+          print(f"Verified {len(rows)} English project locale rows.")
+          conn.close()
+          PY
+
       - name: Generate Payload types
         run: npm run generate:types
 
