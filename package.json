@@ -19,7 +19,7 @@
     "migrate:create": "payload migrate:create",
     "seed": "tsx scripts/seed.ts",
     "content:projects-en": "tsx scripts/run-projects-en.ts",
-    "content:sync": "payload run scripts/sync-content.ts && payload run scripts/activate-cv-creator.ts"
+    "content:sync": "tsx scripts/sync-content.ts && tsx scripts/activate-cv-creator.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
