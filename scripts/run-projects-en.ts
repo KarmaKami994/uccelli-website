@@ -52,7 +52,9 @@ async function buildRuntimeSource() {
     "    }",
     "",
     "    const id = found.docs[0].id;",
-  ].join("\n").replace("}` ,", "}`," );
+  ]
+    .join("\n")
+    .replace("}` ,", "}`,");
 
   const newProjectLookup = [
     "    if (found.totalDocs > 1) {",
@@ -64,34 +66,33 @@ async function buildRuntimeSource() {
     "    let document = found.docs[0];",
     "",
     "    if (!document) {",
-    "      if (project.slug !== \"steuern-versicherung\") {",
+    '      if (project.slug !== "steuern-versicherung") {',
     "        throw new Error(`Project with slug ${project.slug} is missing`);",
     "      }",
     "",
     "      document = await cms.create({",
-    "        collection: \"projects\" ,",
-    "        locale: \"de\" ,",
+    '        collection: "projects",',
+    '        locale: "de",',
     "        overrideAccess: true,",
     "        data: {",
-    "          slug: \"steuern-versicherung\" ,",
-    "          category: \"bildung\" ,",
+    '          slug: "steuern-versicherung",',
+    '          category: "bildung",',
     "          featured: false,",
-    "          title: \"Steuern & Versicherungs Schulung\" ,",
+    '          title: "Steuern & Versicherungs Schulung",',
     "          summary:",
-    "            \"Die Steuer- und Finanzschulung vermittelt praxisnahes Wissen zum Schweizer Steuersystem, zu Versicherungen, Vorsorge und persönlicher Finanzplanung.\" ,",
+    '            "Die Steuer- und Finanzschulung vermittelt praxisnahes Wissen zum Schweizer Steuersystem, zu Versicherungen, Vorsorge und persönlicher Finanzplanung.",',
     "        },",
     "      });",
     "",
     "      payload.logger.info(",
-    "        \"CREATED DE BASE: steuern-versicherung -> Steuern & Versicherungs Schulung\" ,",
+    '        "CREATED DE BASE: steuern-versicherung -> Steuern & Versicherungs Schulung",',
     "      );",
     "    }",
     "",
     "    const id = document.id;",
   ]
     .join("\n")
-    .replaceAll("}` ,", "}`,")
-    .replaceAll("\" ,", "\",");
+    .replace("}` ,", "}`,");
 
   if (!source.includes(oldProjectLookup)) {
     throw new Error("Could not find the expected project lookup block");
