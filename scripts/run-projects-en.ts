@@ -113,8 +113,6 @@ async function buildRuntimeSource() {
 }
 
 async function main() {
-  process.env.NODE_ENV = "production";
-
   const runtimeSource = await buildRuntimeSource();
   await writeFile(runtimePath, runtimeSource, "utf8");
 
