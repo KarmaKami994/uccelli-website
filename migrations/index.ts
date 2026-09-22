@@ -3,6 +3,7 @@ import * as migration_20260804_190000_community_items from './20260804_190000_co
 import * as migration_20260804_203000_contact_submissions from './20260804_203000_contact_submissions';
 import * as migration_20260804_213000_enable_cv_creator from './20260804_213000_enable_cv_creator';
 import * as migration_20260922_092500_payload_390_auth from './20260922_092500_payload_390_auth';
+import * as migration_20260922_111500_r2_object_key from './20260922_111500_r2_object_key';
 
 export const migrations = [
   {
@@ -29,5 +30,10 @@ export const migrations = [
     up: migration_20260922_092500_payload_390_auth.up,
     down: migration_20260922_092500_payload_390_auth.down,
     name: '20260922_092500_payload_390_auth'
+  },
+  {
+    up: migration_20260922_111500_r2_object_key.up,
+    down: migration_20260922_111500_r2_object_key.down,
+    name: '20260922_111500_r2_object_key'
   },
 ];
