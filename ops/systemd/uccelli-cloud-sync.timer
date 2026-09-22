@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Uccelli Cloudflare content sync every two minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+RandomizedDelaySec=15s
+Persistent=true
+Unit=uccelli-cloud-sync.service
+
+[Install]
+WantedBy=timers.target
