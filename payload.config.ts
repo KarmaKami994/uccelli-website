@@ -59,13 +59,6 @@ const isCLI = process.argv.some((value) => {
   );
 });
 
-const secret = process.env.PAYLOAD_SECRET;
-if (!secret && isProduction && !isCLI) {
-  throw new Error(
-    "PAYLOAD_SECRET is not set. Configure it as a Cloudflare Worker secret before serving production traffic.",
-  );
-}
-
 const createLog =
   (level: string, fn: typeof console.log) =>
   (objOrMsg: object | string, msg?: string) => {
@@ -193,7 +186,7 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
-  secret: secret || "cloudflare-build-only-secret",
+  secret: process.env.PAYLOAD_SECRET || "",
 });
 
 async function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
