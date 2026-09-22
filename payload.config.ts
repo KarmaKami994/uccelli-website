@@ -96,7 +96,7 @@ export default buildConfig({
   db: sqliteD1Adapter({
     binding: env.D1,
   }),
-  storage: [
+  plugins: [
     r2Storage({
       bucket: env.R2,
       collections: {
