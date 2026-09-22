@@ -221,6 +221,30 @@ def media_signature(path: Path) -> str:
     return f"{stat.st_size}:{stat.st_mtime_ns}"
 
 
+def get_media_records() -> list[tuple[str, str | None]]:
+    if not DB_PATH.exists():
+        raise FileNotFoundError(f"Local database not found: {DB_PATH}")
+
+    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
+    try:
+        rows = conn.execute(
+            """
+            SELECT filename, mime_type
+            FROM media
+            WHERE filename IS NOT NULL
+              AND filename <> ''
+            ORDER BY id
+            """
+        ).fetchall()
+    finally:
+        conn.close()
+
+    return [
+        (str(filename), str(mime_type) if mime_type else None)
+        for filename, mime_type in rows
+    ]
+
+
 def sync_media(state: dict, *, dry_run: bool = False) -> int:
     if not MEDIA_DIR.exists():
         log(f"Media directory {MEDIA_DIR} does not exist; skipping R2 sync")
@@ -229,16 +253,28 @@ def sync_media(state: dict, *, dry_run: bool = False) -> int:
     media_state = state.setdefault("media", {})
     uploads = 0
 
-    for path in sorted(p for p in MEDIA_DIR.rglob("*") if p.is_file()):
-        relative = path.relative_to(MEDIA_DIR).as_posix()
-        signature = media_signature(path)
-        if media_state.get(relative) == signature:
+    for filename, stored_mime_type in get_media_records():
+        path = MEDIA_DIR / filename
+
+        if not path.is_file():
+            log(f"Media referenced by database is missing locally: {filename}")
             continue
 
-        mime_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
-        target = f"{R2_BUCKET}/{relative}"
+        signature = media_signature(path)
 
-        log(f"Uploading media: {relative}")
+        if media_state.get(filename) == signature:
+            continue
+
+        mime_type = (
+            stored_mime_type
+            or mimetypes.guess_type(path.name)[0]
+            or "application/octet-stream"
+        )
+
+        target = f"{R2_BUCKET}/{filename}"
+
+        log(f"Uploading media: {filename} ({mime_type})")
+
         run(
             wrangler_base()
             + [
@@ -254,7 +290,8 @@ def sync_media(state: dict, *, dry_run: bool = False) -> int:
         )
 
         if not dry_run:
-            media_state[relative] = signature
+            media_state[filename] = signature
+
         uploads += 1
 
     return uploads
