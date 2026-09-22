@@ -1,0 +1,44 @@
+# Dedicated home-server CMS build.
+# The public website continues to run on Cloudflare; this image only hosts Payload Admin.
+
+FROM node:22-alpine AS builder
+WORKDIR /app
+
+RUN apk add --no-cache libc6-compat
+
+COPY package.json ./
+RUN npm install --no-audit --no-fund
+
+COPY . .
+
+# Build against the local SQLite config, not the Cloudflare D1 config.
+RUN cp payload.config.home.ts payload.config.ts
+
+# The Cloudflare-only R2 passthrough route must not shadow Payload's local-file route.
+RUN rm -rf "app/(payload)/api/media/file"
+
+RUN npm run build
+RUN npm prune --omit=dev
+
+FROM node:22-alpine
+WORKDIR /app
+
+RUN apk add --no-cache libc6-compat
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+ENV ADMIN_ONLY=1
+
+COPY --from=builder --chown=node:node /app ./
+
+RUN mkdir -p /app/data /app/media && chown -R node:node /app/data /app/media
+
+USER node
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1
+
+CMD ["npm", "run", "start"]
