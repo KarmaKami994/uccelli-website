@@ -9,7 +9,7 @@ import {
 } from "@payloadcms/next/layouts";
 import React from "react";
 
-import { importMap } from "./admin/[[...segments]]/importMap";
+import { importMap } from "./admin/importMap.js";
 
 export const generateViewport = generatePayloadViewport;
 
