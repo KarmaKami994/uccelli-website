@@ -22,7 +22,7 @@
     "content:sync": "NODE_ENV=production tsx scripts/sync-content.ts && NODE_ENV=production tsx scripts/activate-cv-creator.ts",
     "cloudflare:migrate": "CLOUDFLARE_REMOTE=1 NODE_ENV=production PAYLOAD_SECRET=ignore payload migrate && wrangler d1 execute D1 --command 'PRAGMA optimize' --remote",
     "cloudflare:build": "npm run cloudflare:migrate && opennextjs-cloudflare build",
-    "deploy": "opennextjs-cloudflare deploy",
+    "deploy": "npm run cloudflare:build && opennextjs-cloudflare deploy",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview"
   },
   "dependencies": {
