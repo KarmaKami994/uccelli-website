@@ -1,19 +1,15 @@
 /**
  * Runs once at server startup (Next.js instrumentation hook).
- * Fail fast when required configuration is missing, instead of booting
- * an insecure server that errors lazily on first CMS access.
+ * Throwing is Worker-compatible; process.exit is not available in workerd.
  */
 export async function register() {
   if (
     process.env.NODE_ENV === "production" &&
-    !process.env.PAYLOAD_SECRET
+    !process.env.PAYLOAD_SECRET &&
+    process.env.NEXT_PHASE !== "phase-production-build"
   ) {
-    // eslint-disable-next-line no-console
-    console.error(
-      "\n[FATAL] PAYLOAD_SECRET ist nicht gesetzt. Server-Start abgebrochen.\n" +
-        "        Secret generieren:  openssl rand -hex 32\n" +
-        "        Dann in .env bzw. docker-compose Umgebung setzen (siehe .env.example).\n"
+    throw new Error(
+      "PAYLOAD_SECRET ist nicht gesetzt. Configure it as a Cloudflare Worker secret before serving production traffic."
     );
-    process.exit(1);
   }
 }

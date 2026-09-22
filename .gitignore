@@ -17,6 +17,11 @@
 /.next/
 /out/
 
+# cloudflare
+/.open-next/
+/.wrangler/
+.dev.vars*
+
 # production
 /build
 
@@ -45,4 +50,3 @@ next-env.d.ts
 *.db-journal
 /data/
 /media/
-

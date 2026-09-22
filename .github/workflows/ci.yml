@@ -17,7 +17,6 @@ jobs:
     timeout-minutes: 30
     env:
       PAYLOAD_SECRET: ci-only-payload-secret-with-sufficient-length
-      DATABASE_URI: file:./data/ci.db
       SITE_URL: http://localhost:3000
       RESEND_API_KEY: ""
       TURNSTILE_SITE_KEY: ""
@@ -30,54 +29,10 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Install dependencies
-        run: npm ci --no-audit --no-fund
-
-      - name: Prepare test database
-        run: mkdir -p data
-
-      - name: Apply Payload migrations
-        run: npm run migrate
-
-      - name: Sync canonical content
-        run: npm run content:sync
-
-      - name: Import English project translations
-        run: npm run content:projects-en
-
-      - name: Verify English project rows in SQLite
-        run: |
-          python3 <<'PY'
-          import sqlite3
-
-          conn = sqlite3.connect("data/ci.db")
-          rows = conn.execute(
-              """
-              SELECT p.slug, pl.title, pl.summary, pl.body
-              FROM projects AS p
-              JOIN projects_locales AS pl ON pl._parent_id = p.id
-              WHERE pl._locale = 'en'
-              ORDER BY p.slug
-              """
-          ).fetchall()
-
-          expected = {
-              "kleidersammelaktion",
-              "lifelab",
-              "nightshift-music",
-              "skills4growth",
-              "steuern-versicherung",
-              "uccelli-liga",
-          }
-
-          found = {row[0] for row in rows}
-          assert found == expected, (found, expected)
-          assert all(row[1] and row[2] and row[3] for row in rows), rows
-          print(f"Verified {len(rows)} English project locale rows.")
-          conn.close()
-          PY
+        run: npm install --no-audit --no-fund
 
       - name: Generate Payload types
         run: npm run generate:types
@@ -108,30 +63,5 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Production build
-        run: npm run build
-
-      - name: Docker image build
-        run: docker build --tag uccelli-website:ci .
-
-      - name: Production container smoke test
-        run: |
-          docker run -d --name uccelli-ci -p 3000:3000 \
-            -e PAYLOAD_SECRET=ci-only-payload-secret-with-sufficient-length \
-            -e DATABASE_URI=file:/app/data/uccelli.db \
-            -e SITE_URL=http://localhost:3000 \
-            uccelli-website:ci
-
-          for attempt in $(seq 1 30); do
-            if curl --fail --silent http://127.0.0.1:3000/api/health > /dev/null; then
-              exit 0
-            fi
-            sleep 2
-          done
-
-          docker logs uccelli-ci
-          exit 1
-
-      - name: Remove smoke-test container
-        if: always()
-        run: docker rm -f uccelli-ci 2>/dev/null || true
+      - name: Cloudflare production bundle
+        run: npx opennextjs-cloudflare build

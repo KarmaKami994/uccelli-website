@@ -19,21 +19,27 @@
     "migrate:create": "payload migrate:create",
     "seed": "tsx scripts/seed.ts",
     "content:projects-en": "NODE_ENV=production tsx scripts/run-projects-en.ts",
-    "content:sync": "NODE_ENV=production tsx scripts/sync-content.ts && NODE_ENV=production tsx scripts/activate-cv-creator.ts"
+    "content:sync": "NODE_ENV=production tsx scripts/sync-content.ts && NODE_ENV=production tsx scripts/activate-cv-creator.ts",
+    "cloudflare:migrate": "CLOUDFLARE_REMOTE=1 NODE_ENV=production PAYLOAD_SECRET=ignore payload migrate && wrangler d1 execute D1 --command 'PRAGMA optimize' --remote",
+    "cloudflare:build": "npm run cloudflare:migrate && opennextjs-cloudflare build",
+    "deploy": "wrangler deploy",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^5.4.0",
     "@marsidev/react-turnstile": "^1.3.0",
-    "@payloadcms/db-sqlite": "^3.85.1",
+    "@opennextjs/cloudflare": "1.20.6",
+    "@payloadcms/db-d1-sqlite": "3.85.1",
     "@payloadcms/next": "^3.85.1",
     "@payloadcms/richtext-lexical": "^3.85.1",
+    "@payloadcms/storage-r2": "3.85.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.41.0",
     "gsap": "^3.15.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.21.0",
-    "next": "16.2.9",
+    "next": "16.3.5",
     "next-intl": "^4.13.0",
     "payload": "^3.85.1",
     "react": "19.2.4",
@@ -50,17 +56,21 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/leaflet": "^1.9.21",
-    "@types/node": "^20",
+    "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.3",
     "eslint": "^9",
-    "eslint-config-next": "16.2.9",
+    "eslint-config-next": "16.3.5",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4",
     "tsx": "^4.22.4",
     "typescript": "^5",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.9",
+    "wrangler": "4.136.1"
   },
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": ">=24.15.0"
+  }
 }

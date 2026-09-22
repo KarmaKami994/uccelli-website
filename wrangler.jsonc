@@ -1,0 +1,33 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "uccelli-website",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-21",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+  "build": {
+    "command": "npm run cloudflare:build"
+  },
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "D1",
+      "database_name": "uccelli-prod",
+      "database_id": "ee481111-658c-41af-b8f1-5f231a2f8dd3"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "uccelli-media"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

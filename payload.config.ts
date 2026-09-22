@@ -1,10 +1,11 @@
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { buildConfig } from "payload";
-
-const dirname = path.dirname(fileURLToPath(import.meta.url));
-import { sqliteAdapter } from "@payloadcms/db-sqlite";
+import { sqliteD1Adapter } from "@payloadcms/db-d1-sqlite";
 import { lexicalEditor, FixedToolbarFeature, HeadingFeature } from "@payloadcms/richtext-lexical";
+import { getCloudflareContext, type CloudflareContext } from "@opennextjs/cloudflare";
+import { r2Storage } from "@payloadcms/storage-r2";
 
 import { Projects } from "./collections/Projects";
 import { Posts } from "./collections/Posts";
@@ -23,13 +24,56 @@ import { Homepage } from "./globals/Homepage";
 import { Navigation } from "./globals/Navigation";
 import { adminOnly, adminOrSelf, adminOnlyField, authenticated } from "./lib/access";
 
-const secret = process.env.PAYLOAD_SECRET;
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
+const isProduction = process.env.NODE_ENV === "production";
 const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
-if (!secret && process.env.NODE_ENV === "production" && !isBuildPhase) {
+
+const realpath = (value: string) => (fs.existsSync(value) ? fs.realpathSync(value) : "");
+const isCLI = process.argv.some((value) =>
+  realpath(value).endsWith(path.join("payload", "bin.js"))
+);
+
+const secret = process.env.PAYLOAD_SECRET;
+if (!secret && isProduction && !isBuildPhase && !isCLI) {
   throw new Error(
-    "PAYLOAD_SECRET is not set. Refusing to start with an insecure default — set it in the environment (see .env.example)."
+    "PAYLOAD_SECRET is not set. Configure it as a Cloudflare Worker secret before serving production traffic."
   );
 }
+
+const createLog =
+  (level: string, fn: typeof console.log) =>
+  (objOrMsg: object | string, msg?: string) => {
+    if (typeof objOrMsg === "string") {
+      fn(JSON.stringify({ level, msg: objOrMsg }));
+    } else {
+      fn(
+        JSON.stringify({
+          level,
+          ...objOrMsg,
+          msg: msg ?? (objOrMsg as { msg?: string }).msg,
+        })
+      );
+    }
+  };
+
+const cloudflareLogger = {
+  level: process.env.PAYLOAD_LOG_LEVEL || "info",
+  trace: createLog("trace", console.debug),
+  debug: createLog("debug", console.debug),
+  info: createLog("info", console.log),
+  warn: createLog("warn", console.warn),
+  error: createLog("error", console.error),
+  fatal: createLog("fatal", console.error),
+  silent: () => {},
+} as any;
+
+const cloudflare =
+  isCLI || !isProduction
+    ? await getCloudflareContextFromWrangler()
+    : await getCloudflareContext({ async: true });
+
+const env = cloudflare.env as any;
 
 export default buildConfig({
   admin: {
@@ -37,6 +81,9 @@ export default buildConfig({
     meta: {
       titleSuffix: " – Uccelli CMS",
       description: "Redaktionssystem für die Website des Vereins Uccelli.",
+    },
+    importMap: {
+      baseDir: path.resolve(dirname),
     },
   },
   editor: lexicalEditor({
@@ -46,9 +93,18 @@ export default buildConfig({
       HeadingFeature({ enabledHeadingSizes: ["h2", "h3", "h4"] }),
     ],
   }),
-  db: sqliteAdapter({
-    client: { url: process.env.DATABASE_URI || "file:./data/uccelli.db" },
+  db: sqliteD1Adapter({
+    binding: env.D1,
   }),
+  storage: [
+    r2Storage({
+      bucket: env.R2,
+      collections: {
+        media: true,
+      },
+    }),
+  ],
+  logger: isProduction ? cloudflareLogger : undefined,
   localization: {
     locales: [
       { label: "Deutsch", code: "de" },
@@ -110,5 +166,15 @@ export default buildConfig({
   ],
   globals: [Homepage, Navigation],
   typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },
-  secret: secret || "insecure-dev-only-secret",
+  secret: secret || "cloudflare-build-only-secret",
 });
+
+async function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
+  const { getPlatformProxy } = await import(
+    /* webpackIgnore: true */ `${"__wrangler".replaceAll("_", "")}`
+  );
+
+  return getPlatformProxy({
+    remoteBindings: process.env.CLOUDFLARE_REMOTE === "1",
+  });
+}

@@ -1,18 +1,29 @@
+import { withPayload } from "@payloadcms/next/withPayload";
 import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
 
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: [
-    "@payloadcms/db-sqlite",
-    "@libsql/client",
-    "@libsql/hrana-client",
-    "drizzle-kit",
-  ],
+  images: {
+    localPatterns: [
+      {
+        pathname: "/api/media/file/**",
+      },
+    ],
+  },
+  serverExternalPackages: ["jose", "pg-cloudflare"],
+  webpack: (webpackConfig) => {
+    webpackConfig.resolve.extensionAlias = {
+      ".cjs": [".cts", ".cjs"],
+      ".js": [".ts", ".tsx", ".js", ".jsx"],
+      ".mjs": [".mts", ".mjs"],
+    };
+
+    return webpackConfig;
+  },
   async redirects() {
     return [
-      // Previous Next.js information architecture
       { source: "/programm/projekte", destination: "/projekte", permanent: true },
       { source: "/programm/projekte/:slug", destination: "/projekte/:slug", permanent: true },
       { source: "/programm/news", destination: "/news", permanent: true },
@@ -24,8 +35,6 @@ const nextConfig: NextConfig = {
       { source: "/ueber-uns/partner", destination: "/ueber-uns#partner", permanent: true },
       { source: "/ueber-uns/faq", destination: "/ueber-uns#faq", permanent: true },
       { source: "/werte/:slug", destination: "/ueber-uns#werte", permanent: true },
-
-      // Old WordPress pages
       { source: "/ueber-die-uccelli-familie", destination: "/ueber-uns#geschichte", permanent: true },
       { source: "/team-4-cols-v2", destination: "/ueber-uns#team", permanent: true },
       { source: "/team/:member", destination: "/ueber-uns#team", permanent: true },
@@ -44,8 +53,6 @@ const nextConfig: NextConfig = {
       { source: "/contact", destination: "/kontakt", permanent: true },
       { source: "/faq", destination: "/ueber-uns#faq", permanent: true },
       { source: "/formulare", destination: "/teil-werden", permanent: true },
-
-      // Old article slugs
       { source: "/dein-weg-zum-job-in-der-schweiz-anker-swiss-ag-wird-neuer-partner-der-uccelli-society", destination: "/news/partnerschaft-anker-swiss", permanent: true },
       { source: "/unsere-wurzeln-unsere-homebase-ein-grosses-danke-an-unseren-ersten-partner-das-gz-hoengg", destination: "/news/danke-gz-hoengg", permanent: true },
       { source: "/uccelli-society-x-royal-studio-wir-halten-eure-erlebnisse-fest", destination: "/news/partnerschaft-royal-studio", permanent: true },
@@ -56,4 +63,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default withPayload(withNextIntl(nextConfig), {
+  devBundleServerPackages: false,
+});

@@ -12,6 +12,8 @@ export const Media: CollectionConfig = {
   },
   upload: {
     mimeTypes: ["image/*", "application/pdf"],
+    crop: false,
+    focalPoint: false,
   },
   admin: {
     group: "Kommunikation",
