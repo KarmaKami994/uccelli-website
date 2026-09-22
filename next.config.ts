@@ -12,7 +12,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  serverExternalPackages: ["jose", "pg-cloudflare"],
+  serverExternalPackages: [
+    "jose",
+    "pg-cloudflare",
+    "@payloadcms/db-sqlite",
+    "@libsql/client",
+    "@libsql/hrana-client",
+    "drizzle-kit",
+  ],
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       ".cjs": [".cts", ".cjs"],
