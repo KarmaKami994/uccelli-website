@@ -15,7 +15,8 @@
     {
       "binding": "D1",
       "database_name": "uccelli-prod",
-      "database_id": "ee481111-658c-41af-b8f1-5f231a2f8dd3"
+      "database_id": "ee481111-658c-41af-b8f1-5f231a2f8dd3",
+      "remote": true
     }
   ],
   "r2_buckets": [

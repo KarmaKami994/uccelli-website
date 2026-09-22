@@ -3,8 +3,16 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { buildConfig } from "payload";
 import { sqliteD1Adapter } from "@payloadcms/db-d1-sqlite";
-import { lexicalEditor, FixedToolbarFeature, HeadingFeature } from "@payloadcms/richtext-lexical";
-import { getCloudflareContext, type CloudflareContext } from "@opennextjs/cloudflare";
+import {
+  lexicalEditor,
+  FixedToolbarFeature,
+  HeadingFeature,
+} from "@payloadcms/richtext-lexical";
+import {
+  getCloudflareContext,
+  type CloudflareContext,
+} from "@opennextjs/cloudflare";
+import type { GetPlatformProxyOptions } from "wrangler";
 import { r2Storage } from "@payloadcms/storage-r2";
 
 import { Projects } from "./collections/Projects";
@@ -22,22 +30,39 @@ import { Pages } from "./collections/Pages";
 import { Media } from "./collections/Media";
 import { Homepage } from "./globals/Homepage";
 import { Navigation } from "./globals/Navigation";
-import { adminOnly, adminOrSelf, adminOnlyField, authenticated } from "./lib/access";
+import {
+  adminOnly,
+  adminOrSelf,
+  adminOnlyField,
+  authenticated,
+} from "./lib/access";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 const isProduction = process.env.NODE_ENV === "production";
-const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
 
-const realpath = (value: string) => (fs.existsSync(value) ? fs.realpathSync(value) : "");
-const isCLI = process.argv.some((value) =>
-  realpath(value).endsWith(path.join("payload", "bin.js"))
-);
+const realpath = (value: string) => {
+  try {
+    return fs.existsSync(value) ? fs.realpathSync(value) : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const isCLI = process.argv.some((value) => {
+  const resolved = realpath(value);
+  if (!resolved) return false;
+
+  return (
+    resolved.endsWith(path.join("payload", "bin.js")) ||
+    resolved.endsWith(path.join("next", "dist", "bin", "next"))
+  );
+});
 
 const secret = process.env.PAYLOAD_SECRET;
-if (!secret && isProduction && !isBuildPhase && !isCLI) {
+if (!secret && isProduction && !isCLI) {
   throw new Error(
-    "PAYLOAD_SECRET is not set. Configure it as a Cloudflare Worker secret before serving production traffic."
+    "PAYLOAD_SECRET is not set. Configure it as a Cloudflare Worker secret before serving production traffic.",
   );
 }
 
@@ -52,7 +77,7 @@ const createLog =
           level,
           ...objOrMsg,
           msg: msg ?? (objOrMsg as { msg?: string }).msg,
-        })
+        }),
       );
     }
   };
@@ -165,16 +190,19 @@ export default buildConfig({
     },
   ],
   globals: [Homepage, Navigation],
-  typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },
+  typescript: {
+    outputFile: path.resolve(dirname, "payload-types.ts"),
+  },
   secret: secret || "cloudflare-build-only-secret",
 });
 
 async function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
-  const { getPlatformProxy } = await import(
+  return import(
     /* webpackIgnore: true */ `${"__wrangler".replaceAll("_", "")}`
+  ).then(({ getPlatformProxy }) =>
+    getPlatformProxy({
+      environment: process.env.CLOUDFLARE_ENV,
+      remoteBindings: isProduction,
+    } satisfies GetPlatformProxyOptions),
   );
-
-  return getPlatformProxy({
-    remoteBindings: process.env.CLOUDFLARE_REMOTE === "1",
-  });
 }
