@@ -50,3 +50,5 @@ next-env.d.ts
 *.db-journal
 /data/
 /media/
+
+/backups/
