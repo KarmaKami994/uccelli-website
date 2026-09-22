@@ -1,4 +1,4 @@
-import { MigrateDownArgs, MigrateUpArgs, sql } from "@payloadcms/db-sqlite";
+import { MigrateDownArgs, MigrateUpArgs, sql } from "@payloadcms/db-d1-sqlite";
 
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.run(sql`CREATE TABLE IF NOT EXISTS \`contact_submissions\` (
