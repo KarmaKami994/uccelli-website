@@ -6,6 +6,11 @@ WORKDIR /app
 
 RUN apk add --no-cache libc6-compat
 
+# Node 22 currently ships npm 10.9.x, which can crash in Arborist with
+# "Cannot read properties of null (reading 'edgesOut')" on this dependency graph.
+# npm 11 resolves the same graph correctly.
+RUN npm install -g npm@11.6.0
+
 COPY package.json ./
 RUN npm install --no-audit --no-fund
 
