@@ -1,15 +1,16 @@
-import { MigrateDownArgs, MigrateUpArgs, sql } from "@payloadcms/db-d1-sqlite";
+import type { MigrateDownArgs, MigrateUpArgs } from "@payloadcms/db-d1-sqlite";
+import { sql } from "@payloadcms/db-d1-sqlite";
 
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.run(sql`
-    ALTER TABLE `users`
-    ADD COLUMN `reset_password_requested_at` text;
+    ALTER TABLE users
+    ADD COLUMN reset_password_requested_at text;
   `);
 }
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.run(sql`
-    ALTER TABLE `users`
-    DROP COLUMN `reset_password_requested_at`;
+    ALTER TABLE users
+    DROP COLUMN reset_password_requested_at;
   `);
 }
