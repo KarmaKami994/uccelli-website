@@ -6,6 +6,9 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
   images: {
+    // OpenNext image optimization requires a Cloudflare Images binding.
+    // Serve Payload/R2 images directly instead so the site works on the free plan.
+    unoptimized: true,
     localPatterns: [
       {
         pathname: "/api/media/file/**",
