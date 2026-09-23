@@ -30,6 +30,8 @@ import { Pages } from "./collections/Pages";
 import { Media } from "./collections/Media";
 import { Homepage } from "./globals/Homepage";
 import { Navigation } from "./globals/Navigation";
+import { ProjectsPage } from "./globals/ProjectsPage";
+import { CommunityPage } from "./globals/CommunityPage";
 import {
   adminOnly,
   adminOrSelf,
@@ -49,15 +51,17 @@ const realpath = (value: string) => {
   }
 };
 
-const isCLI = process.argv.some((value) => {
+const isPayloadCLI = process.argv.some((value) => {
   const resolved = realpath(value);
-  if (!resolved) return false;
-
-  return (
-    resolved.endsWith(path.join("payload", "bin.js")) ||
-    resolved.endsWith(path.join("next", "dist", "bin", "next"))
-  );
+  return Boolean(resolved?.endsWith(path.join("payload", "bin.js")));
 });
+
+const isNextCLI = process.argv.some((value) => {
+  const resolved = realpath(value);
+  return Boolean(resolved?.endsWith(path.join("next", "dist", "bin", "next")));
+});
+
+const isCLI = isPayloadCLI || isNextCLI;
 
 const createLog =
   (level: string, fn: typeof console.log) =>
@@ -84,6 +88,8 @@ const cloudflareLogger = {
   error: createLog("error", console.error),
   fatal: createLog("fatal", console.error),
   silent: () => {},
+// Payload accepts a Pino-compatible logger; this lightweight adapter intentionally mirrors that runtime shape.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
 
 const cloudflare =
@@ -91,6 +97,8 @@ const cloudflare =
     ? await getCloudflareContextFromWrangler()
     : await getCloudflareContext({ async: true });
 
+// Wrangler/OpenNext inject D1 and R2 bindings at runtime; the generated context type is intentionally generic here.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const env = cloudflare.env as any;
 
 export default buildConfig({
@@ -182,7 +190,7 @@ export default buildConfig({
       ],
     },
   ],
-  globals: [Homepage, Navigation],
+  globals: [Homepage, Navigation, ProjectsPage, CommunityPage],
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
@@ -195,7 +203,7 @@ async function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
   ).then(({ getPlatformProxy }) =>
     getPlatformProxy({
       environment: process.env.CLOUDFLARE_ENV,
-      remoteBindings: isProduction,
+      remoteBindings: isProduction && isPayloadCLI,
     } satisfies GetPlatformProxyOptions),
   );
 }

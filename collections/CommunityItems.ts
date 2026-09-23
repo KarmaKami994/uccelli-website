@@ -14,6 +14,9 @@ export const CommunityItems: CollectionConfig = {
     defaultColumns: ["title", "type", "status", "featured", "order"],
     description: "Tools, Games und Ressourcen im Community Hub. Status und Reihenfolge steuern die öffentliche Darstellung.",
     hideAPIURL: true,
+    components: {
+      beforeList: ["/components/admin/CollectionPageSettingsLink"],
+    },
   },
   defaultSort: "order",
   fields: [

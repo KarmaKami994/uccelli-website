@@ -4,6 +4,7 @@ import * as migration_20260804_203000_contact_submissions from './20260804_20300
 import * as migration_20260804_213000_enable_cv_creator from './20260804_213000_enable_cv_creator';
 import * as migration_20260922_092500_payload_390_auth from './20260922_092500_payload_390_auth';
 import * as migration_20260922_111500_r2_object_key from './20260922_111500_r2_object_key';
+import * as migration_20260923_141500_page_settings from './20260923_141500_page_settings';
 
 export const migrations = [
   {
@@ -35,5 +36,10 @@ export const migrations = [
     up: migration_20260922_111500_r2_object_key.up,
     down: migration_20260922_111500_r2_object_key.down,
     name: '20260922_111500_r2_object_key'
+  },
+  {
+    up: migration_20260923_141500_page_settings.up,
+    down: migration_20260923_141500_page_settings.down,
+    name: '20260923_141500_page_settings'
   },
 ];

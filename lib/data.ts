@@ -32,6 +32,7 @@ export type Wert = { title: string; slug: string; body?: RichTextContent | null 
 export type Course = { name: string; description: string };
 export type Page = { title: string; slug: string; body?: RichTextContent | null };
 export type NavItem = { label: string; href?: string; openInNewTab?: boolean; children: { label: string; href: string }[] };
+export type PageSettingsData = { title?: string; subtitle?: string; intro?: string; heroImage?: string };
 
 export type HomepageData = {
   hero: { title: string; subtitle?: string; ctaText?: string; ctaHref?: string; image?: string };
@@ -151,6 +152,32 @@ export const getProjectBySlug = cache(async (slug: string, locale: Locale): Prom
   const doc = await fetchBySlug("projects", slug, locale);
   return doc ? mapProject(doc) : null;
 });
+
+async function getPageSettings(
+  slug: "projects-page" | "community-items-page",
+  locale: Locale,
+): Promise<PageSettingsData | null> {
+  try {
+    const doc = await fetchGlobal(slug, locale);
+    return {
+      title: opt(doc.title),
+      subtitle: opt(doc.subtitle),
+      intro: opt(doc.intro),
+      heroImage: resolveImageUrl(doc.heroImage),
+    };
+  } catch (error) {
+    console.error(`[page-settings] ${slug} unavailable:`, error);
+    return null;
+  }
+}
+
+export const getProjectsPageSettings = cache(async (locale: Locale): Promise<PageSettingsData | null> =>
+  getPageSettings("projects-page", locale),
+);
+
+export const getCommunityPageSettings = cache(async (locale: Locale): Promise<PageSettingsData | null> =>
+  getPageSettings("community-items-page", locale),
+);
 
 export const getNetworks = cache(async (locale: Locale): Promise<Network[]> => {
   const docs = await fetchCollection("networks", { sort: "order", locale });

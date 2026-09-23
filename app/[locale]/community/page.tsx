@@ -6,7 +6,7 @@ import { CommunityCard } from "@/components/community/CommunityCard";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { StaggerReveal } from "@/components/ui/StaggerReveal";
 import { ensureCvCreator } from "@/lib/cv-creator";
-import { getCommunityItems } from "@/lib/data";
+import { getCommunityItems, getCommunityPageSettings } from "@/lib/data";
 import { toLocale } from "@/lib/payload";
 import { localizedPath, pageMetadata } from "@/lib/seo";
 
@@ -35,7 +35,11 @@ export default async function CommunityPage({ params, searchParams }: Params) {
   const locale = toLocale((await params).locale);
   setRequestLocale(locale);
   const t = await getTranslations("community");
-  const items = ensureCvCreator(await getCommunityItems(locale), locale);
+  const [rawItems, pageSettings] = await Promise.all([
+    getCommunityItems(locale),
+    getCommunityPageSettings(locale),
+  ]);
+  const items = ensureCvCreator(rawItems, locale);
   const rawType = (await searchParams).typ;
   const requested = Array.isArray(rawType) ? rawType[0] : rawType;
   const active: Filter = filterValues.includes(requested as Filter) ? (requested as Filter) : "all";
@@ -43,10 +47,17 @@ export default async function CommunityPage({ params, searchParams }: Params) {
 
   return (
     <>
-      <Hero title={t("title")} variant="gradient" subtitle={t("subtitle")} />
+      <Hero
+        title={pageSettings?.title ?? t("title")}
+        variant="gradient"
+        subtitle={pageSettings?.subtitle ?? t("subtitle")}
+        imageSrc={pageSettings?.heroImage}
+      />
       <section className="py-14 lg:py-20 px-6 lg:px-10 border-b border-neutral-100">
         <ScrollReveal className="max-w-[820px] mx-auto text-center">
-          <p className="text-[16px] text-neutral-600 leading-[1.8] mb-9">{t("intro")}</p>
+          <p className="text-[16px] text-neutral-600 leading-[1.8] mb-9">
+            {pageSettings?.intro ?? t("intro")}
+          </p>
           <nav aria-label={t("filters.all")} className="flex flex-wrap justify-center gap-2">
             {filterValues.map((value) => {
               const href = value === "all" ? localizedPath("/community", locale) : `${localizedPath("/community", locale)}?typ=${value}`;

@@ -4,12 +4,28 @@ type RouteArgs = {
   params: Promise<{ filename: string }>;
 };
 
-async function getBucket() {
+type R2ObjectMetadata = {
+  writeHttpMetadata?: (headers: Headers) => void;
+  httpEtag?: string;
+  etag?: string;
+  size?: number;
+};
+
+type R2ObjectBody = R2ObjectMetadata & {
+  body?: BodyInit | null;
+};
+
+type R2BucketLike = {
+  get: (key: string) => Promise<R2ObjectBody | null>;
+  head: (key: string) => Promise<R2ObjectMetadata | null>;
+};
+
+async function getBucket(): Promise<R2BucketLike> {
   const { env } = await getCloudflareContext({ async: true });
-  return (env as { R2: any }).R2;
+  return (env as { R2: R2BucketLike }).R2;
 }
 
-function applyMetadata(object: any, headers: Headers) {
+function applyMetadata(object: R2ObjectMetadata, headers: Headers) {
   object.writeHttpMetadata?.(headers);
 
   if (object.httpEtag) {
