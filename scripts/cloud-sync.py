@@ -48,7 +48,7 @@ CONTENT_ROOTS = (
     "courses",
     "pages",
     "community_items",
-    "community_page",
+    "community_items_page",
     "homepage",
     "navigation",
 )
