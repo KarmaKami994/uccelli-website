@@ -5,7 +5,7 @@ import { ProjectCard } from "@/components/projects/ProjectCard";
 import { ProjectFilter, normalizeProjectFilter } from "@/components/projects/ProjectFilter";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { StaggerReveal } from "@/components/ui/StaggerReveal";
-import { getProjects } from "@/lib/data";
+import { getProjects, getProjectsPageSettings } from "@/lib/data";
 import { toLocale } from "@/lib/payload";
 import { pageMetadata } from "@/lib/seo";
 
@@ -28,7 +28,10 @@ export default async function ProjectsPage({ params, searchParams }: Params) {
   const locale = toLocale((await params).locale);
   setRequestLocale(locale);
   const t = await getTranslations("projects");
-  const projects = await getProjects(locale);
+  const [projects, pageSettings] = await Promise.all([
+    getProjects(locale),
+    getProjectsPageSettings(locale),
+  ]);
   const rawCategory = (await searchParams).kategorie;
   const active = normalizeProjectFilter(Array.isArray(rawCategory) ? rawCategory[0] : rawCategory);
   const visibleProjects = active === "all" ? projects : projects.filter((project) => project.category === active);
@@ -41,10 +44,17 @@ export default async function ProjectsPage({ params, searchParams }: Params) {
 
   return (
     <>
-      <Hero title={t("title")} variant="gradient" subtitle={t("subtitle")} />
+      <Hero
+        title={pageSettings?.title ?? t("title")}
+        variant="gradient"
+        subtitle={pageSettings?.subtitle ?? t("subtitle")}
+        imageSrc={pageSettings?.heroImage}
+      />
       <section className="py-14 lg:py-20 px-6 lg:px-10 border-b border-neutral-100">
         <ScrollReveal className="max-w-[900px] mx-auto text-center">
-          <p className="text-[16px] text-neutral-600 leading-[1.8] max-w-2xl mx-auto mb-9">{t("intro")}</p>
+          <p className="text-[16px] text-neutral-600 leading-[1.8] max-w-2xl mx-auto mb-9">
+            {pageSettings?.intro ?? t("intro")}
+          </p>
           <ProjectFilter
             locale={locale}
             active={active}
