@@ -1,21 +1,122 @@
-# Hybridbetrieb: Cloudflare Website + Payload Admin auf dem Home-Server
+# Hybridbetrieb: Cloudflare Website + Payload Admin auf `freeza`
+
+> Für die vollständige Architektur siehe [`ARCHITECTURE.md`](ARCHITECTURE.md). Dieses Dokument beschreibt gezielt den Hybridbetrieb des CMS.
 
 ## Zielbild
 
+Die Uccelli-Website trennt öffentliche Auslieferung und Redaktion bewusst voneinander:
+
+```text
+Öffentliche Website
+https://uccelli-society.ch
+        ↓
+Cloudflare Worker: uccelli-website
+        ├─ D1: uccelli-prod
+        └─ R2: uccelli-media
+
+Redaktion
+https://cms.uccelli-society.ch/admin
+        ↓
+Cloudflare Tunnel: uccelli-cms
+        ↓
+freeza
+        ↓
+Docker: uccelli-website:3000
+        ├─ SQLite: data/uccelli.db
+        └─ Media: media/
+```
+
+Wesentliche Eigenschaften:
+
 - Die öffentliche Website läuft auf Cloudflare Workers.
-- Produktionsinhalte liegen in Cloudflare D1.
-- Produktionsmedien liegen in Cloudflare R2.
-- Der schwere Payload-Admin läuft nur auf dem Home-Server.
-- `/admin` auf der öffentlichen Website leitet zum Home-CMS weiter.
-- Der Home-Server ist **nicht** für die Verfügbarkeit der öffentlichen Website nötig.
+- Produktionsinhalte für Besucher liegen in D1.
+- öffentliche Medien liegen in R2.
+- Payload Admin läuft ausschließlich auf `freeza`.
+- Die redaktionelle Source of Truth ist SQLite + lokales `media/`.
+- `/admin` auf der Hauptdomain leitet zum Home-CMS weiter.
+- Der Home-Server ist für die Verfügbarkeit der öffentlichen Website nicht erforderlich.
+- Das CMS besitzt einen eigenen Cloudflare-Tunnel und ist nicht von anderen Projekten oder Domains abhängig.
 
-Aktueller Admin-Ursprung:
+## Domains
 
+```text
+Website: https://uccelli-society.ch
+CMS:     https://cms.uccelli-society.ch/admin
 ```
-https://uccelli.qrwed.uk
+
+Der frühere temporäre Host `uccelli.qrwed.uk` gehört nicht mehr zur Uccelli-Architektur.
+
+## Home-CMS auf freeza
+
+Projektverzeichnis:
+
+```text
+/opt/uccelli-website
 ```
 
-Später kann `ADMIN_ORIGIN` auf z. B. `https://admin.uccelli.ch` geändert werden.
+Compose Service:
+
+```text
+uccelli
+```
+
+Container:
+
+```text
+uccelli-website
+```
+
+Persistente Daten:
+
+```text
+/opt/uccelli-website/data/uccelli.db
+/opt/uccelli-website/media/
+```
+
+Docker-Netzwerk:
+
+```text
+npm
+```
+
+Der Container verwendet `Dockerfile.admin` und läuft mit:
+
+```env
+DATABASE_URI=file:/app/data/uccelli.db
+SITE_URL=https://uccelli-society.ch
+ADMIN_ORIGIN=https://cms.uccelli-society.ch
+ADMIN_ONLY=1
+```
+
+`PAYLOAD_SECRET` muss produktiv gesetzt sein.
+
+## Warum es zwei Payload-Konfigurationen gibt
+
+### Cloudflare
+
+```text
+payload.config.ts
+```
+
+Diese Konfiguration nutzt:
+
+- D1 über `@payloadcms/db-d1-sqlite`
+- R2 über `@payloadcms/storage-r2`
+- Cloudflare Bindings `D1` und `R2`
+
+### Home-CMS
+
+```text
+payload.config.home.ts
+```
+
+Diese Konfiguration nutzt:
+
+- SQLite über `@payloadcms/db-sqlite`
+- lokales Dateisystem für Uploads
+- keine D1-/R2-Abhängigkeit für redaktionelle Schreibvorgänge
+
+Beim Build von `Dockerfile.admin` wird die Home-Konfiguration als aktive Payload-Konfiguration verwendet.
 
 ## Home-CMS aktualisieren
 
@@ -23,72 +124,122 @@ Auf `freeza`:
 
 ```bash
 cd /opt/uccelli-website
-git pull
-
-docker compose up -d --build
+git pull --ff-only origin main
+docker compose up -d --build uccelli
 docker compose ps
 ```
 
-Das Compose-Setup verwendet `Dockerfile.admin`. Beim Build wird die lokale
-SQLite-Konfiguration eingesetzt und die Cloudflare-spezifische R2-Dateiroute
-entfernt. Die bestehende Datenbank und Medien bleiben als Volumes eingebunden:
+Logs:
 
+```bash
+docker logs --tail 100 uccelli-website
 ```
+
+Healthcheck:
+
+```bash
+curl -s https://cms.uccelli-society.ch/api/health
+```
+
+## Cloudflare Tunnel
+
+Der Admin wird über einen eigenen Tunnel veröffentlicht:
+
+```text
+Tunnel name:     uccelli-cms
+Public hostname: cms.uccelli-society.ch
+Origin service:  http://uccelli-website:3000
+```
+
+Connector auf `freeza`:
+
+```text
+Container: uccelli-cloudflared
+Network:   npm
+```
+
+Der Connector erreicht den CMS-Container direkt über Docker-DNS.
+
+Status:
+
+```bash
+docker ps --filter name=uccelli-cloudflared
+docker logs --tail 50 uccelli-cloudflared
+```
+
+Neustart:
+
+```bash
+docker restart uccelli-cloudflared
+```
+
+Der Tunnel wird remote über Cloudflare One verwaltet. Das Tunnel-Token liegt ausschließlich lokal und darf nicht ins Repository gelangen.
+
+## `/admin`-Routing
+
+Die Middleware unterscheidet öffentliche Website und Home-CMS.
+
+Auf der öffentlichen Website:
+
+```text
+https://uccelli-society.ch/admin
+```
+
+wird auf:
+
+```text
+https://cms.uccelli-society.ch/admin
+```
+
+umgeleitet.
+
+Auf dem Home-CMS sorgt `ADMIN_ONLY=1` dafür, dass der Container als Admin-System und nicht als zweite öffentliche Website betrieben wird.
+
+## Content-Synchronisation
+
+Publisher:
+
+```text
+scripts/cloud-sync.py
+```
+
+Der Publisher liest aus:
+
+```text
 /opt/uccelli-website/data/uccelli.db
 /opt/uccelli-website/media/
 ```
 
-Der Container bleibt absichtlich unter dem bisherigen Namen
-`uccelli-website`, damit bestehende Reverse-Proxy-Ziele nicht angepasst werden
-müssen.
+und veröffentlicht nach:
 
-## Was wird synchronisiert?
-
-`scripts/cloud-sync.py` veröffentlicht redaktionelle Daten aus SQLite nach D1
-und neue/geänderte Dateien aus `media/` nach R2.
-
-Synchronisiert werden unter anderem:
-
-- Projekte
-- News
-- Events
-- Team
-- Partner
-- FAQs
-- Netzwerk
-- Werte
-- Kurse
-- Seiten
-- Community
-- Homepage
-- Navigation
-- Media-Metadaten und Dateien
-
-Bewusst **nicht** vom Home-Server überschrieben werden:
-
-- Payload-Benutzer und Sessions
-- Payload-interne Tabellen
-- Contact-Submissions aus der öffentlichen Website
-
-Damit kann eine neue Kontaktanfrage in D1 nicht durch einen späteren CMS-Sync
-gelöscht werden.
-
-## Cloudflare-Token für den Sync
-
-Für den Dauerbetrieb einen eigenen, möglichst eingeschränkten API-Token
-verwenden. Der Token wird nicht im Repository gespeichert.
-
-Datei anlegen:
-
-```bash
-sudo install -m 600 /dev/null /etc/uccelli-cloud-sync.env
-sudo nano /etc/uccelli-cloud-sync.env
+```text
+D1: uccelli-prod
+R2: uccelli-media
 ```
 
-Inhalt:
+Synchronisiert werden redaktionelle Content-Tabellen, Globals, Media-Metadaten und DB-referenzierte Mediendateien.
+
+Bewusst ausgeschlossen sind unter anderem:
+
+- Benutzer
+- Sessions
+- Payload-interne Tabellen
+- `contact-submissions`
+
+Damit überschreibt ein späterer Home-CMS-Sync keine Daten, die ausschließlich in der öffentlichen Cloudflare-Runtime entstanden sind.
+
+## Sync-Konfiguration
+
+Produktive Sync-Secrets liegen in:
+
+```text
+/etc/uccelli-cloud-sync.env
+```
+
+Beispielstruktur:
 
 ```bash
-CLOUDFLARE_API_TOKEN=DEIN_TOKEN
+CLOUDFLARE_API_TOKEN=<token>
 UCCELLI_D1_DATABASE=uccelli-prod
 UCCELLI_R2_BUCKET=uccelli-media
 UCCELLI_DB_PATH=/opt/uccelli-website/data/uccelli.db
@@ -96,41 +247,25 @@ UCCELLI_MEDIA_DIR=/opt/uccelli-website/media
 UCCELLI_SYNC_STATE=/var/lib/uccelli-cloud-sync/state.json
 ```
 
-## Ersten Sync testen
+Der echte API-Token wird niemals committed.
 
-```bash
-cd /opt/uccelli-website
-set -a
-source /etc/uccelli-cloud-sync.env
-set +a
+## Automatischer Sync
 
-python3 scripts/cloud-sync.py --dry-run
-python3 scripts/cloud-sync.py --force
+Systemd-Dateien im Repository:
+
+```text
+ops/systemd/uccelli-cloud-sync.service
+ops/systemd/uccelli-cloud-sync.timer
 ```
 
-Der erste echte Lauf lädt vorhandene lokale Medien bei Bedarf nach R2 und
-veröffentlicht die redaktionellen Tabellen nach D1. Weitere Läufe vergleichen
-einen Inhalts-Hash und überspringen D1, wenn sich nichts geändert hat.
-
-## Automatischen Sync aktivieren
+Status:
 
 ```bash
-sudo cp ops/systemd/uccelli-cloud-sync.service /etc/systemd/system/
-sudo cp ops/systemd/uccelli-cloud-sync.timer /etc/systemd/system/
-
-sudo mkdir -p /var/lib/uccelli-cloud-sync
-sudo systemctl daemon-reload
-sudo systemctl enable --now uccelli-cloud-sync.timer
-```
-
-Status prüfen:
-
-```bash
-systemctl status uccelli-cloud-sync.timer
+systemctl status uccelli-cloud-sync.timer --no-pager
 systemctl list-timers uccelli-cloud-sync.timer
 ```
 
-Einen Lauf sofort auslösen:
+Manueller Lauf:
 
 ```bash
 sudo systemctl start uccelli-cloud-sync.service
@@ -142,31 +277,79 @@ Logs:
 journalctl -u uccelli-cloud-sync.service -n 100 --no-pager
 ```
 
-Der Timer läuft ungefähr alle zwei Minuten. Die öffentliche Website kann
-zusätzlich durch Next.js-Revalidation einige Minuten benötigen, bis ein neuer
-Stand sichtbar ist.
+Der Timer läuft ungefähr alle zwei Minuten mit einem kleinen zufälligen Delay.
 
-## Admin-Aufruf
+## Publikationslogik
 
-Auf dem Home-CMS selbst bleibt Payload unter:
+Der Publisher arbeitet idempotent:
 
+- Für die D1-Daten wird ein Inhalts-Hash berechnet.
+- Wenn sich redaktionelle Daten nicht geändert haben, wird D1 nicht neu beschrieben.
+- Medien werden anhand ihres lokalen Zustands nur hochgeladen, wenn sie neu oder geändert sind.
+- Es werden nur Dateien publiziert, die in der Payload-Medienbibliothek referenziert sind.
+- MIME-Typen stammen bevorzugt aus den Media-Metadaten der Datenbank.
+
+## Medien auf Cloudflare
+
+Die öffentliche Website liest Medien aus R2 über:
+
+```text
+/api/media/file/[filename]
 ```
-https://uccelli.qrwed.uk/admin
+
+Die Home-CMS-Buildvariante entfernt diese Cloudflare-spezifische R2-Passthrough-Route, damit Payload dort lokale Dateien ausliefern kann.
+
+## Ausfallverhalten
+
+### `freeza` ist offline
+
+- CMS nicht erreichbar
+- keine neuen Content-Publishes
+- öffentliche Website bleibt erreichbar
+- D1/R2 behalten den zuletzt publizierten Stand
+
+### Tunnel ist offline
+
+- CMS nicht erreichbar
+- öffentliche Website bleibt erreichbar
+
+### Sync schlägt fehl
+
+- Redaktion kann lokal weiterarbeiten
+- öffentliche Website zeigt weiterhin den letzten erfolgreichen Publish
+- Fehler über systemd Journal untersuchen
+
+### Cloudflare Worker/D1/R2 gestört
+
+- öffentliche Website kann beeinträchtigt sein
+- Home-CMS auf `freeza` bleibt davon grundsätzlich getrennt
+
+## Sicherheitsgrenzen
+
+- CMS ist nur über den eigenen Uccelli-Tunnel veröffentlicht.
+- Keine öffentliche Portfreigabe ist für den Tunnel erforderlich.
+- Payload behält seine eigene Benutzeranmeldung.
+- Cloudflare Access ist für das aktuelle Setup nicht erforderlich.
+- `PAYLOAD_SECRET`, Tunnel-Token und Cloudflare API-Token bleiben außerhalb von Git.
+- SQLite und `media/` dürfen nicht committed werden.
+
+## Schnelldiagnose
+
+```bash
+curl -I https://uccelli-society.ch
+curl -I https://uccelli-society.ch/admin
+curl -I https://cms.uccelli-society.ch/admin
+curl -s https://cms.uccelli-society.ch/api/health
+
+docker ps --filter name=uccelli-website
+docker ps --filter name=uccelli-cloudflared
+
+systemctl status uccelli-cloud-sync.timer --no-pager
+journalctl -u uccelli-cloud-sync.service -n 50 --no-pager
 ```
 
-Die öffentliche Cloudflare-Version fängt `/admin` bereits im leichten
-Middleware-Layer ab und leitet dorthin weiter. Dadurch muss der Payload-Admin
-nicht mehr im Cloudflare Worker gerendert werden und das 10-ms-CPU-Limit des
-Free-Plans spielt für das CMS keine Rolle.
+## Weitere Dokumentation
 
-## Später auf admin.uccelli.ch wechseln
-
-Sobald der neue Hostname auf denselben Home-Server zeigt:
-
-1. `ADMIN_ORIGIN=https://admin.uccelli.ch` in der Home-`.env` setzen.
-2. Den Default `DEFAULT_ADMIN_ORIGIN` in `middleware.ts` auf den neuen
-   Hostnamen ändern und Cloudflare neu deployen.
-3. Reverse Proxy / Tunnel auf Port 3100 zeigen lassen.
-
-Cloudflare Access ist für dieses Setup nicht erforderlich. Payload behält seine
-eigene Benutzeranmeldung.
+- vollständige Architektur: [`ARCHITECTURE.md`](ARCHITECTURE.md)
+- Betrieb und Recovery: [`RUNBOOK.md`](RUNBOOK.md)
+- Environment-Beispiel: [`../.env.example`](../.env.example)
