@@ -2,7 +2,7 @@
 
 > **Stand:** 23. September 2026  
 > **Status:** Produktionsarchitektur  
-> **Geltungsbereich:** Öffentliche Website, Payload CMS, Cloudflare-Infrastruktur, Home-Server, Daten- und Medien-Synchronisation, Deployment und Betrieb.
+> **Geltungsbereich:** Öffentliche Website, Payload CMS, Cloudflare-Infrastruktur, Home-Server, Daten- und Medien-Synchronisation, Deployment, CMS-Seiteneinstellungen und Betrieb.
 
 Dieses Dokument beschreibt die **aktuelle Ziel- und Produktionsarchitektur** der Uccelli-Website. Es ist die technische Referenz für neue Entwickler:innen und für den Betrieb. Ältere Dokumente im Repository können noch historische Hostnamen oder frühere Deployment-Varianten enthalten; bei Widersprüchen gilt dieses Dokument für die Architektur.
 
@@ -10,7 +10,7 @@ Dieses Dokument beschreibt die **aktuelle Ziel- und Produktionsarchitektur** der
 
 ## 1. Architektur in einem Satz
 
-Die öffentliche Website läuft auf **Cloudflare Workers** mit **D1** und **R2**, während der redaktionelle **Payload-Admin** auf dem Home-Server `freeza` mit **SQLite** und lokalem Medienverzeichnis läuft; ein automatischer Publisher synchronisiert redaktionelle Inhalte und Medien vom Home-Server nach Cloudflare.
+Die öffentliche Website läuft auf **Cloudflare Workers** mit **D1** und **R2**, während der redaktionelle **Payload-Admin** auf dem Home-Server `freeza` mit **SQLite** und lokalem Medienverzeichnis läuft; ein automatischer Publisher synchronisiert redaktionelle Inhalte, Seiteneinstellungen und Medien vom Home-Server nach Cloudflare.
 
 ---
 
@@ -41,7 +41,7 @@ Die Architektur trennt bewusst **öffentliche Auslieferung** und **Redaktionssys
 
 - Die öffentliche Website bleibt verfügbar, auch wenn `freeza` oder der CMS-Tunnel offline ist.
 - Redakteur:innen arbeiten ausschließlich im Home-CMS.
-- Cloudflare erhält eine veröffentlichte Kopie der redaktionellen Inhalte.
+- Cloudflare erhält eine veröffentlichte Kopie der redaktionellen Inhalte und Seiteneinstellungen.
 - Besucherzugriffe belasten den Home-Server nicht.
 
 ---
@@ -114,8 +114,11 @@ Diese Konfiguration ist für die öffentliche Website bestimmt.
 - Binding: `R2`
 - Cloudflare-Kontext via `@opennextjs/cloudflare`
 - produktionsgeeigneter strukturierter Logger
+- registriert dieselben öffentlichen Content-Collections und Globals wie das Home-CMS
 
 Die Cloudflare-Instanz ist primär ein **Read-/Public-Runtime-System**. Öffentliche Formulare können jedoch gezielt Daten direkt in D1 schreiben.
+
+Bei lokalen/CI-Builds darf Wrangler ohne Remote-Bindings arbeiten. Remote-Bindings werden nur verwendet, wenn die entsprechende Cloudflare-Authentifizierung verfügbar ist.
 
 ### `payload.config.home.ts` – Home-CMS Runtime
 
@@ -125,6 +128,7 @@ Diese Konfiguration wird beim Bau von `Dockerfile.admin` als `payload.config.ts`
 - Datenbank: `DATABASE_URI`, standardmäßig `file:./data/uccelli.db`
 - keine D1- oder R2-Abhängigkeit
 - lokaler Payload Upload Storage
+- dieselben redaktionellen Globals wie die Cloudflare-Konfiguration
 - Fail-Fast, wenn im Produktionsbetrieb kein `PAYLOAD_SECRET` vorhanden ist
 
 Damit bleibt das CMS vollständig lokal funktionsfähig und ist nicht von D1/R2 für redaktionelle Schreibvorgänge abhängig.
@@ -135,7 +139,7 @@ Damit bleibt das CMS vollständig lokal funktionsfähig und ist nicht von D1/R2 
 
 ### Redaktionelle Source of Truth
 
-Für redaktionelle Inhalte ist die SQLite-Datenbank auf `freeza` die maßgebliche Quelle:
+Für redaktionelle Inhalte und Seiteneinstellungen ist die SQLite-Datenbank auf `freeza` die maßgebliche Quelle:
 
 ```text
 /opt/uccelli-website/data/uccelli.db
@@ -162,7 +166,7 @@ Diese Daten werden regelmäßig vom Home-CMS veröffentlicht.
 
 ### Wichtig
 
-Redaktionelle Content-Tabellen in D1 dürfen nicht als eigenständige zweite Pflegequelle behandelt werden. Der nächste Publisher-Lauf kann sie wieder durch den Stand aus SQLite ersetzen.
+Redaktionelle Content- und Global-Tabellen in D1 dürfen nicht als eigenständige zweite Pflegequelle behandelt werden. Der nächste Publisher-Lauf kann sie wieder durch den Stand aus SQLite ersetzen.
 
 ---
 
@@ -189,6 +193,79 @@ Globals:
 
 - `homepage`
 - `navigation`
+- `projects-page`
+- `community-items-page`
+
+### Seitenbezogene CMS-Einstellungen
+
+Die Übersichtsseiten `/projekte` und `/community` besitzen eigene Payload Globals. Sie gehören fachlich zur Seite und **nicht** zu einem einzelnen Projekt bzw. Community-Eintrag.
+
+#### Projektseite
+
+```text
+Global: projects-page
+Admin: /admin/globals/projects-page
+Öffentliche Seite: /projekte
+```
+
+Pflegbare Felder:
+
+- `heroImage` → Upload/Relation zur `media` Collection
+- `title` → lokalisiert (`de` / `en`)
+- `subtitle` → lokalisiert (`de` / `en`)
+- `intro` → lokalisiert (`de` / `en`)
+
+#### Community-Seite
+
+```text
+Global: community-items-page
+Admin: /admin/globals/community-items-page
+Öffentliche Seite: /community
+```
+
+Pflegbare Felder:
+
+- `heroImage` → Upload/Relation zur `media` Collection
+- `title` → lokalisiert (`de` / `en`)
+- `subtitle` → lokalisiert (`de` / `en`)
+- `intro` → lokalisiert (`de` / `en`)
+
+### CMS-UX für Seiteneinstellungen
+
+Die Collections `projects` und `community-items` verwenden eine gemeinsame Admin-Komponente:
+
+```text
+components/admin/CollectionPageSettingsLink.tsx
+```
+
+Sie wird als `beforeList`-Komponente eingebunden und zeigt oberhalb der jeweiligen Listenansicht einen Zahnrad-Link:
+
+```text
+Projekte       → ⚙ Projektseite einstellen
+Community Hub  → ⚙ Community-Seite einstellen
+```
+
+Der Zahnrad-Link öffnet direkt das zugehörige Global. Dadurch bleiben Einzelinhalte und Einstellungen der Hauptseite technisch sauber getrennt, obwohl sie redaktionell am selben Ort erreichbar sind.
+
+### Frontend-Fallback
+
+Die öffentlichen Übersichtsseiten laden Einträge und Seiteneinstellungen parallel.
+
+Für `title`, `subtitle` und `intro` gilt:
+
+```text
+CMS-Wert vorhanden → CMS-Wert verwenden
+CMS-Wert leer      → bisherigen next-intl Standardtext verwenden
+```
+
+Für `heroImage` gilt:
+
+```text
+CMS-Bild gesetzt → Hero mit Bild
+kein Bild        → bisheriger Gradient-Hero
+```
+
+Damit bleiben bestehende Seiten auch ohne gesetzte neue CMS-Werte vollständig funktionsfähig.
 
 ### Benutzer und Rollen
 
@@ -213,6 +290,7 @@ Routing:
 ```text
 /                 Deutsch
 /projekte         Deutsch
+/community        Deutsch
 /en               Englisch
 /en/projects/...  Englisch bzw. lokalisierte Route
 ```
@@ -221,7 +299,8 @@ Technisch:
 
 - `next-intl` übernimmt Locale-Routing und UI-Texte.
 - Payload speichert lokalisierte Content-Felder.
-- Fehlende englische Inhalte fallen auf Deutsch zurück.
+- `projects-page` und `community-items-page` speichern Titel, Untertitel und Intro ebenfalls lokalisiert.
+- Fehlende englische Inhalte fallen auf Deutsch bzw. auf die bestehenden UI-Übersetzungen zurück.
 - Slugs sind grundsätzlich sprachunabhängig.
 
 Canonical URLs und OpenGraph-URLs werden über `SITE_URL` erzeugt.
@@ -244,7 +323,18 @@ Wrangler-Konfiguration:
 Worker: uccelli-website
 Main: .open-next/worker.js
 Assets: .open-next/assets
+Build: npm run cloudflare:build
 ```
+
+In `wrangler.jsonc` ist ein Custom Build hinterlegt:
+
+```json
+"build": {
+  "command": "npm run cloudflare:build"
+}
+```
+
+Damit wird das OpenNext-Artefakt erzeugt, bevor Wrangler `.open-next/worker.js` hochlädt. Das ist insbesondere für die Cloudflare Git-Integration bzw. `wrangler versions upload` relevant.
 
 ### Bindings
 
@@ -269,6 +359,8 @@ images: {
 ```
 
 Grund: Die OpenNext-Bildoptimierung würde eine zusätzliche Cloudflare-Images-Konfiguration benötigen. Payload-/R2-Bilder werden deshalb direkt ausgeliefert.
+
+Das gilt auch für Hero-Bilder der Projekt- und Community-Hauptseiten: Die Bildreferenz stammt aus dem jeweiligen Global, die Datei selbst wird wie alle Payload-Medien nach R2 publiziert.
 
 ### Medienroute
 
@@ -332,6 +424,8 @@ Der Home-Container ist absichtlich ein CMS-Server, nicht die öffentliche Websit
 5. startet als User `node`,
 6. prüft beim Start das lokale Schema,
 7. startet den Next.js-Server.
+
+`scripts/ensure-home-schema.mjs` stellt sicher, dass das lokale SQLite-Schema mit den vom CMS benötigten Tabellen kompatibel ist. Neue Globals wie `projects-page` und `community-items-page` müssen daher sowohl in der Migration als auch im lokalen Schema berücksichtigt werden.
 
 ### Healthcheck
 
@@ -404,6 +498,8 @@ Default für den Admin-Ursprung:
 https://cms.uccelli-society.ch
 ```
 
+Die Zahnrad-Links für Projekt- und Community-Seiteneinstellungen sind reine Payload-Admin-Navigation und bleiben damit ausschließlich im CMS-Origin.
+
 ---
 
 ## 13. Content-Publishing: SQLite → D1 und Media → R2
@@ -426,13 +522,13 @@ sequenceDiagram
     participant D1 as Cloudflare D1
     participant Site as Öffentliche Website
 
-    Editor->>CMS: Inhalt ändern / Medium hochladen
-    CMS->>SQLite: Metadaten speichern
+    Editor->>CMS: Inhalt / Seiteneinstellung ändern oder Medium hochladen
+    CMS->>SQLite: Inhalte und Global-Metadaten speichern
     CMS->>CMS: Datei in media/ speichern
     Sync->>SQLite: publishbare Tabellen lesen
     Sync->>R2: neue/geänderte referenzierte Medien hochladen
-    Sync->>D1: vollständigen Content-Stand publizieren
-    Site->>D1: Inhalte lesen
+    Sync->>D1: vollständigen Content- und Global-Stand publizieren
+    Site->>D1: Inhalte und Seiteneinstellungen lesen
     Site->>R2: Medien lesen
 ```
 
@@ -443,6 +539,7 @@ Der Publisher berücksichtigt Tabellen, die zu folgenden Roots gehören:
 ```text
 media
 projects
+projects_page
 posts
 events
 team_members
@@ -453,9 +550,12 @@ werte
 courses
 pages
 community_items
+community_items_page
 homepage
 navigation
 ```
+
+`projects_page` und `community_items_page` sind die Datenbank-Roots der neuen Payload Globals für die Übersichtsseiten. Dadurch werden Hero-Bildreferenzen und lokalisierte Seitentexte zusammen mit dem restlichen redaktionellen Stand nach D1 publiziert.
 
 ### Bewusst NICHT synchronisiert
 
@@ -479,6 +579,7 @@ Ein SHA-256-Hash des erzeugten SQL-Standes verhindert unnötige D1-Schreibvorgä
 ### Medien-Sync
 
 - Es werden nur Dateien hochgeladen, die in der Payload-`media`-Tabelle referenziert sind.
+- Das umfasst auch Hero-Bilder, die über `projects-page` oder `community-items-page` ausgewählt wurden.
 - MIME-Type kommt bevorzugt aus der Datenbank.
 - Änderungen werden anhand `size + mtime` erkannt.
 - Der Publisher lädt neue/geänderte Dateien nach R2.
@@ -514,7 +615,7 @@ RandomizedDelaySec=15s
 Persistent=true
 ```
 
-Das bedeutet: Änderungen werden typischerweise innerhalb weniger Minuten nach Cloudflare publiziert.
+Das bedeutet: Änderungen werden typischerweise innerhalb weniger Minuten nach Cloudflare publiziert. Das gilt ebenfalls für Änderungen an den Projekt- und Community-Seiteneinstellungen.
 
 Der API-Token liegt außerhalb des Repositories in:
 
@@ -573,11 +674,11 @@ Das aktuelle Rate-Limit verwendet eine In-Memory-Map im Runtime-Prozess. Auf ein
 | `TURNSTILE_SITE_KEY` | Turnstile Frontend-Key |
 | `TURNSTILE_SECRET_KEY` | Turnstile Server-Key |
 
-### Publisher
+### Publisher / CI
 
 | Variable | Zweck |
 |---|---|
-| `CLOUDFLARE_API_TOKEN` | Zugriff für D1/R2-Publisher |
+| `CLOUDFLARE_API_TOKEN` | Zugriff für D1/R2-Publisher und authentifizierte Remote-Bindings/CI-Builds |
 | `UCCELLI_D1_DATABASE` | D1-Datenbankname |
 | `UCCELLI_R2_BUCKET` | R2-Bucketname |
 | `UCCELLI_DB_PATH` | Pfad zur lokalen SQLite-DB |
@@ -587,7 +688,7 @@ Das aktuelle Rate-Limit verwendet eine In-Memory-Map im Runtime-Prozess. Auf ein
 
 ### Regel
 
-Secrets gehören niemals in Git, Dockerfiles oder öffentliche Dokumentation mit echten Werten.
+Secrets gehören niemals in Git, Dockerfiles oder öffentliche Dokumentation mit echten Werten. GitHub Actions und Cloudflare Build verwenden dafür Secret-/Environment-Mechanismen.
 
 ---
 
@@ -600,7 +701,8 @@ app/                         Next.js App Router
 app/(payload)/               Payload Admin/API Integration
 app/api/                     eigene öffentliche API-Routen
 collections/                 Payload Collections
-globals/                     Payload Globals
+globals/                     Payload Globals inkl. Seiten-Hauptseiten
+components/admin/            Payload Admin UI-Erweiterungen
 components/                  UI-Komponenten
 lib/                         gemeinsame Runtime-Logik
 messages/                    UI-i18n Texte
@@ -614,10 +716,21 @@ payload.config.ts            Cloudflare/D1/R2 Payload-Konfiguration
 payload.config.home.ts       Home/SQLite Payload-Konfiguration
 Dockerfile.admin             dediziertes Home-CMS Image
 docker-compose.yml           Home-CMS Runtime
-wrangler.jsonc               Cloudflare Worker + Bindings
+wrangler.jsonc               Cloudflare Worker, Custom Build + Bindings
 open-next.config.ts          OpenNext Cloudflare-Konfiguration
 middleware.ts                i18n + Admin-Routing
 next.config.ts               Next.js-Konfiguration und Legacy-Redirects
+```
+
+Für die Übersichtsseiten besonders relevant:
+
+```text
+globals/ProjectsPage.ts
+globals/CommunityPage.ts
+components/admin/CollectionPageSettingsLink.tsx
+app/[locale]/projekte/page.tsx
+app/[locale]/community/page.tsx
+lib/data.ts
 ```
 
 ---
@@ -668,6 +781,8 @@ Collection/Global ändern
 → Payload Types neu erzeugen
 → Migration erzeugen
 → Migration testen
+→ lokalen Schema-Bootstrap prüfen
+→ Publisher-Roots prüfen
 → Commit + CI
 → Cloudflare Migration anwenden
 → Home-CMS mit kompatiblem Schema neu bauen/starten
@@ -681,6 +796,14 @@ npm run migrate:create
 npm run cloudflare:migrate
 ```
 
+Die Seiteneinstellungen für Projekte und Community wurden über folgende Migration eingeführt:
+
+```text
+migrations/20260923_141500_page_settings.ts
+```
+
+Bei neuen synchronisierten Globals muss zusätzlich `scripts/cloud-sync.py` erweitert werden, damit deren Tabellen nach D1 gelangen.
+
 Wichtig: SQLite und D1 sollen fachlich dasselbe Content-Schema besitzen, obwohl sie über unterschiedliche Adapter betrieben werden.
 
 ---
@@ -692,6 +815,14 @@ Wichtig: SQLite und D1 sollen fachlich dasselbe Content-Schema besitzen, obwohl 
 Produktionscode liegt auf Branch `main`.
 
 Cloudflare ist mit GitHub verbunden und deployt die öffentliche Website aus dem Repository. Das Build-Artefakt wird mit OpenNext erzeugt.
+
+Wrangler verwendet dabei den in `wrangler.jsonc` definierten Custom Build:
+
+```text
+npm run cloudflare:build
+→ erzeugt .open-next/worker.js
+→ Wrangler Upload/Version
+```
 
 Für manuelles Deployment existiert:
 
@@ -712,6 +843,8 @@ docker compose up -d --build uccelli
 docker compose ps
 ```
 
+Nach Schemaänderungen baut der Container das CMS mit der Home-Konfiguration und prüft beim Start das lokale Schema.
+
 Der Home-CMS-Container wird nicht benötigt, um die bereits publizierte öffentliche Website auszuliefern.
 
 ---
@@ -726,13 +859,17 @@ GitHub Actions Workflow:
 
 Aktuell werden unter anderem geprüft:
 
+- Node.js 22.23.2
+- npm 11 für reproduzierbare Installation im Runner
 - Payload Types generieren
 - CV-Creator JavaScript Syntax
 - ESLint
 - TypeScript
 - Unit Tests mit Vitest
 - externer CV-Compiler Smoke Test
-- Cloudflare/OpenNext Produktionsbundle
+- Cloudflare/OpenNext Produktionsbundle, sofern die benötigte Cloudflare-Authentifizierung verfügbar ist
+
+Die OpenNext-Produktion kann während des Next.js-Builds Cloudflare-Bindings benötigen. In nicht-interaktiven Umgebungen darf deshalb kein Remote-Wrangler-Zugriff erzwungen werden, wenn kein `CLOUDFLARE_API_TOKEN` vorhanden ist.
 
 Zusätzliche Smoke-Workflows können externe Funktionen separat prüfen.
 
@@ -758,6 +895,7 @@ Nicht committen:
 - Payload Auth bleibt die Anwendungsauthentifizierung.
 - Der Cloudflare Tunnel veröffentlicht nur den benötigten CMS-Origin.
 - Der Home-Server braucht für den Tunnel keine öffentliche eingehende Web-Portfreigabe.
+- Seiteneinstellungen werden ausschließlich über den authentifizierten Payload-Admin geändert.
 
 ### Git
 
@@ -780,6 +918,8 @@ Mindestens sichern:
 /etc/uccelli-cloud-sync.env separat und sicher
 ```
 
+Die SQLite-Sicherung enthält auch die Seiteneinstellungen der Projekt- und Community-Hauptseiten. Die zugehörigen Hero-Dateien liegen im normalen `media/`-Backup.
+
 Empfehlungen:
 
 - SQLite mit `.backup` sichern, nicht blind während Schreibvorgängen kopieren.
@@ -798,9 +938,9 @@ R2 und D1 erhöhen die Verfügbarkeit der öffentlichen Kopie, ersetzen aber nic
 |---|---|
 | `freeza` offline | Öffentliche Website bleibt grundsätzlich verfügbar; CMS und neue Publikationen fallen aus |
 | CMS-Tunnel offline | CMS nicht erreichbar; öffentliche Website bleibt verfügbar |
-| systemd Sync gestoppt | Website zeigt letzten erfolgreich publizierten Stand |
+| systemd Sync gestoppt | Website zeigt letzten erfolgreich publizierten Stand, inklusive letzter Seiteneinstellungen |
 | D1 nicht erreichbar | dynamische öffentliche Inhalte/API können fehlschlagen |
-| R2 nicht erreichbar | Medien können fehlen, Seitenstruktur kann weiterhin geladen werden |
+| R2 nicht erreichbar | Medien und Hero-Bilder können fehlen, Seitenstruktur kann weiterhin geladen werden |
 | Cloudflare Worker gestört | öffentliche Website betroffen |
 | Resend gestört | Kontaktanfrage kann weiterhin in D1 gespeichert werden; E-Mail-Status wird als Fehler markiert |
 | Turnstile gestört und Secret aktiv | Formulare können mit Bot-Verifikationsfehler antworten |
@@ -839,9 +979,13 @@ journalctl -u uccelli-cloud-sync.service -n 100 --no-pager
 ```bash
 curl -I https://uccelli-society.ch
 curl -I https://uccelli-society.ch/admin
+curl -I https://uccelli-society.ch/projekte
+curl -I https://uccelli-society.ch/community
 ```
 
 Der erwartete `/admin`-Pfad auf der Hauptdomain ist ein Redirect zum CMS.
+
+Bei Seiteneinstellungen sollte zusätzlich geprüft werden, dass eine im CMS gesetzte Hero-Datei nach dem nächsten Sync über die öffentliche Media-Route erreichbar ist.
 
 ---
 
@@ -857,6 +1001,10 @@ Der erwartete `/admin`-Pfad auf der Hauptdomain ist ein Redirect zum CMS.
 8. **Produktionsdomain für SEO nicht auf Preview-/CMS-Hosts ändern.** `SITE_URL` bleibt `https://uccelli-society.ch`.
 9. **Bei neuen Runtime-Daten festlegen, wem sie gehören.** Vor der Implementierung entscheiden: Home Source of Truth, Cloud-only oder synchronisiert.
 10. **Backups getrennt von Publishing behandeln.** Synchronisation ist kein Backupverfahren.
+11. **Seiteneinstellungen gehören in Globals, nicht in Dummy-Collection-Einträge.** Übersichtsseiten wie Projekte oder Community erhalten eigene Payload Globals.
+12. **CMS-Komfortnavigation darf die Datenarchitektur nicht vermischen.** Zahnrad-Links können Globals aus Collection-Listen öffnen, die Speicherung bleibt aber sauber getrennt.
+13. **Neue synchronisierte Globals müssen in Migration, Home-Schema und Publisher berücksichtigt werden.** Nur so bleiben SQLite und D1 konsistent.
+14. **UI-Defaults bleiben als Fallback bestehen.** Neue CMS-Felder dürfen bestehende Seiten nicht unbrauchbar machen, wenn sie leer sind.
 
 ---
 
@@ -883,8 +1031,35 @@ Der erwartete `/admin`-Pfad auf der Hauptdomain ist ein Redirect zum CMS.
                      │             ┌──────┴──────┐
                      │             │             │
                   SQLite         SQLite        media/
-              redaktionelle      CMS DB         Dateien
+              Inhalte + Globals   CMS DB         Dateien
               Source of Truth
+```
+
+Für die neuen Übersichtsseiten ergibt sich zusätzlich:
+
+```text
+Payload Admin
+├── Projekte
+│   ├── ⚙ Projektseite einstellen
+│   └── Projekt-Einträge
+│
+└── Community Hub
+    ├── ⚙ Community-Seite einstellen
+    └── Community-Einträge
+
+⚙ Seiteneinstellungen
+→ Payload Global
+→ SQLite
+→ cloud-sync.py
+→ D1
+→ öffentliche /projekte bzw. /community Seite
+
+Hero-Bild
+→ Payload media
+→ lokales media/
+→ cloud-sync.py
+→ R2
+→ öffentliche Hero-Komponente
 ```
 
 Kurz gesagt:
@@ -894,6 +1069,9 @@ Kurz gesagt:
 - **SQLite + lokales Media sind die redaktionelle Quelle.**
 - **D1 + R2 sind die veröffentlichte Cloud-Kopie.**
 - **Der Publisher verbindet beide Welten.**
+- **Projekt- und Community-Hauptseiten besitzen eigene CMS-Globals.**
+- **Zahnrad-Links machen diese Globals direkt aus den jeweiligen Collection-Listen erreichbar.**
+- **Hero-Bilder werden über die normale Payload-Mediathek verwaltet und nach R2 publiziert.**
 - **Der CMS-Tunnel ist ein eigener Uccelli-Tunnel.**
 
-Damit bleibt die Website schnell und hoch verfügbar, während Payload ohne die CPU- und Runtime-Grenzen des Cloudflare-Free-Plans auf dem Home-Server betrieben werden kann.
+Damit bleibt die Website schnell und hoch verfügbar, während Payload ohne die CPU- und Runtime-Grenzen des Cloudflare-Free-Plans auf dem Home-Server betrieben werden kann und Redakteur:innen die wichtigsten Übersichtsseiten direkt im CMS pflegen können.
