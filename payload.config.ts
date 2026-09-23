@@ -30,6 +30,8 @@ import { Pages } from "./collections/Pages";
 import { Media } from "./collections/Media";
 import { Homepage } from "./globals/Homepage";
 import { Navigation } from "./globals/Navigation";
+import { ProjectsPage } from "./globals/ProjectsPage";
+import { CommunityPage } from "./globals/CommunityPage";
 import {
   adminOnly,
   adminOrSelf,
@@ -182,7 +184,7 @@ export default buildConfig({
       ],
     },
   ],
-  globals: [Homepage, Navigation],
+  globals: [Homepage, Navigation, ProjectsPage, CommunityPage],
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
