@@ -37,6 +37,7 @@ from typing import Iterable
 CONTENT_ROOTS = (
     "media",
     "projects",
+    "projects_page",
     "posts",
     "events",
     "team_members",
@@ -47,6 +48,7 @@ CONTENT_ROOTS = (
     "courses",
     "pages",
     "community_items",
+    "community_page",
     "homepage",
     "navigation",
 )
