@@ -154,7 +154,7 @@ export const getProjectBySlug = cache(async (slug: string, locale: Locale): Prom
 });
 
 async function getPageSettings(
-  slug: "projects-page" | "community-page",
+  slug: "projects-page" | "community-items-page",
   locale: Locale,
 ): Promise<PageSettingsData | null> {
   try {
@@ -176,7 +176,7 @@ export const getProjectsPageSettings = cache(async (locale: Locale): Promise<Pag
 );
 
 export const getCommunityPageSettings = cache(async (locale: Locale): Promise<PageSettingsData | null> =>
-  getPageSettings("community-page", locale),
+  getPageSettings("community-items-page", locale),
 );
 
 export const getNetworks = cache(async (locale: Locale): Promise<Network[]> => {
