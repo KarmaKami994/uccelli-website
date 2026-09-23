@@ -201,7 +201,8 @@ async function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
   ).then(({ getPlatformProxy }) =>
     getPlatformProxy({
       environment: process.env.CLOUDFLARE_ENV,
-      remoteBindings: isProduction,
+      remoteBindings:
+        isProduction && Boolean(process.env.CLOUDFLARE_API_TOKEN),
     } satisfies GetPlatformProxyOptions),
   );
 }
