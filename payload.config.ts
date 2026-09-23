@@ -51,15 +51,17 @@ const realpath = (value: string) => {
   }
 };
 
-const isCLI = process.argv.some((value) => {
+const isPayloadCLI = process.argv.some((value) => {
   const resolved = realpath(value);
-  if (!resolved) return false;
-
-  return (
-    resolved.endsWith(path.join("payload", "bin.js")) ||
-    resolved.endsWith(path.join("next", "dist", "bin", "next"))
-  );
+  return Boolean(resolved?.endsWith(path.join("payload", "bin.js")));
 });
+
+const isNextCLI = process.argv.some((value) => {
+  const resolved = realpath(value);
+  return Boolean(resolved?.endsWith(path.join("next", "dist", "bin", "next")));
+});
+
+const isCLI = isPayloadCLI || isNextCLI;
 
 const createLog =
   (level: string, fn: typeof console.log) =>
@@ -201,8 +203,7 @@ async function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
   ).then(({ getPlatformProxy }) =>
     getPlatformProxy({
       environment: process.env.CLOUDFLARE_ENV,
-      remoteBindings:
-        isProduction && Boolean(process.env.CLOUDFLARE_API_TOKEN),
+      remoteBindings: isProduction && isPayloadCLI,
     } satisfies GetPlatformProxyOptions),
   );
 }
