@@ -2,7 +2,7 @@ import type { GlobalConfig } from "payload";
 import { anyone, authenticated } from "../lib/access";
 
 export const CommunityPage: GlobalConfig = {
-  slug: "community-page",
+  slug: "community-items-page",
   label: "Community-Seite",
   access: { read: anyone, update: authenticated },
   admin: {
