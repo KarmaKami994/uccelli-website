@@ -19,6 +19,11 @@ COPY . .
 # Build against the local SQLite config, not the Cloudflare D1 config.
 RUN cp payload.config.home.ts payload.config.ts
 
+# Payload custom Admin components are resolved through the generated import map.
+# Regenerate it after switching to the home-server config so newly added list actions
+# (for example the Projects / Community page-settings shortcut) are bundled into Admin.
+RUN npm run generate:importmap
+
 # The Cloudflare-only R2 passthrough route must not shadow Payload's local-file route.
 RUN rm -rf "app/(payload)/api/media/file"
 
