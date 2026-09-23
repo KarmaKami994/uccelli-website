@@ -8,7 +8,7 @@ const intlMiddleware = createMiddleware({
   localeDetection: false,
 });
 
-const DEFAULT_ADMIN_ORIGIN = "https://uccelli.qrwed.uk";
+const DEFAULT_ADMIN_ORIGIN = "https://cms.uccelli-society.ch";
 
 export default function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { Locale } from "./payload";
 
-export const SITE_URL = process.env.SITE_URL || "https://uccelli.qrwed.uk";
+export const SITE_URL = process.env.SITE_URL || "https://uccelli-society.ch";
 
 export function localizedPath(path: string, locale: Locale): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;

@@ -10,8 +10,8 @@ services:
     environment:
       - DATABASE_URI=file:/app/data/uccelli.db
       - PAYLOAD_SECRET=${PAYLOAD_SECRET:?PAYLOAD_SECRET muss gesetzt sein (.env)}
-      - SITE_URL=${SITE_URL:-https://uccelli.qrwed.uk}
-      - ADMIN_ORIGIN=${ADMIN_ORIGIN:-https://uccelli.qrwed.uk}
+      - SITE_URL=${SITE_URL:-https://uccelli-society.ch}
+      - ADMIN_ORIGIN=${ADMIN_ORIGIN:-https://cms.uccelli-society.ch}
       - ADMIN_ONLY=1
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-}
