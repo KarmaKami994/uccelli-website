@@ -6,7 +6,7 @@ const settingsByCollection: Record<string, { href: string; label: string }> = {
     label: "Projektseite einstellen",
   },
   "community-items": {
-    href: "/admin/globals/community-page",
+    href: "/admin/globals/community-items-page",
     label: "Community-Seite einstellen",
   },
 };
