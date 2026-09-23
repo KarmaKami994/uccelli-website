@@ -86,6 +86,8 @@ const cloudflareLogger = {
   error: createLog("error", console.error),
   fatal: createLog("fatal", console.error),
   silent: () => {},
+// Payload accepts a Pino-compatible logger; this lightweight adapter intentionally mirrors that runtime shape.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
 
 const cloudflare =
@@ -93,6 +95,8 @@ const cloudflare =
     ? await getCloudflareContextFromWrangler()
     : await getCloudflareContext({ async: true });
 
+// Wrangler/OpenNext inject D1 and R2 bindings at runtime; the generated context type is intentionally generic here.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const env = cloudflare.env as any;
 
 export default buildConfig({
