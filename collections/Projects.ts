@@ -11,6 +11,9 @@ export const Projects: CollectionConfig = {
     defaultColumns: ["title", "category", "featured", "updatedAt"],
     description: "Projekte der Uccelli Society. «Hervorgehoben» steuert die Auswahl auf der Startseite.",
     hideAPIURL: true,
+    components: {
+      beforeList: ["/components/admin/CollectionPageSettingsLink"],
+    },
   },
   fields: [
     { name: "slug", type: "text", required: true, unique: true, admin: { position: "sidebar", description: "URL-Teil, z. B. nightshift-music" } },
