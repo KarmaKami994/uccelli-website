@@ -1,129 +1,281 @@
 # Uccelli Society – Website
 
-Neue Website des Vereins Uccelli in Zürich. Der aktuelle öffentliche Testbetrieb läuft unter `https://uccelli.qrwed.uk`; die bisherige WordPress-Seite unter `https://uccelli-society.ch` bleibt während der Migration separat erreichbar.
+Produktive Website des Vereins Uccelli.
+
+- Öffentliche Website: `https://uccelli-society.ch`
+- CMS: `https://cms.uccelli-society.ch/admin`
+- Architektur: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- Betrieb / Recovery: [`docs/RUNBOOK.md`](docs/RUNBOOK.md)
+
+## Architektur in Kürze
+
+Die Anwendung läuft hybrid:
+
+```text
+Besucher
+  ↓
+Cloudflare
+  ↓
+Worker: uccelli-website
+  ├─ D1: uccelli-prod
+  └─ R2: uccelli-media
+
+Redaktion
+  ↓
+cms.uccelli-society.ch
+  ↓
+Cloudflare Tunnel: uccelli-cms
+  ↓
+freeza
+  ↓
+Docker: uccelli-website:3000
+  ├─ SQLite: /opt/uccelli-website/data/uccelli.db
+  └─ Media:  /opt/uccelli-website/media/
+```
+
+Das Home-CMS ist die redaktionelle Source of Truth. `scripts/cloud-sync.py` veröffentlicht redaktionelle Daten regelmäßig nach D1 und Medien nach R2. Die öffentliche Website bleibt dadurch auch verfügbar, wenn der Home-Server oder der CMS-Tunnel nicht erreichbar ist.
 
 ## Stack
 
 | Bereich | Technologie |
 |---|---|
-| Framework | Next.js 16 (App Router, React 19) |
-| CMS | Payload CMS 3 (Admin unter `/admin`), SQLite |
-| i18n | next-intl (DE default, EN) + native Payload-Localization |
-| Styling | Tailwind CSS v4, Framer Motion |
+| Frontend | Next.js 16.3.3, React 19.2.6, TypeScript |
+| CMS | Payload CMS 3.90.0 |
+| Public Database | Cloudflare D1 |
+| Public Media | Cloudflare R2 |
+| CMS Database | SQLite auf `freeza` |
+| CMS Media | lokales `media/` auf `freeza` |
+| Cloud Runtime | Cloudflare Workers + OpenNext |
+| CMS-Zugriff | Cloudflare Tunnel `uccelli-cms` |
+| i18n | next-intl + Payload Localization |
+| Styling | Tailwind CSS v4, Framer Motion, GSAP |
 | E-Mail | Resend |
 | Bot-Schutz | Cloudflare Turnstile |
 | Tests | Vitest + Testing Library |
-| Deployment | Docker hinter Cloudflare und dem Home-Lab-Reverse-Proxy |
 
-## Öffentliche Struktur
+## Repository-Struktur
 
-- Startseite
-- Projekte mit Kategorienfilter und Detailseiten
-- Community Hub für Tools, Games und Ressourcen
-- News mit Detailseiten
-- Über-uns-One-Pager
-- Teil-werden-One-Pager
-- Deutsch und Englisch
+Wichtige Bereiche:
 
-Veranstaltungen werden primär über Instagram kommuniziert. Die alten Kurs-, Veranstaltungs-, Netzwerk- und Unterseiten werden über permanente Redirects auf die neue Struktur geführt.
+```text
+app/                     Next.js App Router
+collections/             Payload Collections
+globals/                 Payload Globals
+lib/                     gemeinsame App-/Payload-Logik
+messages/                UI-Übersetzungen DE/EN
+migrations/              Payload-/D1-Migrationen
+ops/systemd/             Sync-Service und Timer
+scripts/cloud-sync.py    SQLite/Media → D1/R2 Publisher
+docs/ARCHITECTURE.md     verbindliche Architektur-Dokumentation
+docs/RUNBOOK.md          Betriebs- und Recovery-Handbuch
+payload.config.ts        Cloudflare Payload-Konfiguration
+payload.config.home.ts   Home-CMS SQLite-Konfiguration
+Dockerfile.admin         Home-CMS Image
+docker-compose.yml       Home-CMS auf freeza
+wrangler.jsonc           Cloudflare Bindings
+```
 
 ## Lokale Entwicklung
+
+Voraussetzung: Node.js gemäß `.node-version` / `package.json`.
 
 ```bash
 cp .env.example .env
 # PAYLOAD_SECRET in .env durch einen langen Zufallswert ersetzen
-npm ci
-npm run migrate
-npm run content:sync
+npm install
 npm run dev
 ```
 
-Die Website ist danach unter `http://localhost:3000` und das Payload-Admin unter `http://localhost:3000/admin` erreichbar.
-
-## Wichtige Befehle
+Wichtige Befehle:
 
 | Befehl | Zweck |
 |---|---|
 | `npm run dev` | Entwicklungsserver |
-| `npm run build` | Produktions-Build |
-| `npm run lint` | ESLint-Prüfung |
-| `npm run typecheck` | Payload-Typen erzeugen und TypeScript prüfen |
-| `npm test` | Tests ausführen |
-| `npm run migrate` | Datenbankmigrationen anwenden |
-| `npm run content:sync` | Versionierte, idempotente Inhaltsmigration anwenden |
-| `npm run generate:types` | `payload-types.ts` neu erzeugen |
+| `npm run build` | Next.js Produktions-Build |
+| `npm run cloudflare:build` | OpenNext Cloudflare Bundle |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | Payload-Typen + TypeScript |
+| `npm test` | Unit Tests |
+| `npm run migrate` | Payload Migrationen |
+| `npm run migrate:create` | neue Migration erzeugen |
+| `npm run generate:types` | `payload-types.ts` aktualisieren |
+| `npm run sync:cloudflare` | Home-CMS-Inhalte nach D1/R2 publizieren |
+| `npm run deploy` | Cloudflare Migration + Build + Deployment |
 
-## Inhalte und Lokalisierung
+## Produktivbetrieb
 
-- Inhalte werden im Payload-Admin gepflegt.
-- Deutsch und Englisch werden als lokalisierte CMS-Felder gespeichert.
-- Fehlende englische Inhalte fallen auf Deutsch zurück.
-- Slugs bleiben sprachunabhängig; englische Seiten verwenden `/en/...`.
-- UI-Texte liegen in `messages/de.json` und `messages/en.json`.
-- Der versionierte Inhaltsimport läuft pro Version genau einmal und überschreibt spätere CMS-Änderungen nicht erneut.
+### Öffentliche Website
 
-## Home-Lab-Deployment
-
-Die produktive SQLite-Datenbank und Medien liegen auf dem Host in:
+Die öffentliche Anwendung nutzt:
 
 ```text
-/opt/uccelli-website/data/
+Worker: uccelli-website
+D1:     uccelli-prod
+R2:     uccelli-media
+```
+
+`wrangler.jsonc` enthält die D1- und R2-Bindings. Die öffentliche Payload-Konfiguration ist `payload.config.ts`.
+
+`SITE_URL` für Produktion:
+
+```env
+SITE_URL=https://uccelli-society.ch
+```
+
+### Home-CMS auf freeza
+
+Projektpfad:
+
+```text
+/opt/uccelli-website
+```
+
+Persistente Daten:
+
+```text
+/opt/uccelli-website/data/uccelli.db
 /opt/uccelli-website/media/
 ```
 
-Die zusätzliche Datei `/opt/uccelli-website/uccelli.db` ist nicht das von Docker Compose eingebundene Datenbank-Volume.
+CMS-Container:
 
-### Vor jedem Update sichern
-
-```bash
-cd /opt/uccelli-website
-backup_dir="backups/$(date +%Y%m%d-%H%M%S)"
-mkdir -p "$backup_dir"
-cp -a data "$backup_dir/"
-cp -a media "$backup_dir/"
-cp -a .env "$backup_dir/" 2>/dev/null || true
+```text
+Compose service: uccelli
+Container:       uccelli-website
+Host port:       3100
+Container port:  3000
+Docker network:  npm
 ```
 
-### Aktualisieren
+Wichtige Produktionswerte:
+
+```env
+SITE_URL=https://uccelli-society.ch
+ADMIN_ORIGIN=https://cms.uccelli-society.ch
+ADMIN_ONLY=1
+```
+
+Update des CMS:
 
 ```bash
 cd /opt/uccelli-website
 git pull --ff-only origin main
-docker compose build --pull
-docker compose up -d
-docker compose logs --tail=200 -f uccelli
+docker compose up -d --build uccelli
+docker compose ps
 ```
 
-Beim Start führt der Container nacheinander aus:
+Logs:
+
+```bash
+docker logs --tail 100 uccelli-website
+```
+
+## CMS-Tunnel
+
+Das CMS besitzt einen eigenen Cloudflare-Tunnel:
 
 ```text
-Payload-Schemamigration
-→ versionierte Inhaltsmigration
-→ Next.js-Server
+Tunnel:          uccelli-cms
+Public hostname: cms.uccelli-society.ch
+Service:         http://uccelli-website:3000
+Connector:       uccelli-cloudflared auf freeza
+Network:         npm
 ```
 
-Der Healthcheck verwendet `/api/health`.
+Der frühere Host `uccelli.qrwed.uk` gehört nicht mehr zur Uccelli-Architektur.
 
-### Öffentliche Domain
+## Content-Publishing
 
-`SITE_URL` muss der Adresse entsprechen, die Besucher im Browser sehen:
+Der Home-Server veröffentlicht redaktionelle Daten mit:
 
-```env
-SITE_URL=https://uccelli.qrwed.uk
+```text
+scripts/cloud-sync.py
 ```
 
-Cloudflare leitet die Domain zum Home-Lab weiter. `SITE_URL` steuert unabhängig davon Canonical-URLs, Sitemap, Open Graph und andere Metadaten.
+Dabei werden redaktionelle Collections/Globals und Media-Metadaten nach D1 sowie DB-referenzierte Dateien nach R2 übertragen.
 
-## Qualitätsprüfung
+Bewusst nicht vom Home-CMS überschrieben werden unter anderem:
 
-Der GitHub-Workflow prüft:
+- Payload-Benutzer
+- Sessions und Payload-interne Tabellen
+- `contact-submissions`
 
-1. Datenbankmigrationen auf einer leeren SQLite-Datenbank
-2. versionierten Inhaltsimport
-3. generierte Payload-Typen
+Der automatische Lauf wird über systemd gesteuert:
+
+```bash
+systemctl status uccelli-cloud-sync.timer
+journalctl -u uccelli-cloud-sync.service -n 100 --no-pager
+```
+
+Ein Lauf kann manuell gestartet werden:
+
+```bash
+sudo systemctl start uccelli-cloud-sync.service
+```
+
+## Admin-Routing
+
+Auf der öffentlichen Website wird:
+
+```text
+https://uccelli-society.ch/admin
+```
+
+auf:
+
+```text
+https://cms.uccelli-society.ch/admin
+```
+
+umgeleitet.
+
+Das Home-CMS läuft mit `ADMIN_ONLY=1` und dient nicht als zweite öffentliche Website.
+
+## Medien
+
+Auf Cloudflare werden Medien über R2 bereitgestellt. Die öffentliche Route lautet:
+
+```text
+/api/media/file/[filename]
+```
+
+Next.js Image Optimization ist bewusst deaktiviert (`images.unoptimized = true`), damit Payload-/R2-Medien ohne zusätzliches Cloudflare-Images-Binding ausgeliefert werden können.
+
+## Lokalisierung
+
+- Deutsch ist Standardsprache.
+- Englisch ist zusätzlich verfügbar.
+- `next-intl` übernimmt Routing und UI-Übersetzungen.
+- Payload speichert lokalisierte CMS-Felder.
+- Fehlende englische CMS-Inhalte können auf Deutsch zurückfallen.
+
+## CI
+
+Der GitHub-Workflow validiert unter anderem:
+
+1. Dependency Installation
+2. Payload-Typgenerierung
+3. CV-Creator JavaScript Syntax
 4. ESLint
 5. TypeScript
 6. Unit Tests
-7. Next.js-Produktionsbuild
-8. Docker-Image-Build
-9. echten Containerstart inklusive Healthcheck
+7. externen CV-Compiler Smoke Test
+8. OpenNext Cloudflare Production Bundle
+
+## Secrets
+
+Niemals echte Secrets ins Repository committen. Dazu gehören insbesondere:
+
+- `PAYLOAD_SECRET`
+- `CLOUDFLARE_API_TOKEN`
+- Cloudflare Tunnel Tokens
+- `RESEND_API_KEY`
+- `TURNSTILE_SECRET_KEY`
+
+Die Beispielwerte stehen in `.env.example`. Produktive Werte liegen ausschließlich außerhalb von Git.
+
+## Dokumentation
+
+Für technische Entscheidungen und Datenflüsse gilt [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) als maßgebliche Referenz.
+
+Für Betrieb, Updates, Sync, Tunnel, Backups und Incident-Hilfe siehe [`docs/RUNBOOK.md`](docs/RUNBOOK.md).
