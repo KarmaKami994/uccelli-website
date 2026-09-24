@@ -5,6 +5,9 @@ import type { NextConfig } from "next";
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
+  experimental: {
+    globalNotFound: true,
+  },
   images: {
     // OpenNext image optimization requires a Cloudflare Images binding.
     // Serve Payload/R2 images directly instead so the site works on the free plan.

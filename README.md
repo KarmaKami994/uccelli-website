@@ -77,12 +77,13 @@ wrangler.jsonc           Cloudflare Bindings
 
 ## Lokale Entwicklung
 
-Voraussetzung: Node.js gemäß `.node-version` / `package.json`.
+Voraussetzung: Node.js und npm gemäß `.node-version` / `package.json`.
 
 ```bash
+npm install --global npm@11.6.0
 cp .env.example .env
 # PAYLOAD_SECRET in .env durch einen langen Zufallswert ersetzen
-npm install
+npm ci
 npm run dev
 ```
 

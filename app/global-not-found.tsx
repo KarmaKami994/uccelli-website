@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function RootNotFound() {
+export default function GlobalNotFound() {
   return (
     <html lang="de">
       <body style={{ fontFamily: "system-ui, sans-serif", margin: 0, display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "2rem" }}>

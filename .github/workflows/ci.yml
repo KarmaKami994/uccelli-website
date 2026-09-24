@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - agent/**
+      - codex/**
   pull_request:
   workflow_dispatch:
 
@@ -30,13 +31,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.23.2
+          node-version-file: .node-version
+          cache: npm
 
       - name: Use npm 11
         run: npm install -g npm@11.6.0
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Generate Payload types
         run: npm run generate:types
@@ -55,6 +57,12 @@ jobs:
 
       - name: Unit tests
         run: npm test
+
+      - name: Next.js production build
+        run: npm run build
+
+      - name: Verify generated Payload types are committed
+        run: git diff --exit-code -- payload-types.ts
 
       - name: External CV compiler smoke test
         run: npm run test:cv-external

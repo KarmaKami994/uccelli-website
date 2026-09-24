@@ -42,6 +42,7 @@ import {
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 const isProduction = process.env.NODE_ENV === "production";
+const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
 
 const realpath = (value: string) => {
   try {
@@ -93,7 +94,7 @@ const cloudflareLogger = {
 } as any;
 
 const cloudflare =
-  isCLI || !isProduction
+  isCLI || isBuildPhase || !isProduction
     ? await getCloudflareContextFromWrangler()
     : await getCloudflareContext({ async: true });
 

@@ -1,6 +1,7 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -11,6 +12,11 @@ import { LOCALES, toLocale } from "@/lib/payload";
 import "@/styles/globals.css";
 
 export const revalidate = 300;
+
+export const metadata: Metadata = {
+  title: "Uccelli Society",
+  description: "Gemeinschaft. Integrität. Generativität.",
+};
 
 const lato = localFont({
   src: [

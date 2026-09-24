@@ -68,16 +68,18 @@ export interface Config {
   blocks: {};
   collections: {
     projects: Project;
+    'community-items': CommunityItem;
     posts: Post;
-    events: Event;
+    pages: Page;
     'team-members': TeamMember;
     partners: Partner;
     faqs: Faq;
+    'contact-submissions': ContactSubmission;
+    media: Media;
+    events: Event;
     networks: Network;
     werte: Werte;
     courses: Course;
-    pages: Page;
-    media: Media;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -87,16 +89,18 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    'community-items': CommunityItemsSelect<false> | CommunityItemsSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
-    events: EventsSelect<false> | EventsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
     partners: PartnersSelect<false> | PartnersSelect<true>;
     faqs: FaqsSelect<false> | FaqsSelect<true>;
+    'contact-submissions': ContactSubmissionsSelect<false> | ContactSubmissionsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
     networks: NetworksSelect<false> | NetworksSelect<true>;
     werte: WerteSelect<false> | WerteSelect<true>;
     courses: CoursesSelect<false> | CoursesSelect<true>;
-    pages: PagesSelect<false> | PagesSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -110,10 +114,14 @@ export interface Config {
   globals: {
     homepage: Homepage;
     navigation: Navigation;
+    'projects-page': ProjectsPage;
+    'community-items-page': CommunityItemsPage;
   };
   globalsSelect: {
     homepage: HomepageSelect<false> | HomepageSelect<true>;
     navigation: NavigationSelect<false> | NavigationSelect<true>;
+    'projects-page': ProjectsPageSelect<false> | ProjectsPageSelect<true>;
+    'community-items-page': CommunityItemsPageSelect<false> | CommunityItemsPageSelect<true>;
   };
   locale: 'de' | 'en';
   widgets: {
@@ -144,14 +152,22 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Projekte der Uccelli Society. «Hervorgehoben» steuert die Auswahl auf der Startseite.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects".
  */
 export interface Project {
   id: number;
-  title: string;
+  /**
+   * URL-Teil, z. B. nightshift-music
+   */
   slug: string;
-  category: 'sozial' | 'bildung' | 'gemeinschaft';
+  featured?: boolean | null;
+  title: string;
+  /**
+   * Wird auf Projektkarten angezeigt.
+   */
   summary: string;
   body?: {
     root: {
@@ -169,17 +185,23 @@ export interface Project {
     [k: string]: unknown;
   } | null;
   image?: (number | null) | Media;
-  featured?: boolean | null;
+  category: 'sozial' | 'bildung' | 'gemeinschaft';
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * Zentrale Bibliothek für Bilder, Logos und PDF-Dateien.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
+  /**
+   * Beschreibt den Bildinhalt für Barrierefreiheit und Suchmaschinen.
+   */
   alt: string;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -189,18 +211,22 @@ export interface Media {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
+ * Tools, Games und Ressourcen im Community Hub. Status und Reihenfolge steuern die öffentliche Darstellung.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "community-items".
  */
-export interface Post {
+export interface CommunityItem {
   id: number;
-  title: string;
+  /**
+   * URL-Teil für die Detailseite.
+   */
   slug: string;
-  date: string;
+  featured?: boolean | null;
+  order?: number | null;
+  title: string;
   summary: string;
   body?: {
     root: {
@@ -218,6 +244,200 @@ export interface Post {
     [k: string]: unknown;
   } | null;
   image?: (number | null) | Media;
+  type: 'tool' | 'game' | 'resource';
+  status: 'available' | 'beta' | 'coming-soon';
+  /**
+   * Leer lassen, um die interne Detailseite zu verwenden.
+   */
+  href?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Neuigkeiten und Mitteilungen der Uccelli Society. Die neuesten Beiträge erscheinen automatisch auf der Startseite.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  /**
+   * URL-Teil, z. B. neue-partnerschaft
+   */
+  slug: string;
+  date: string;
+  title: string;
+  /**
+   * Wird auf News-Karten angezeigt.
+   */
+  summary: string;
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  image?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Allgemeine Inhalte wie Datenschutz und Impressum. Strukturierte Bereiche werden in ihren eigenen Collections gepflegt.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  /**
+   * Technischer Seitenbezeichner.
+   */
+  slug: string;
+  title: string;
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Personen, die auf der Über-uns-Seite als Team dargestellt werden.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-members".
+ */
+export interface TeamMember {
+  id: number;
+  order?: number | null;
+  name: string;
+  role: string;
+  bio?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  image?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Partner und Sponsoren für die Über-uns-Seite und das Logo-Banner auf der Startseite.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners".
+ */
+export interface Partner {
+  id: number;
+  type: 'partner' | 'sponsor';
+  name: string;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  url?: string | null;
+  logo?: (number | null) | Media;
+  socials?: {
+    linkedin?: string | null;
+    instagram?: string | null;
+    facebook?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Häufige Fragen für die Über-uns-Seite.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faqs".
+ */
+export interface Faq {
+  id: number;
+  order?: number | null;
+  question: string;
+  answer: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Alle Eingänge aus dem Kontakt- und Teil-werden-Formular. Neue Anfragen zuerst bearbeiten und danach auf «Erledigt» setzen.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-submissions".
+ */
+export interface ContactSubmission {
+  id: number;
+  source: 'contact' | 'join';
+  locale: 'de' | 'en';
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  interest?: ('project' | 'volunteer' | 'membership' | 'partnership' | 'support' | 'general') | null;
+  project?: string | null;
+  status: 'new' | 'in-progress' | 'done';
+  /**
+   * Nur im CMS sichtbar. Wird nicht per E-Mail versendet.
+   */
+  internalNote?: string | null;
+  emailStatus: 'pending' | 'sent' | 'skipped' | 'failed';
+  emailId?: string | null;
+  emailError?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -247,93 +467,6 @@ export interface Event {
     [k: string]: unknown;
   } | null;
   image?: (number | null) | Media;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "team-members".
- */
-export interface TeamMember {
-  id: number;
-  name: string;
-  role: string;
-  bio?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  image?: (number | null) | Media;
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "partners".
- */
-export interface Partner {
-  id: number;
-  name: string;
-  type: 'partner' | 'sponsor';
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  logo?: (number | null) | Media;
-  url?: string | null;
-  socials?: {
-    linkedin?: string | null;
-    instagram?: string | null;
-    facebook?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "faqs".
- */
-export interface Faq {
-  id: number;
-  question: string;
-  answer: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -404,32 +537,8 @@ export interface Course {
   createdAt: string;
 }
 /**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
- */
-export interface Page {
-  id: number;
-  title: string;
-  slug: string;
-  body?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
+ * Zugänge und Rollen für das Uccelli CMS.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -444,6 +553,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -485,12 +595,16 @@ export interface PayloadLockedDocument {
         value: number | Project;
       } | null)
     | ({
+        relationTo: 'community-items';
+        value: number | CommunityItem;
+      } | null)
+    | ({
         relationTo: 'posts';
         value: number | Post;
       } | null)
     | ({
-        relationTo: 'events';
-        value: number | Event;
+        relationTo: 'pages';
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'team-members';
@@ -505,6 +619,18 @@ export interface PayloadLockedDocument {
         value: number | Faq;
       } | null)
     | ({
+        relationTo: 'contact-submissions';
+        value: number | ContactSubmission;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'events';
+        value: number | Event;
+      } | null)
+    | ({
         relationTo: 'networks';
         value: number | Network;
       } | null)
@@ -515,14 +641,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'courses';
         value: number | Course;
-      } | null)
-    | ({
-        relationTo: 'pages';
-        value: number | Page;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: number | Media;
       } | null)
     | ({
         relationTo: 'users';
@@ -575,13 +693,31 @@ export interface PayloadMigration {
  * via the `definition` "projects_select".
  */
 export interface ProjectsSelect<T extends boolean = true> {
-  title?: T;
   slug?: T;
-  category?: T;
+  featured?: T;
+  title?: T;
   summary?: T;
   body?: T;
   image?: T;
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-items_select".
+ */
+export interface CommunityItemsSelect<T extends boolean = true> {
+  slug?: T;
   featured?: T;
+  order?: T;
+  title?: T;
+  summary?: T;
+  body?: T;
+  image?: T;
+  type?: T;
+  status?: T;
+  href?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -590,9 +726,9 @@ export interface ProjectsSelect<T extends boolean = true> {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  title?: T;
   slug?: T;
   date?: T;
+  title?: T;
   summary?: T;
   body?: T;
   image?: T;
@@ -601,15 +737,12 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "events_select".
+ * via the `definition` "pages_select".
  */
-export interface EventsSelect<T extends boolean = true> {
+export interface PagesSelect<T extends boolean = true> {
+  slug?: T;
   title?: T;
-  date?: T;
-  endDate?: T;
-  location?: T;
-  description?: T;
-  image?: T;
+  body?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -618,11 +751,11 @@ export interface EventsSelect<T extends boolean = true> {
  * via the `definition` "team-members_select".
  */
 export interface TeamMembersSelect<T extends boolean = true> {
+  order?: T;
   name?: T;
   role?: T;
   bio?: T;
   image?: T;
-  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -631,11 +764,11 @@ export interface TeamMembersSelect<T extends boolean = true> {
  * via the `definition` "partners_select".
  */
 export interface PartnersSelect<T extends boolean = true> {
-  name?: T;
   type?: T;
+  name?: T;
   description?: T;
-  logo?: T;
   url?: T;
+  logo?: T;
   socials?:
     | T
     | {
@@ -651,9 +784,61 @@ export interface PartnersSelect<T extends boolean = true> {
  * via the `definition` "faqs_select".
  */
 export interface FaqsSelect<T extends boolean = true> {
+  order?: T;
   question?: T;
   answer?: T;
-  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-submissions_select".
+ */
+export interface ContactSubmissionsSelect<T extends boolean = true> {
+  source?: T;
+  locale?: T;
+  name?: T;
+  email?: T;
+  subject?: T;
+  message?: T;
+  interest?: T;
+  project?: T;
+  status?: T;
+  internalNote?: T;
+  emailStatus?: T;
+  emailId?: T;
+  emailError?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  date?: T;
+  endDate?: T;
+  location?: T;
+  description?: T;
+  image?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -694,35 +879,6 @@ export interface CoursesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages_select".
- */
-export interface PagesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  body?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -735,6 +891,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -786,6 +943,8 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * Texte und Hero-Bild der Startseite. Projekte, Community, News und Partner werden in ihren eigenen Bereichen gepflegt.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "homepage".
  */
@@ -795,6 +954,9 @@ export interface Homepage {
     title: string;
     subtitle?: string | null;
     ctaText?: string | null;
+    /**
+     * Interner Pfad, z. B. /projekte
+     */
     ctaHref?: string | null;
     image?: (number | null) | Media;
   };
@@ -803,7 +965,19 @@ export interface Homepage {
     title: string;
     text: string;
     ctaText?: string | null;
+    /**
+     * Interner Pfad, z. B. /ueber-uns
+     */
     ctaHref?: string | null;
+  };
+  cta: {
+    title: string;
+    text?: string | null;
+    buttonText?: string | null;
+    /**
+     * Interner Pfad, z. B. /teil-werden
+     */
+    buttonHref?: string | null;
   };
   tasks: {
     title: string;
@@ -818,17 +992,11 @@ export interface Homepage {
         }[]
       | null;
   };
-  cta: {
-    title: string;
-    text?: string | null;
-    buttonText?: string | null;
-    buttonHref?: string | null;
-  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * Haupt-Navigation der Website. Reihenfolge per Drag & Drop. Labels sind pro Sprache übersetzbar (DE/EN oben rechts umschalten).
+ * Historische Navigationsdaten. Die öffentliche Hauptnavigation wird aktuell aus der vereinfachten Website-Struktur erzeugt.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "navigation".
@@ -838,14 +1006,8 @@ export interface Navigation {
   items?:
     | {
         label: string;
-        /**
-         * Wohin der Titel selbst verlinkt (z.B. /programm/projekte). Leer lassen wenn nur Dropdown.
-         */
         href?: string | null;
         openInNewTab?: boolean | null;
-        /**
-         * Sub-Navigation (Dropdown auf Desktop, Akkordeon auf Mobile)
-         */
         children?:
           | {
               label: string;
@@ -856,6 +1018,60 @@ export interface Navigation {
         id?: string | null;
       }[]
     | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Einstellungen für die Projekt-Hauptseite /projekte.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects-page".
+ */
+export interface ProjectsPage {
+  id: number;
+  /**
+   * Empfohlen: breites Bild im Format 16:9, mindestens ca. 1600 px breit.
+   */
+  heroImage?: (number | null) | Media;
+  /**
+   * Leer lassen, um den bisherigen Standardtitel zu verwenden.
+   */
+  title?: string | null;
+  /**
+   * Leer lassen, um den bisherigen Standarduntertitel zu verwenden.
+   */
+  subtitle?: string | null;
+  /**
+   * Text direkt unter dem Hero und oberhalb der Projektfilter.
+   */
+  intro?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Einstellungen für die Community-Hauptseite /community.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-items-page".
+ */
+export interface CommunityItemsPage {
+  id: number;
+  /**
+   * Empfohlen: breites Bild im Format 16:9, mindestens ca. 1600 px breit.
+   */
+  heroImage?: (number | null) | Media;
+  /**
+   * Leer lassen, um den bisherigen Standardtitel zu verwenden.
+   */
+  title?: string | null;
+  /**
+   * Leer lassen, um den bisherigen Standarduntertitel zu verwenden.
+   */
+  subtitle?: string | null;
+  /**
+   * Text direkt unter dem Hero und oberhalb der Community-Filter.
+   */
+  intro?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -882,6 +1098,14 @@ export interface HomepageSelect<T extends boolean = true> {
         ctaText?: T;
         ctaHref?: T;
       };
+  cta?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        buttonText?: T;
+        buttonHref?: T;
+      };
   tasks?:
     | T
     | {
@@ -896,14 +1120,6 @@ export interface HomepageSelect<T extends boolean = true> {
               image?: T;
               id?: T;
             };
-      };
-  cta?:
-    | T
-    | {
-        title?: T;
-        text?: T;
-        buttonText?: T;
-        buttonHref?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -929,6 +1145,32 @@ export interface NavigationSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects-page_select".
+ */
+export interface ProjectsPageSelect<T extends boolean = true> {
+  heroImage?: T;
+  title?: T;
+  subtitle?: T;
+  intro?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-items-page_select".
+ */
+export interface CommunityItemsPageSelect<T extends boolean = true> {
+  heroImage?: T;
+  title?: T;
+  subtitle?: T;
+  intro?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
