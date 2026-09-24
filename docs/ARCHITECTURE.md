@@ -1,16 +1,20 @@
 # Uccelli Website – Architektur
 
-> **Stand:** 23. September 2026  
+> **Stand:** 24. September 2026  
 > **Status:** Produktionsarchitektur  
 > **Geltungsbereich:** Öffentliche Website, Payload CMS, Cloudflare-Infrastruktur, Home-Server, Daten- und Medien-Synchronisation, Deployment und Betrieb.
 
-Dieses Dokument beschreibt die **aktuelle Ziel- und Produktionsarchitektur** der Uccelli-Website. Es ist die technische Referenz für neue Entwickler:innen und für den Betrieb. Ältere Dokumente im Repository können noch historische Hostnamen oder frühere Deployment-Varianten enthalten; bei Widersprüchen gilt dieses Dokument für die Architektur.
+Dieses Dokument beschreibt die **aktuelle Ziel- und Produktionsarchitektur** der Uccelli-Website. Es ist die technische Referenz für Entwicklung und Betrieb. Ältere Dokumente können historische Hostnamen oder frühere Deployment-Varianten enthalten; bei Widersprüchen gilt dieses Dokument für die Architektur.
 
 ---
 
 ## 1. Architektur in einem Satz
 
 Die öffentliche Website läuft auf **Cloudflare Workers** mit **D1** und **R2**, während der redaktionelle **Payload-Admin** auf dem Home-Server `freeza` mit **SQLite** und lokalem Medienverzeichnis läuft; ein automatischer Publisher synchronisiert redaktionelle Inhalte und Medien vom Home-Server nach Cloudflare.
+
+Die wichtigste Regel lautet:
+
+> **Kein Besuchertraffic der öffentlichen Website läuft über `freeza`.**
 
 ---
 
@@ -41,23 +45,24 @@ Die Architektur trennt bewusst **öffentliche Auslieferung** und **Redaktionssys
 
 - Die öffentliche Website bleibt verfügbar, auch wenn `freeza` oder der CMS-Tunnel offline ist.
 - Redakteur:innen arbeiten ausschließlich im Home-CMS.
+- SQLite und das lokale Medienverzeichnis sind die redaktionelle Source of Truth.
 - Cloudflare erhält eine veröffentlichte Kopie der redaktionellen Inhalte.
 - Besucherzugriffe belasten den Home-Server nicht.
 
 ---
 
-## 3. Öffentliche Domains und Zuständigkeiten
+## 3. Domains und Zuständigkeiten
 
 | Hostname | Zweck | Ziel |
 |---|---|---|
 | `https://uccelli-society.ch` | Öffentliche Website | Cloudflare Worker `uccelli-website` |
 | `https://www.uccelli-society.ch` | Canonical Redirect | 301 auf `https://uccelli-society.ch` |
-| `https://cms.uccelli-society.ch` | Payload Admin | eigener Cloudflare Tunnel `uccelli-cms` → `freeza` |
+| `https://cms.uccelli-society.ch` | Payload Admin | Cloudflare Tunnel `uccelli-cms` → `freeza` |
 | `/admin` auf der Hauptdomain | Komfort-URL | Redirect auf `https://cms.uccelli-society.ch/admin` |
 
 Die DNS-Zone von `uccelli-society.ch` wird von Cloudflare verwaltet. Mail bleibt davon getrennt und wird weiterhin über die bestehenden Hosttech-MX-Einträge zugestellt.
 
-Der frühere temporäre Host `uccelli.qrwed.uk` gehört **nicht** mehr zur Uccelli-Architektur und darf nicht als Abhängigkeit für das CMS verwendet werden.
+Der frühere temporäre Host `uccelli.qrwed.uk` gehört **nicht** mehr zur Uccelli-Architektur und darf nicht als Abhängigkeit für Website oder CMS verwendet werden.
 
 ---
 
@@ -74,18 +79,26 @@ Der frühere temporäre Host `uccelli.qrwed.uk` gehört **nicht** mehr zur Uccel
 - **Tailwind CSS v4**
 - **Framer Motion / GSAP** für Animationen
 
+### Toolchain
+
+- **Node.js 22.23.2** als aktuelle Baseline
+- **npm 11.6.0**
+- versioniertes `package-lock.json`
+- reproduzierbare Installationen mit `npm ci`
+
 ### Cloudflare
 
 - **Cloudflare Workers** für die öffentliche Next.js-Anwendung
 - **OpenNext for Cloudflare** als Adapter
 - **Cloudflare D1** als öffentliche Produktionsdatenbank
 - **Cloudflare R2** für öffentliche Medien
-- **Cloudflare Tunnel** für den privaten Ursprung des Home-CMS
+- **Cloudflare Tunnel** für den Home-CMS-Origin
 - **Cloudflare Turnstile** optional für Formular-Bot-Schutz
 
 ### Home-Server
 
 - Hostname: `freeza`
+- Repository: `/opt/uccelli-website`
 - Docker / Docker Compose
 - Payload Admin in Container `uccelli-website`
 - SQLite als redaktionelle Datenbank
@@ -117,12 +130,40 @@ Diese Konfiguration ist für die öffentliche Website bestimmt.
 
 Die Cloudflare-Instanz ist primär ein **Read-/Public-Runtime-System**. Öffentliche Formulare können jedoch gezielt Daten direkt in D1 schreiben.
 
+#### Build- und CLI-Kontext
+
+`payload.config.ts` unterscheidet aktuell zwischen:
+
+- Payload CLI,
+- Next.js CLI,
+- Next.js Production Build,
+- lokaler Entwicklung,
+- echter Cloudflare Produktionsruntime.
+
+Der Next.js Production Build wird über
+
+```text
+NEXT_PHASE=phase-production-build
+```
+
+erkannt.
+
+CLI-, Build- und lokale Entwicklungsprozesse verwenden den Wrangler-Kontext. Die echte Produktionsruntime verwendet `getCloudflareContext({ async: true })`.
+
+`remoteBindings` werden nur für einen **Production Payload CLI**-Lauf aktiviert:
+
+```ts
+remoteBindings: isProduction && isPayloadCLI
+```
+
+Damit kann ein normaler Next.js-Produktionsbuild ohne unbeabsichtigten Remote-Zugriff auf D1/R2 laufen, während gezielte Payload-CLI-Operationen weiterhin mit produktiven Cloudflare-Bindings arbeiten können.
+
 ### `payload.config.home.ts` – Home-CMS Runtime
 
 Diese Konfiguration wird beim Bau von `Dockerfile.admin` als `payload.config.ts` eingesetzt.
 
 - Datenbankadapter: `@payloadcms/db-sqlite`
-- Datenbank: `DATABASE_URI`, standardmäßig `file:./data/uccelli.db`
+- produktive Datenbank: `file:/app/data/uccelli.db`
 - keine D1- oder R2-Abhängigkeit
 - lokaler Payload Upload Storage
 - Fail-Fast, wenn im Produktionsbetrieb kein `PAYLOAD_SECRET` vorhanden ist
@@ -160,6 +201,12 @@ R2: uccelli-media
 
 Diese Daten werden regelmäßig vom Home-CMS veröffentlicht.
 
+### Cloud-only Daten
+
+Nicht alle produktiven Daten stammen aus `freeza`.
+
+Insbesondere `contact-submissions` entstehen direkt auf Cloudflare und gehören der öffentlichen Runtime. Diese Daten werden vom Publisher bewusst nicht überschrieben.
+
 ### Wichtig
 
 Redaktionelle Content-Tabellen in D1 dürfen nicht als eigenständige zweite Pflegequelle behandelt werden. Der nächste Publisher-Lauf kann sie wieder durch den Stand aus SQLite ersetzen.
@@ -189,6 +236,34 @@ Globals:
 
 - `homepage`
 - `navigation`
+- `projects-page`
+- `community-items-page`
+
+### Übersichtsseiten-Einstellungen
+
+Die Globals `projects-page` und `community-items-page` konfigurieren die Hauptseiten `/projekte` und `/community`.
+
+Sie enthalten derzeit:
+
+- Hero-Bild
+- lokalisierten Titel
+- lokalisierten Untertitel
+- lokalisierte Einleitung
+
+Die Collection-Listen für Projekte und Community besitzen im Payload Admin einen Shortcut zu diesen Seiteneinstellungen.
+
+Wichtig: Der technische Slug der Community-Einstellungen lautet **`community-items-page`**. Historische Notizen mit `community-page` sind veraltet.
+
+### Physische Tabellen der Page-Settings
+
+Die Globals werden unter anderem in folgenden Tabellen gespeichert:
+
+```text
+projects_page
+projects_page_locales
+community_items_page
+community_items_page_locales
+```
 
 ### Benutzer und Rollen
 
@@ -223,6 +298,7 @@ Technisch:
 - Payload speichert lokalisierte Content-Felder.
 - Fehlende englische Inhalte fallen auf Deutsch zurück.
 - Slugs sind grundsätzlich sprachunabhängig.
+- Die Page-Settings-Globals verwenden lokalisierte Felder für Titel, Untertitel und Einleitung.
 
 Canonical URLs und OpenGraph-URLs werden über `SITE_URL` erzeugt.
 
@@ -246,17 +322,28 @@ Main: .open-next/worker.js
 Assets: .open-next/assets
 ```
 
+### Build-Hook
+
+`wrangler.jsonc` erzeugt das OpenNext-Artefakt explizit vor dem Worker-Upload:
+
+```json
+"build": {
+  "command": "npm run cloudflare:build"
+}
+```
+
+Dadurch ist `.open-next/worker.js` vorhanden, bevor Wrangler den Worker verarbeitet.
+
 ### Bindings
 
 ```text
 D1 binding: D1
 Database: uccelli-prod
+Database ID: ee481111-658c-41af-b8f1-5f231a2f8dd3
 
 R2 binding: R2
 Bucket: uccelli-media
 ```
-
-Die Anwendung wird mit OpenNext für Cloudflare gebaut.
 
 ### Bilder
 
@@ -323,15 +410,37 @@ Der Home-Container ist absichtlich ein CMS-Server, nicht die öffentliche Websit
 
 ### Build-Verhalten
 
-`Dockerfile.admin`:
+`Dockerfile.admin` ist das dedizierte Home-CMS-Image. Der frühere generische `Dockerfile` gehört nicht mehr zur aktuellen Baseline.
 
-1. installiert Dependencies,
-2. ersetzt `payload.config.ts` durch `payload.config.home.ts`,
-3. entfernt die Cloudflare-spezifische R2-Passthrough-Route,
-4. baut Next.js,
-5. startet als User `node`,
-6. prüft beim Start das lokale Schema,
-7. startet den Next.js-Server.
+Der Build läuft vereinfacht so:
+
+1. Node `22.23.2` verwenden.
+2. npm `11.6.0` installieren.
+3. `package.json` und `package-lock.json` kopieren.
+4. Dependencies mit `npm ci` installieren.
+5. Repository-Inhalt kopieren.
+6. `payload.config.home.ts` nach `payload.config.ts` kopieren.
+7. `npm run generate:importmap` ausführen.
+8. die Cloudflare-spezifische R2-Passthrough-Route `app/(payload)/api/media/file` entfernen.
+9. Next.js bauen.
+10. Dev-Dependencies entfernen.
+11. als User `node` starten.
+12. beim Containerstart `scripts/ensure-home-schema.mjs` ausführen.
+13. danach `npm run start` ausführen.
+
+Die Import-Map-Regeneration ist wichtig, weil Payload Custom-Admin-Komponenten – aktuell insbesondere der Shortcut zu den Projekte-/Community-Seiteneinstellungen – sonst im Home-CMS fehlen können.
+
+### Home-Schema-Bootstrap
+
+`scripts/ensure-home-schema.mjs` stellt beim Start derzeit unter anderem sicher:
+
+- `users.reset_password_requested_at`
+- `projects_page`
+- `projects_page_locales`
+- `community_items_page`
+- `community_items_page_locales`
+
+Damit kann das lokale CMS die neuen Seiteneinstellungs-Globals verwenden, ohne D1 als primäre Datenbank zu benötigen.
 
 ### Healthcheck
 
@@ -351,6 +460,7 @@ Das CMS verwendet einen **eigenen Uccelli-Tunnel** und ist nicht an andere Proje
 
 ```text
 Tunnel name: uccelli-cms
+Tunnel ID: 3e4a4f72-5cfd-48d9-a555-58a561f0b118
 Public hostname: cms.uccelli-society.ch
 Service: http://uccelli-website:3000
 ```
@@ -443,6 +553,7 @@ Der Publisher berücksichtigt Tabellen, die zu folgenden Roots gehören:
 ```text
 media
 projects
+projects_page
 posts
 events
 team_members
@@ -453,9 +564,12 @@ werte
 courses
 pages
 community_items
+community_items_page
 homepage
 navigation
 ```
+
+Dadurch werden auch die Page-Settings-Globals für Projekte und Community nach D1 publiziert.
 
 ### Bewusst NICHT synchronisiert
 
@@ -514,7 +628,7 @@ RandomizedDelaySec=15s
 Persistent=true
 ```
 
-Das bedeutet: Änderungen werden typischerweise innerhalb weniger Minuten nach Cloudflare publiziert.
+Änderungen werden dadurch typischerweise innerhalb weniger Minuten nach Cloudflare publiziert.
 
 Der API-Token liegt außerhalb des Repositories in:
 
@@ -522,7 +636,7 @@ Der API-Token liegt außerhalb des Repositories in:
 /etc/uccelli-cloud-sync.env
 ```
 
-Erforderliche bzw. relevante Variablen:
+Relevante Variablen:
 
 ```env
 CLOUDFLARE_API_TOKEN=...
@@ -618,23 +732,30 @@ wrangler.jsonc               Cloudflare Worker + Bindings
 open-next.config.ts          OpenNext Cloudflare-Konfiguration
 middleware.ts                i18n + Admin-Routing
 next.config.ts               Next.js-Konfiguration und Legacy-Redirects
+package-lock.json            reproduzierbarer npm Dependency Lock
+.node-version                Node-Baseline
 ```
+
+Ein generischer `Dockerfile` ist nicht mehr Bestandteil der aktuellen Produktionsbaseline; für das Home-CMS gilt `Dockerfile.admin`.
 
 ---
 
 ## 18. Entwicklung lokal
 
-Node-Version:
+Node-/npm-Baseline:
 
 ```text
->= 22.23.2 < 23
+Node: >= 22.23.2 < 23
+npm:  11.6.0
 ```
 
 Typischer Ablauf:
 
 ```bash
+npm install --global npm@11.6.0
 cp .env.example .env
-npm install
+# PAYLOAD_SECRET in .env durch einen langen Zufallswert ersetzen
+npm ci
 npm run dev
 ```
 
@@ -646,6 +767,7 @@ npm run typecheck
 npm test
 npm run build
 npm run generate:types
+npm run generate:importmap
 npm run migrate
 npm run migrate:create
 npm run cloudflare:build
@@ -666,11 +788,13 @@ Empfohlener Ablauf:
 ```text
 Collection/Global ändern
 → Payload Types neu erzeugen
-→ Migration erzeugen
-→ Migration testen
+→ D1-Migration erzeugen/anpassen
+→ Home-Schema-Kompatibilität prüfen
+→ Publisher-Roots prüfen
+→ Migration und Build testen
 → Commit + CI
 → Cloudflare Migration anwenden
-→ Home-CMS mit kompatiblem Schema neu bauen/starten
+→ Home-CMS neu bauen/starten
 ```
 
 Relevante Befehle:
@@ -683,6 +807,13 @@ npm run cloudflare:migrate
 
 Wichtig: SQLite und D1 sollen fachlich dasselbe Content-Schema besitzen, obwohl sie über unterschiedliche Adapter betrieben werden.
 
+Für neue Globals oder Collections muss zusätzlich geprüft werden:
+
+- müssen sie von `freeza` nach D1 synchronisiert werden?
+- benötigen sie lokalisierte Nebentabellen?
+- benötigt `scripts/ensure-home-schema.mjs` eine Anpassung?
+- benötigt `scripts/cloud-sync.py` einen neuen Root?
+
 ---
 
 ## 20. Deployment
@@ -691,7 +822,7 @@ Wichtig: SQLite und D1 sollen fachlich dasselbe Content-Schema besitzen, obwohl 
 
 Produktionscode liegt auf Branch `main`.
 
-Cloudflare ist mit GitHub verbunden und deployt die öffentliche Website aus dem Repository. Das Build-Artefakt wird mit OpenNext erzeugt.
+Cloudflare ist mit GitHub verbunden und deployt die öffentliche Website aus dem Repository. `wrangler.jsonc` führt über den Build-Hook zuerst `npm run cloudflare:build` aus.
 
 Für manuelles Deployment existiert:
 
@@ -710,6 +841,13 @@ cd /opt/uccelli-website
 git pull --ff-only origin main
 docker compose up -d --build uccelli
 docker compose ps
+docker logs --tail 100 uccelli-website
+```
+
+Danach prüfen:
+
+```bash
+curl -I https://cms.uccelli-society.ch/admin
 ```
 
 Der Home-CMS-Container wird nicht benötigt, um die bereits publizierte öffentliche Website auszuliefern.
@@ -724,17 +862,28 @@ GitHub Actions Workflow:
 .github/workflows/ci.yml
 ```
 
-Aktuell werden unter anderem geprüft:
+Der Workflow läuft aktuell für unter anderem:
 
+- `main`
+- `agent/**`
+- `codex/**`
+- Pull Requests
+- manuelle Starts
+
+Aktuell werden geprüft:
+
+- reproduzierbare Installation mit `npm ci`
 - Payload Types generieren
 - CV-Creator JavaScript Syntax
 - ESLint
 - TypeScript
 - Unit Tests mit Vitest
+- Next.js Production Build
+- Prüfung, dass generierte `payload-types.ts` committed und aktuell sind
 - externer CV-Compiler Smoke Test
-- Cloudflare/OpenNext Produktionsbundle
+- Cloudflare/OpenNext Produktionsbundle, wenn `CLOUDFLARE_API_TOKEN` als CI-Secret vorhanden ist
 
-Zusätzliche Smoke-Workflows können externe Funktionen separat prüfen.
+Die CI verwendet `.node-version` und npm `11.6.0`.
 
 ---
 
@@ -761,7 +910,9 @@ Nicht committen:
 
 ### Git
 
-`data/`, `media/`, Datenbanken und Backups dürfen nicht versioniert werden. Historische Repository-Versionen enthielten früher lokale Datenbankdateien; aktuelle Secrets und Admin-Passwörter dürfen deshalb nie aus alten Werten wiederverwendet werden.
+`data/`, `media/`, Datenbanken, Backups und lokale Artefakte dürfen nicht versioniert werden.
+
+Historische Repository-Versionen enthielten früher lokale Datenbankdateien. Aktuelle Secrets und Admin-Passwörter dürfen deshalb nie aus alten Werten wiederverwendet werden.
 
 ---
 
@@ -789,6 +940,17 @@ Empfehlungen:
 - Tunnel- und Cloudflare-Tokens nicht in normale unverschlüsselte Projektbackups legen.
 
 R2 und D1 erhöhen die Verfügbarkeit der öffentlichen Kopie, ersetzen aber nicht die redaktionelle Source-of-Truth-Sicherung.
+
+### Aktueller Betriebsstatus
+
+Ein tägliches Backup-Konzept mit SQLite-Backup, Medienarchiv, Integrity Check und Retention wurde vorgesehen. Der produktive Status des Backup-Timers ist jedoch noch **zu verifizieren**.
+
+Prüfen auf `freeza`:
+
+```bash
+systemctl status uccelli-backup.timer
+ls -lah /opt/uccelli-backups
+```
 
 ---
 
@@ -834,6 +996,13 @@ systemctl status uccelli-cloud-sync.service
 journalctl -u uccelli-cloud-sync.service -n 100 --no-pager
 ```
 
+### Backups
+
+```bash
+systemctl status uccelli-backup.timer
+ls -lah /opt/uccelli-backups
+```
+
 ### Öffentliche Website
 
 ```bash
@@ -852,11 +1021,14 @@ Der erwartete `/admin`-Pfad auf der Hauptdomain ist ein Redirect zum CMS.
 3. **Cloud-only Daten vom Publisher ausschließen.** Insbesondere Kontaktanfragen dürfen nicht durch den Content-Sync überschrieben werden.
 4. **Neue CMS-Medien müssen über die Payload-Mediathek laufen.** Nur DB-referenzierte Medien werden zuverlässig publiziert.
 5. **Schemaänderungen in beiden Laufzeiten testen.** D1 und SQLite verwenden unterschiedliche Adapter.
-6. **Secrets außerhalb von Git halten.** Das gilt auch für Tunnel-Tokens und Cloudflare-API-Tokens.
-7. **`cms.uccelli-society.ch` bleibt der einzige offizielle Admin-Origin.** Keine Kopplung an fremde Cloudflare-Zonen oder andere Projekte.
-8. **Produktionsdomain für SEO nicht auf Preview-/CMS-Hosts ändern.** `SITE_URL` bleibt `https://uccelli-society.ch`.
-9. **Bei neuen Runtime-Daten festlegen, wem sie gehören.** Vor der Implementierung entscheiden: Home Source of Truth, Cloud-only oder synchronisiert.
-10. **Backups getrennt von Publishing behandeln.** Synchronisation ist kein Backupverfahren.
+6. **Bei neuen Collections/Globals Publisher und Home-Schema mitdenken.** Schema allein reicht nicht.
+7. **Payload Custom-Admin-Komponenten müssen im Home-Build in der Import-Map landen.** Deshalb wird die Import-Map nach dem Wechsel auf `payload.config.home.ts` neu erzeugt.
+8. **Secrets außerhalb von Git halten.** Das gilt auch für Tunnel-Tokens und Cloudflare-API-Tokens.
+9. **`cms.uccelli-society.ch` bleibt der einzige offizielle Admin-Origin.** Keine Kopplung an fremde Cloudflare-Zonen oder andere Projekte.
+10. **Produktionsdomain für SEO nicht auf Preview-/CMS-Hosts ändern.** `SITE_URL` bleibt `https://uccelli-society.ch`.
+11. **Bei neuen Runtime-Daten festlegen, wem sie gehören.** Vor der Implementierung entscheiden: Home Source of Truth, Cloud-only oder synchronisiert.
+12. **Backups getrennt von Publishing behandeln.** Synchronisation ist kein Backupverfahren.
+13. **Builds reproduzierbar halten.** Node-/npm-Baseline, `package-lock.json` und `npm ci` nicht ohne Grund umgehen.
 
 ---
 
@@ -893,7 +1065,9 @@ Kurz gesagt:
 - **`freeza` ist das Redaktionssystem.**
 - **SQLite + lokales Media sind die redaktionelle Quelle.**
 - **D1 + R2 sind die veröffentlichte Cloud-Kopie.**
+- **`contact-submissions` sind bewusst Cloud-only.**
 - **Der Publisher verbindet beide Welten.**
 - **Der CMS-Tunnel ist ein eigener Uccelli-Tunnel.**
+- **`projects-page` und `community-items-page` sind Teil des synchronisierten Content-Modells.**
 
-Damit bleibt die Website schnell und hoch verfügbar, während Payload ohne die CPU- und Runtime-Grenzen des Cloudflare-Free-Plans auf dem Home-Server betrieben werden kann.
+Damit bleibt die Website schnell und hoch verfügbar, während Payload auf dem Home-Server als redaktionelle Source of Truth betrieben werden kann.
