@@ -13,10 +13,10 @@ npx vitest             # Tests (Watch-Mode)
 ## Datenbank
 
 ```bash
-npm run migrate                 # Migrationen anwenden (auch im Container-Start enthalten)
+npm run migrate                 # Payload-Migrationen manuell anwenden (nicht Teil des Container-Starts)
 npm run migrate:create <name>   # Nach Schema-Änderungen: neue Migration erzeugen und committen
-npm run seed                    # Kanonische Inhalte einmalig in eine leere DB schreiben
-npm run content:sync            # Versionierte DE/EN-Inhalte idempotent anwenden
+npm run seed                    # Alias für content:sync; nur für leere DB oder geplante Content-Migration
+npm run content:sync            # Repository-Inhalte versioniert in die Datenbank schreiben
 npm run generate:types          # payload-types.ts aktualisieren (nach Collection-Änderungen)
 ```
 
@@ -32,11 +32,18 @@ rm -f data/uccelli.db && npm run migrate && npm run seed
 docker compose up -d --build    # Bauen + Starten
 docker compose logs -f uccelli  # Logs
 docker compose ps               # Healthcheck-Status (healthy?)
-docker compose exec uccelli npm run seed   # Kanonische Inhalte im Container anwenden
 ```
 
-> Der frühere Seed-Endpoint `GET /api/seed?key=...` wurde aus Sicherheitsgründen entfernt.
-> Seeding läuft nur noch über die CLI (lokal `npm run seed`, im Container siehe oben).
+> Der frühere Seed-Endpoint `GET /api/seed?key=...` wurde entfernt. Ein Content-Sync wird
+> ausschließlich bewusst über die CLI und unter den folgenden Voraussetzungen gestartet.
+>
+> **Produktionshinweis:** `npm run seed` und `npm run content:sync` sind keine regulären
+> Deployment-Schritte. Sie dürfen auf der produktiven redaktionellen SQLite-Datenbank auf
+> `freeza` nur als bewusst geplante Content-Migration und nach einem aktuellen Backup ausgeführt
+> werden. Der Sync kann redaktionell gepflegte Inhalte überschreiben oder löschen.
+>
+> `Dockerfile.admin` startet `scripts/ensure-home-schema.mjs`, führt aber keine Payload-Migration
+> über `npm run migrate` aus. Erforderliche Payload-Migrationen müssen bewusst ausgeführt werden.
 
 ## Backup (siehe RUNBOOK für Details)
 

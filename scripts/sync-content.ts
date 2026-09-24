@@ -2,7 +2,9 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { communityItems, faqs, partners, posts, projects, richText, team } from "../content/legacy";
 
-const VERSION_KEY = "uccelli-content:2026-09-canonical-content-v2";
+// Changing this key replays the complete bootstrap against existing CMS data.
+// Only bump it as part of an explicitly reviewed content migration.
+const VERSION_KEY = "uccelli-content:2026-08-site-restructure-v1";
 type Locale = "de" | "en";
 
 async function run() {
