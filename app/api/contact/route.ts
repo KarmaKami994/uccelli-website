@@ -79,14 +79,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, subject, message, interest, project } = parsed.data;
+    const { name, email, subject, message, interest, project, turnstileToken } = parsed.data;
     const source = parsed.data.source ?? "contact";
     const locale = parsed.data.locale ?? "de";
 
     const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
     if (turnstileSecret) {
-      const token = (raw as { turnstileToken?: unknown }).turnstileToken;
-      if (typeof token !== "string" || token.length === 0 || !(await verifyTurnstile(turnstileSecret, token, ip))) {
+      if (!turnstileToken || !(await verifyTurnstile(turnstileSecret, turnstileToken, ip))) {
         return NextResponse.json({ error: "Bot-Verifikation fehlgeschlagen." }, { status: 403 });
       }
     }

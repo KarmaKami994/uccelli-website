@@ -2,7 +2,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { communityItems, faqs, partners, posts, projects, richText, team } from "../content/legacy";
 
-const VERSION_KEY = "uccelli-content:2026-08-site-restructure-v1";
+const VERSION_KEY = "uccelli-content:2026-09-canonical-content-v2";
 type Locale = "de" | "en";
 
 async function run() {

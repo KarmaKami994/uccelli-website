@@ -179,21 +179,31 @@ export const communityItems = [
   {
     slug: "cv-creator",
     type: "tool",
-    status: "coming-soon",
+    status: "available",
+    href: "/community/cv-creator",
     featured: true,
     order: 1,
     title: { de: "CV Creator", en: "CV Creator" },
     summary: {
-      de: "Erstelle Schritt für Schritt einen übersichtlichen Lebenslauf für Bewerbungen in der Schweiz.",
-      en: "Create a clear CV step by step for applications in Switzerland.",
+      de: "Erstelle, speichere und exportiere einen professionellen Lebenslauf direkt im Browser.",
+      en: "Create, save and export a professional CV directly in your browser.",
     },
-    sections: [{
-      heading: { de: "Einfach zum professionellen Lebenslauf", en: "A simple route to a professional CV" },
-      text: {
-        de: "Der CV Creator wird Informationen strukturiert abfragen und daraus eine klare, exportierbare Bewerbungsvorlage erstellen. Das Angebot befindet sich in Vorbereitung.",
-        en: "The CV Creator will collect information in a structured way and turn it into a clear, exportable application template. The tool is currently in preparation.",
+    sections: [
+      {
+        heading: { de: "Dein Lebenslauf, Schritt für Schritt", en: "Your CV, step by step" },
+        text: {
+          de: "Erfasse Ausbildung, Berufserfahrung, Skills, Projekte und Auszeichnungen. Du kannst deinen Zwischenstand im Browser speichern sowie als JSON importieren oder exportieren.",
+          en: "Enter education, work experience, skills, projects and awards. You can save progress in the browser and import or export it as JSON.",
+        },
       },
-    }] satisfies RichSection[],
+      {
+        heading: { de: "Drei PDF-Vorlagen", en: "Three PDF templates" },
+        text: {
+          de: "Wähle zwischen dem Awesome-CV-Beispielstil und zwei weiteren LaTeX-Vorlagen. Die PDF-Vorschau wird direkt im Tool angezeigt und kann heruntergeladen werden.",
+          en: "Choose between the Awesome-CV example style and two additional LaTeX templates. The PDF preview is displayed directly in the tool and can be downloaded.",
+        },
+      },
+    ] satisfies RichSection[],
   },
   {
     slug: "uccelli-game",

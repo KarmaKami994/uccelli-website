@@ -15,7 +15,8 @@ npx vitest             # Tests (Watch-Mode)
 ```bash
 npm run migrate                 # Migrationen anwenden (auch im Container-Start enthalten)
 npm run migrate:create <name>   # Nach Schema-Änderungen: neue Migration erzeugen und committen
-npm run seed                    # Leere DB befüllen — idempotent, überspringt befüllte Collections
+npm run seed                    # Kanonische Inhalte einmalig in eine leere DB schreiben
+npm run content:sync            # Versionierte DE/EN-Inhalte idempotent anwenden
 npm run generate:types          # payload-types.ts aktualisieren (nach Collection-Änderungen)
 ```
 
@@ -31,7 +32,7 @@ rm -f data/uccelli.db && npm run migrate && npm run seed
 docker compose up -d --build    # Bauen + Starten
 docker compose logs -f uccelli  # Logs
 docker compose ps               # Healthcheck-Status (healthy?)
-docker compose exec uccelli npx tsx scripts/seed.ts   # Seed im Container
+docker compose exec uccelli npm run seed   # Kanonische Inhalte im Container anwenden
 ```
 
 > Der frühere Seed-Endpoint `GET /api/seed?key=...` wurde aus Sicherheitsgründen entfernt.

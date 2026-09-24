@@ -1,11 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocale, useTranslations } from "next-intl";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { Button } from "./Button";
+import { useContactSubmission } from "@/components/forms/useContactSubmission";
 import { createContactSchema, type ContactFormData } from "@/lib/contact-schema";
 
 interface ContactFormProps {
@@ -15,10 +15,19 @@ interface ContactFormProps {
 export function ContactForm({ turnstileSiteKey }: ContactFormProps) {
   const t = useTranslations("kontakt.form");
   const locale = useLocale() === "en" ? "en" : "de";
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [serverError, setServerError] = useState("");
-  const [turnstileToken, setTurnstileToken] = useState("");
-  const turnstileRef = useRef<TurnstileInstance | null>(null);
+  const {
+    onTurnstileExpire,
+    onTurnstileSuccess,
+    serverError,
+    status,
+    submit,
+    turnstileRef,
+    waitingForTurnstile,
+  } = useContactSubmission({
+    turnstileSiteKey,
+    genericError: t("errorGeneric"),
+    connectionError: t("errorConnection"),
+  });
 
   const contactSchema = createContactSchema({
     name: t("valName"),
@@ -36,33 +45,7 @@ export function ContactForm({ turnstileSiteKey }: ContactFormProps) {
   });
 
   async function onSubmit(data: ContactFormData) {
-    setStatus("sending");
-    setServerError("");
-
-    try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, source: "contact", locale, turnstileToken }),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        setServerError(result.error || t("errorGeneric"));
-        setStatus("error");
-        turnstileRef.current?.reset();
-        setTurnstileToken("");
-        return;
-      }
-
-      setStatus("sent");
-    } catch {
-      setServerError(t("errorConnection"));
-      setStatus("error");
-      turnstileRef.current?.reset();
-      setTurnstileToken("");
-    }
+    await submit({ ...data, source: "contact", locale });
   }
 
   if (status === "sent") {
@@ -80,8 +63,6 @@ export function ContactForm({ turnstileSiteKey }: ContactFormProps) {
     { name: "email" as const, label: t("email"), type: "email" },
     { name: "subject" as const, label: t("subject"), type: "text" },
   ] as const;
-
-  const waitingForTurnstile = Boolean(turnstileSiteKey) && turnstileToken === "";
 
   return (
     <form onSubmit={(event) => void handleSubmit(onSubmit)(event)} noValidate>
@@ -126,8 +107,8 @@ export function ContactForm({ turnstileSiteKey }: ContactFormProps) {
           <Turnstile
             ref={turnstileRef}
             siteKey={turnstileSiteKey}
-            onSuccess={setTurnstileToken}
-            onExpire={() => setTurnstileToken("")}
+            onSuccess={onTurnstileSuccess}
+            onExpire={onTurnstileExpire}
             options={{ theme: "light" }}
           />
         )}
